@@ -1,0 +1,22 @@
+@import './abstracts/variables.scss';
+@import './abstracts/mixins.scss';
+@import './base/base.scss';
+@import './base/typography.scss';
+@import './base/utilities.scss';
+@import '../../../node_modules/bootstrap/scss/bootstrap.scss';
+@import '../scss/components/loader.scss';
+@import '../scss/components/navbar.scss';
+@import '../scss/components/footer.scss';
+
+@import '../scss/pages/home.scss';
+@import '../scss/components/header.scss';
+@import '../scss/components/categories.scss';
+@import '../scss/components/homecategories.scss';
+@import '../scss/components/policy.scss';
+@import '../scss/components/slider.scss';
+@import '../scss/pages/productspage.scss';
+@import '../scss/components/product.scss';
+@import '../scss/components/ui/radiobutton.scss';
+@import '../scss/components/ui/checkboxbutton.scss';
+@import '../scss/components/ui/rating.scss';
+@import '../scss/pages/login.scss';

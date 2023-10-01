@@ -1,0 +1,237 @@
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import useViewport from "../useViewport";
+import axios from "axios";
+import Rating from "../components/Rating";
+
+import { useSearchParams } from "react-router-dom";
+import RadioButton from "../components/ui/RadioButton";
+import CheckBoxButton from "../components/ui/CheckBoxButton";
+import ColorButton from "../components/ui/ColorButton";
+
+const prices = [
+  {
+    id: 0,
+    name: "$0 to $30",
+    array: [0, 30],
+  },
+  {
+    id: 2,
+    name: "$30 to $70",
+    array: [30, 70],
+  },
+  {
+    id: 3,
+    name: "$70 to $100",
+    array: [70, 100],
+  },
+  {
+    id: 4,
+    name: "$100 to $150",
+    array: [100, 150],
+  },
+  {
+    id: 5,
+    name: "$150 or more",
+    array: [150, 9999],
+  },
+];
+
+const ratings = [
+  {
+    name: "4stars & up",
+    rating: 4,
+  },
+
+  {
+    name: "3stars & up",
+    rating: 3,
+  },
+
+  {
+    name: "2stars & up",
+    rating: 2,
+  },
+
+  {
+    name: "1stars & up",
+    rating: 1,
+  },
+];
+const MobileComponet = () => {
+  return <h1>this is mobileComponet</h1>;
+};
+
+const DesktopComponet = () => {
+  return <h1>this is desktop componenet</h1>;
+};
+
+const ProductList = ({ categories }) => {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const handleChange = (e) => {
+    setSelectedCategory(e.target.value);
+  };
+
+  let [searchParams, setSearchParams] = useSearchParams();
+  let term = searchParams.get("category");
+  //  const sp = new URLSearchParams(search)
+  //  const category = sp.get('category') || 'all'
+  const location = useLocation();
+  const category = location.pathname.split("/")[3];
+
+  const { width } = useViewport();
+  const breakpoint = 500;
+
+  const [subCategories, setSubCategories] = useState([]);
+  const [selectedSubCats, setSelectedSubCats] = useState([]);
+  const [sortFeatures, setSortFeatures] = useState("");
+  const [colors, setColors] = useState([]);
+  const [price, setPrice] = useState([]);
+  const [rating,setRating] = useState('')
+  const [selectedColor, setSelectedColor] = useState("");
+
+  const handleClick = (color) => {
+    console.log(color);
+    setSelectedColor(color);
+  };
+
+  const handleRadio = (e) => {
+    console.log(e.target.value);
+    setPrice(e.target.value);
+  };
+
+  const handleCheckBox = (e) => {
+    const value = e.target.value;
+    const isChecked = e.target.checked;
+    console.log(value);
+    console.log(isChecked);
+    setSelectedSubCats(
+      isChecked
+        ? [...selectedSubCats, value]
+        : selectedSubCats.filter((item) => item !== value)
+    );
+  };
+
+  useEffect(() => {
+    async function fetchSubCategories() {
+      const { data } = await axios.get(
+        `http://localhost:5000/api/categories/${category}`
+      );
+      //  setSubCategories(data.data.categories)
+
+      setSubCategories(data.data.category.subcategories);
+    }
+    fetchSubCategories();
+  }, []);
+
+  useEffect(() => {
+    async function fetchColors() {
+      const { data } = await axios.get(
+        "http://localhost:5000/api/products/allcolors"
+      );
+      console.log(data.data.uniqueColors);
+      setColors(data.data.uniqueColors);
+    }
+    fetchColors();
+  }, []);
+
+  return (
+    <div className="products-list-wrapper">
+      <div className="wrapper">
+        <div className="left">
+          <div className="filter-1">
+            <h6 className="filter-name">Filter By Category</h6>
+            {subCategories?.map((item, index) => (
+              <div className="category-checkbox" key={index}>
+                <CheckBoxButton
+                  id={item.id}
+                  value={item.id}
+                  onChange={handleCheckBox}
+                  text={item.name}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="filter-2">
+            <h6 className="filter-name">Filter By Price</h6>
+
+            {prices?.map((item, index) => (
+              <div key={index}>
+                <RadioButton
+                  id={item.id}
+                  name="price"
+                  value={item.array}
+                  text={item.name}
+                  onChange={handleRadio}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="filter-3">
+            <h6 className="filter-name">Filter By Color</h6>
+            <div className="buttons-wrapper">
+              {colors?.map((color, index) => (
+                <span key={index} className="filter-color-btn">
+                  <button
+                    value={color}
+                    type="submit"
+                    onClick={() => handleClick(color)}
+                    style={{
+                      backgroundColor: `${color}`,
+                    }}
+                  />
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="filter-4">
+            <h6 className="filter-name">Customer Review</h6>
+            <ul className="review-filter">
+              {ratings.map((r) => (
+                <li key={r.name} onClick={()=>setRating(r.rating)}>
+                  <Rating value={r.rating} text={r.name}></Rating>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="right">
+          <div className="sort">
+            <select
+              value={sortFeatures}
+              onChange={(e) => {
+                console.log(e.target.value);
+                setSortFeatures(e.target.value);
+              }}
+            >
+              <option value=''>Sort</option>
+              <option value="priceAscending">Price: Low to High</option>
+              <option value="priceDescending">Price: High to Low</option>
+              <option value="featured">Featured</option>
+              <option value="new">New Arrivals</option>
+            </select>
+
+          
+          </div>
+          <div className="products">
+            <div className="dropdown">
+              <div className="dropdown-btn">Sort</div>
+                <div className="dropdown-content">
+                  <div className="dropdown-item">React</div>
+                  <div className="dropdown-item">Vue</div>
+                  <div className="dropdown-item">Angular</div>
+                </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProductList;

@@ -1,0 +1,8 @@
+.MuiInputLabel-root {
+    color: grey !important;
+    font-size:10px
+    
+  } 
+  .Mui-focused .MuiOutlinedInput-notchedOutline {
+    border-color: #335cad !important;
+  }
