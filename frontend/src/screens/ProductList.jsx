@@ -59,6 +59,7 @@ const ratings = [
     rating: 1,
   },
 ];
+
 const MobileComponet = () => {
   return <h1>this is mobileComponet</h1>;
 };
@@ -93,6 +94,61 @@ const ProductList = ({ categories }) => {
   const [rating, setRating] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [isActive, setActive] = useState(false);
+  const subCategoryIds = ['64c9f8bda5410e8da97f6c2d','64c9f93142153fbbdcb2dcdc']
+ const id = '64c9f8bda5410e8da97f6c2d'
+
+ const params = subCategoryIds.map((subCategory)=>{
+  return `SubCategory=${subCategory}&`
+})
+
+//  function parseParams(params) {
+//   const keys = Object.keys(params)
+//   let options = {}
+
+//   keys.forEach((key) => {
+//     const isParamTypeObject = typeof params[key] === 'object'
+//     const isParamTypeArray = isParamTypeObject && params[key].length >= 0
+
+//     if (!isParamTypeObject) {
+//       options += `${key}=${params[key]}&`
+//     }
+
+//     if (isParamTypeObject && isParamTypeArray) {
+//       params[key].forEach((element) => {
+//         options += `${key}=${element}&`
+//       })
+//     }
+//   })
+
+//   return options ? options.slice(0, -1) : options
+// }
+  // useEffect(() => {
+  //   async function fetchSub() {
+  //     const { data } = await axios.get(`http://localhost:5000/api/products?${params.join('')}`);
+  //     //  setSubCategories(data.data.categories)
+
+  //    console.log(data)
+  //   }
+  //   fetchSub();
+  // }, []);
+
+  useEffect(() => {
+    async function fetchSub() {
+      const { data } = await axios.get('http://localhost:5000/api/products?',{
+        params:{
+          SubCategory:['64c9f8bda5410e8da97f6c2d','64c9f93142153fbbdcb2dcdc']
+        },
+        paramsSerializer:{
+          indexes:null
+        }
+      });
+      //  setSubCategories(data.data.categories)
+
+     console.log('this is data ',data)
+    }
+    fetchSub();
+  }, []);
+ 
   const sortMenu = [
    
     {
@@ -113,33 +169,43 @@ const ProductList = ({ categories }) => {
     },
   ];
   const handleClick = (color) => {
-    console.log(color);
+   
     setSelectedColor(color);
   };
 
   const handleRadio = (e) => {
-    console.log(e.target.value);
+   
     setPrice(e.target.value);
   };
 
   const handleCheckBox = (e) => {
-    const value = e.target.value;
-    const isChecked = e.target.checked;
-    console.log(value);
-    console.log(isChecked);
-    setSelectedSubCats(
-      isChecked
-        ? [...selectedSubCats, value]
-        : selectedSubCats.filter((item) => item !== value)
-    );
+    if(e.target.checked){
+      setSelectedSubCats([...selectedSubCats,e.target.value])
+    }
+    else {
+      const newArr = selectedSubCats.filter((item)=>item !== e.target.value)
+      setSelectedSubCats(newArr)
+    }
+    // const value = e.target.value;
+    // const isChecked = e.target.checked;
+    // console.log(value);
+    // console.log(isChecked);
+    // setSelectedSubCats(
+    //   isChecked
+    //     ? [...selectedSubCats, value]
+    //     : selectedSubCats.filter((item) => item !== value)
+    // );
   };
+  useEffect(()=>{
+    console.log(selectedSubCats)
+  },[selectedSubCats])
 
   const toggleActive = () => {
     setActive((isActive) => !isActive);
   };
 
   const handleSort = (value,name) => {
-    console.log(value);
+   
     setSortFeatures(name)
     setSelectedSort(value)
     setActive(false)
@@ -159,9 +225,12 @@ const ProductList = ({ categories }) => {
       //  setSubCategories(data.data.categories)
 
       setSubCategories(data.data.category.subcategories);
+     
     }
     fetchSubCategories();
   }, []);
+
+ 
 
   useEffect(() => {
     async function fetchColors() {
