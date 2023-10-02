@@ -3,7 +3,8 @@ import { useLocation } from "react-router-dom";
 import useViewport from "../useViewport";
 import axios from "axios";
 import Rating from "../components/Rating";
-
+import {AiOutlineCaretDown} from 'react-icons/ai'
+import {AiOutlineClose} from 'react-icons/ai'
 import { useSearchParams } from "react-router-dom";
 import RadioButton from "../components/ui/RadioButton";
 import CheckBoxButton from "../components/ui/CheckBoxButton";
@@ -86,11 +87,31 @@ const ProductList = ({ categories }) => {
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubCats, setSelectedSubCats] = useState([]);
   const [sortFeatures, setSortFeatures] = useState("");
+  const [selectedSort,setSelectedSort] = useState('')
   const [colors, setColors] = useState([]);
   const [price, setPrice] = useState([]);
-  const [rating,setRating] = useState('')
+  const [rating, setRating] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-
+  const [isActive, setActive] = useState(false);
+  const sortMenu = [
+   
+    {
+      value: "price",
+      name: "Price:Low to High",
+    },
+    {
+      value: "-price",
+      name: "Price:High to Low",
+    },
+    {
+      value: "isFeatured",
+      name: "Featured",
+    },
+    {
+      value: "createdAt",
+      name: "New Arrivals",
+    },
+  ];
   const handleClick = (color) => {
     console.log(color);
     setSelectedColor(color);
@@ -112,6 +133,23 @@ const ProductList = ({ categories }) => {
         : selectedSubCats.filter((item) => item !== value)
     );
   };
+
+  const toggleActive = () => {
+    setActive((isActive) => !isActive);
+  };
+
+  const handleSort = (value,name) => {
+    console.log(value);
+    setSortFeatures(name)
+    setSelectedSort(value)
+    setActive(false)
+  };
+
+  const handleCloseMenu = () => {
+    setSortFeatures('')
+    setActive(false)
+   
+  }
 
   useEffect(() => {
     async function fetchSubCategories() {
@@ -192,7 +230,7 @@ const ProductList = ({ categories }) => {
             <h6 className="filter-name">Customer Review</h6>
             <ul className="review-filter">
               {ratings.map((r) => (
-                <li key={r.name} onClick={()=>setRating(r.rating)}>
+                <li key={r.name} onClick={() => setRating(r.rating)}>
                   <Rating value={r.rating} text={r.name}></Rating>
                 </li>
               ))}
@@ -201,32 +239,29 @@ const ProductList = ({ categories }) => {
         </div>
         <div className="right">
           <div className="sort">
-            <select
-              value={sortFeatures}
-              onChange={(e) => {
-                console.log(e.target.value);
-                setSortFeatures(e.target.value);
-              }}
-            >
-              <option value=''>Sort</option>
-              <option value="priceAscending">Price: Low to High</option>
-              <option value="priceDescending">Price: High to Low</option>
-              <option value="featured">Featured</option>
-              <option value="new">New Arrivals</option>
-            </select>
+            <div className="sort-options">sort options</div>
+          <div className="dropdown">
+              <div className="dropdown-btn" onClick={toggleActive}>
+                {sortFeatures ? (sortFeatures) : ('Sort')}
+                {sortFeatures ? (<AiOutlineClose onClick={handleCloseMenu}/>) : (<AiOutlineCaretDown/>)}
+                
+               
 
+              </div>
+              {isActive && (
+                <div className="dropdown-content">
+                  {sortMenu.map((option,index) => (
+                    <div key={index} className="dropdown-item" onClick={()=>handleSort(option.value,option.name)}>
+                      {option.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           
           </div>
           <div className="products">
-            <div className="dropdown">
-              <div className="dropdown-btn">Sort</div>
-                <div className="dropdown-content">
-                  <div className="dropdown-item">React</div>
-                  <div className="dropdown-item">Vue</div>
-                  <div className="dropdown-item">Angular</div>
-                </div>
-              
-            </div>
+         
           </div>
         </div>
       </div>

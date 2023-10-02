@@ -190,22 +190,50 @@
       .sort{
         display: flex;
         align-items: center;
-        justify-content: flex-end;
-      }
-      .products{
-        padding:3rem;
-        .dropdown{
-          width:400px;
-          .dropdown-btn{
-            padding:10px;
-            background: #fff;
-            border:1px solid black;
-            font-weight: bold;
-            color:#333;
-          }
-        }
+        justify-content: space-between;
       
+     
+      .dropdown{
+        width: 200px;
+        position: relative;
+        font-family: 'lato',sans-serif;
+        user-select: none;
       }
+      .dropdown .dropdown-btn{
+        padding:8px 15px;
+        background: #fff;
+        box-shadow: 3px 3px 4px 4px rgba(0,0,0,0.06);
+        font-weight: 500;
+        font-size: 1.3rem;
+        color:var(--color-grey-dark-3);
+        display:flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        
+      }
+      .dropdown .dropdown-content{
+        position: absolute;
+        top:110%;
+        padding:8px 10px;
+        background: #fff;
+        box-shadow: 3px 3px 10px 6px rgba(0,0,0,0.06);
+        font-weight: 400;
+        font-size: 1.2rem;
+        color:var(--color-grey-dark-2);
+        width:100%;
+      }
+      .dropdown .dropdown-content .dropdown-item{
+        padding:8px 10px;
+        cursor: pointer;
+        transition: all .2s;
+        &:hover{
+          background-color: #f4f4f4;
+
+        }
+      }
+    }
+      
     }
   
   }

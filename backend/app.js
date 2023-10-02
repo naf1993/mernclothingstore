@@ -72,7 +72,7 @@ app.use(mongoSanitize());
 app.use(xss());
 
 
-
+//app.use(compression())
 
 
 app.use('/',authRoutes)
