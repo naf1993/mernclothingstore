@@ -25,12 +25,12 @@ const prices = [
   {
     id: 3,
     name: "$800 to $1500",
-    array: [70, 100],
+    array: [800, 1500],
   },
   {
     id: 4,
     name: "$1500 to $2000",
-    array: [100, 150],
+    array: [1500, 2000],
   },
   {
     id: 5,
@@ -310,7 +310,7 @@ const ProductList = ({ categories }) => {
           </div>
           <div className="products">
            
-            <List catId={category} minPrice={minPrice} maxPrice={maxPrice} sort={selectedSort} subCats={selectedSubCats} color={selectedColor} rating={rating}/>
+            <List catId={category} minPrice={minPrice} maxPrice={maxPrice} sort={selectedSort} subCats={selectedSubCats} colors={selectedColor} ratingsAverage={rating}/>
             
           </div>
         </div>
