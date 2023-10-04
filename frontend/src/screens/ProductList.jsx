@@ -3,38 +3,39 @@ import { useLocation } from "react-router-dom";
 import useViewport from "../useViewport";
 import axios from "axios";
 import Rating from "../components/Rating";
-import {AiOutlineCaretDown} from 'react-icons/ai'
-import {AiOutlineClose} from 'react-icons/ai'
+import { AiOutlineCaretDown } from "react-icons/ai";
+import { AiOutlineClose } from "react-icons/ai";
 import { useSearchParams } from "react-router-dom";
 import RadioButton from "../components/ui/RadioButton";
 import CheckBoxButton from "../components/ui/CheckBoxButton";
 import ColorButton from "../components/ui/ColorButton";
+import List from '../components/List'
 
 const prices = [
   {
     id: 0,
-    name: "$0 to $30",
-    array: [0, 30],
+    name: "$100 to $400",
+    array: [100, 400],
   },
   {
     id: 2,
-    name: "$30 to $70",
-    array: [30, 70],
+    name: "$400 to $800",
+    array: [400, 800],
   },
   {
     id: 3,
-    name: "$70 to $100",
+    name: "$800 to $1500",
     array: [70, 100],
   },
   {
     id: 4,
-    name: "$100 to $150",
+    name: "$1500 to $2000",
     array: [100, 150],
   },
   {
     id: 5,
-    name: "$150 or more",
-    array: [150, 9999],
+    name: "$2000 or more",
+    array: [2000, 9999],
   },
 ];
 
@@ -88,40 +89,42 @@ const ProductList = ({ categories }) => {
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubCats, setSelectedSubCats] = useState([]);
   const [sortFeatures, setSortFeatures] = useState("");
-  const [selectedSort,setSelectedSort] = useState('')
+  const [selectedSort, setSelectedSort] = useState("");
   const [colors, setColors] = useState([]);
-  const [price, setPrice] = useState([]);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [rating, setRating] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [isActive, setActive] = useState(false);
-  const subCategoryIds = ['64c9f8bda5410e8da97f6c2d','64c9f93142153fbbdcb2dcdc']
- const id = '64c9f8bda5410e8da97f6c2d'
 
- const params = subCategoryIds.map((subCategory)=>{
-  return `SubCategory=${subCategory}&`
-})
+  //   const subCategoryIds = ['64c9f8bda5410e8da97f6c2d','64c9f93142153fbbdcb2dcdc']
+  //  const id = '64c9f8bda5410e8da97f6c2d'
 
-//  function parseParams(params) {
-//   const keys = Object.keys(params)
-//   let options = {}
+  //  const params = subCategoryIds.map((subCategory)=>{
+  //   return `SubCategory=${subCategory}&`
+  // })
 
-//   keys.forEach((key) => {
-//     const isParamTypeObject = typeof params[key] === 'object'
-//     const isParamTypeArray = isParamTypeObject && params[key].length >= 0
+  //  function parseParams(params) {
+  //   const keys = Object.keys(params)
+  //   let options = {}
 
-//     if (!isParamTypeObject) {
-//       options += `${key}=${params[key]}&`
-//     }
+  //   keys.forEach((key) => {
+  //     const isParamTypeObject = typeof params[key] === 'object'
+  //     const isParamTypeArray = isParamTypeObject && params[key].length >= 0
 
-//     if (isParamTypeObject && isParamTypeArray) {
-//       params[key].forEach((element) => {
-//         options += `${key}=${element}&`
-//       })
-//     }
-//   })
+  //     if (!isParamTypeObject) {
+  //       options += `${key}=${params[key]}&`
+  //     }
 
-//   return options ? options.slice(0, -1) : options
-// }
+  //     if (isParamTypeObject && isParamTypeArray) {
+  //       params[key].forEach((element) => {
+  //         options += `${key}=${element}&`
+  //       })
+  //     }
+  //   })
+
+  //   return options ? options.slice(0, -1) : options
+  // }
   // useEffect(() => {
   //   async function fetchSub() {
   //     const { data } = await axios.get(`http://localhost:5000/api/products?${params.join('')}`);
@@ -132,25 +135,9 @@ const ProductList = ({ categories }) => {
   //   fetchSub();
   // }, []);
 
-  useEffect(() => {
-    async function fetchSub() {
-      const { data } = await axios.get('http://localhost:5000/api/products?',{
-        params:{
-          SubCategory:['64c9f8bda5410e8da97f6c2d','64c9f93142153fbbdcb2dcdc']
-        },
-        paramsSerializer:{
-          indexes:null
-        }
-      });
-      //  setSubCategories(data.data.categories)
-
-     console.log('this is data ',data)
-    }
-    fetchSub();
-  }, []);
  
+
   const sortMenu = [
-   
     {
       value: "price",
       name: "Price:Low to High",
@@ -169,53 +156,42 @@ const ProductList = ({ categories }) => {
     },
   ];
   const handleClick = (color) => {
-   
     setSelectedColor(color);
   };
 
   const handleRadio = (e) => {
-   
-    setPrice(e.target.value);
+    const pricetext = e.target.value;
+    const myArray = pricetext.split(",");
+    setMinPrice(myArray[0]);
+    setMaxPrice(myArray[1]);
   };
 
   const handleCheckBox = (e) => {
-    if(e.target.checked){
-      setSelectedSubCats([...selectedSubCats,e.target.value])
+    if (e.target.checked) {
+      setSelectedSubCats([...selectedSubCats, e.target.value]);
+    } else {
+      const newArr = selectedSubCats.filter((item) => item !== e.target.value);
+      setSelectedSubCats(newArr);
     }
-    else {
-      const newArr = selectedSubCats.filter((item)=>item !== e.target.value)
-      setSelectedSubCats(newArr)
-    }
-    // const value = e.target.value;
-    // const isChecked = e.target.checked;
-    // console.log(value);
-    // console.log(isChecked);
-    // setSelectedSubCats(
-    //   isChecked
-    //     ? [...selectedSubCats, value]
-    //     : selectedSubCats.filter((item) => item !== value)
-    // );
   };
-  useEffect(()=>{
-    console.log(selectedSubCats)
-  },[selectedSubCats])
+  useEffect(() => {
+    console.log(selectedSubCats);
+  }, [selectedSubCats]);
 
   const toggleActive = () => {
     setActive((isActive) => !isActive);
   };
 
-  const handleSort = (value,name) => {
-   
-    setSortFeatures(name)
-    setSelectedSort(value)
-    setActive(false)
+  const handleSort = (value, name) => {
+    setSortFeatures(name);
+    setSelectedSort(value);
+    setActive(false);
   };
 
   const handleCloseMenu = () => {
-    setSortFeatures('')
-    setActive(false)
-   
-  }
+    setSortFeatures("");
+    setActive(false);
+  };
 
   useEffect(() => {
     async function fetchSubCategories() {
@@ -225,19 +201,16 @@ const ProductList = ({ categories }) => {
       //  setSubCategories(data.data.categories)
 
       setSubCategories(data.data.category.subcategories);
-     
     }
     fetchSubCategories();
   }, []);
-
- 
 
   useEffect(() => {
     async function fetchColors() {
       const { data } = await axios.get(
         "http://localhost:5000/api/products/allcolors"
       );
-      console.log(data.data.uniqueColors);
+
       setColors(data.data.uniqueColors);
     }
     fetchColors();
@@ -299,7 +272,9 @@ const ProductList = ({ categories }) => {
             <h6 className="filter-name">Customer Review</h6>
             <ul className="review-filter">
               {ratings.map((r) => (
-                <li key={r.name} onClick={() => setRating(r.rating)}>
+                <li key={r.name} onClick={() => {
+                  console.log(r.rating)
+                  setRating(r.rating)}}>
                   <Rating value={r.rating} text={r.name}></Rating>
                 </li>
               ))}
@@ -309,28 +284,34 @@ const ProductList = ({ categories }) => {
         <div className="right">
           <div className="sort">
             <div className="sort-options">sort options</div>
-          <div className="dropdown">
+            <div className="dropdown">
               <div className="dropdown-btn" onClick={toggleActive}>
-                {sortFeatures ? (sortFeatures) : ('Sort')}
-                {sortFeatures ? (<AiOutlineClose onClick={handleCloseMenu}/>) : (<AiOutlineCaretDown/>)}
-                
-               
-
+                {sortFeatures ? sortFeatures : "Sort"}
+                {sortFeatures ? (
+                  <AiOutlineClose onClick={handleCloseMenu} />
+                ) : (
+                  <AiOutlineCaretDown />
+                )}
               </div>
               {isActive && (
                 <div className="dropdown-content">
-                  {sortMenu.map((option,index) => (
-                    <div key={index} className="dropdown-item" onClick={()=>handleSort(option.value,option.name)}>
+                  {sortMenu.map((option, index) => (
+                    <div
+                      key={index}
+                      className="dropdown-item"
+                      onClick={() => handleSort(option.value, option.name)}
+                    >
                       {option.name}
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          
           </div>
           <div className="products">
-         
+           
+            <List catId={category} minPrice={minPrice} maxPrice={maxPrice} sort={selectedSort} subCats={selectedSubCats} color={selectedColor} rating={rating}/>
+            
           </div>
         </div>
       </div>
