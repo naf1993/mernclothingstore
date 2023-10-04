@@ -9,7 +9,7 @@ import { useSearchParams } from "react-router-dom";
 import RadioButton from "../components/ui/RadioButton";
 import CheckBoxButton from "../components/ui/CheckBoxButton";
 import ColorButton from "../components/ui/ColorButton";
-import List from '../components/List'
+import List from "../components/List";
 
 const prices = [
   {
@@ -60,14 +60,24 @@ const ratings = [
     rating: 1,
   },
 ];
-
-const MobileComponet = () => {
-  return <h1>this is mobileComponet</h1>;
-};
-
-const DesktopComponet = () => {
-  return <h1>this is desktop componenet</h1>;
-};
+const sortMenu = [
+  {
+    value: "price",
+    name: "Price:Low to High",
+  },
+  {
+    value: "-price",
+    name: "Price:High to Low",
+  },
+  {
+    value: "-isFeatured",
+    name: "Featured",
+  },
+  {
+    value: "createdAt",
+    name: "New Arrivals",
+  },
+];
 
 const ProductList = ({ categories }) => {
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -85,7 +95,7 @@ const ProductList = ({ categories }) => {
 
   const { width } = useViewport();
   const breakpoint = 500;
-
+  const [categoryName,setCategoryName] = useState('')
   const [subCategories, setSubCategories] = useState([]);
   const [selectedSubCats, setSelectedSubCats] = useState([]);
   const [sortFeatures, setSortFeatures] = useState("");
@@ -96,65 +106,8 @@ const ProductList = ({ categories }) => {
   const [rating, setRating] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [isActive, setActive] = useState(false);
+  const [subCategoryName,setSubCategoryName] = useState([])
 
-  //   const subCategoryIds = ['64c9f8bda5410e8da97f6c2d','64c9f93142153fbbdcb2dcdc']
-  //  const id = '64c9f8bda5410e8da97f6c2d'
-
-  //  const params = subCategoryIds.map((subCategory)=>{
-  //   return `SubCategory=${subCategory}&`
-  // })
-
-  //  function parseParams(params) {
-  //   const keys = Object.keys(params)
-  //   let options = {}
-
-  //   keys.forEach((key) => {
-  //     const isParamTypeObject = typeof params[key] === 'object'
-  //     const isParamTypeArray = isParamTypeObject && params[key].length >= 0
-
-  //     if (!isParamTypeObject) {
-  //       options += `${key}=${params[key]}&`
-  //     }
-
-  //     if (isParamTypeObject && isParamTypeArray) {
-  //       params[key].forEach((element) => {
-  //         options += `${key}=${element}&`
-  //       })
-  //     }
-  //   })
-
-  //   return options ? options.slice(0, -1) : options
-  // }
-  // useEffect(() => {
-  //   async function fetchSub() {
-  //     const { data } = await axios.get(`http://localhost:5000/api/products?${params.join('')}`);
-  //     //  setSubCategories(data.data.categories)
-
-  //    console.log(data)
-  //   }
-  //   fetchSub();
-  // }, []);
-
- 
-
-  const sortMenu = [
-    {
-      value: "price",
-      name: "Price:Low to High",
-    },
-    {
-      value: "-price",
-      name: "Price:High to Low",
-    },
-    {
-      value: "isFeatured",
-      name: "Featured",
-    },
-    {
-      value: "createdAt",
-      name: "New Arrivals",
-    },
-  ];
   const handleClick = (color) => {
     setSelectedColor(color);
   };
@@ -166,17 +119,21 @@ const ProductList = ({ categories }) => {
     setMaxPrice(myArray[1]);
   };
 
-  const handleCheckBox = (e) => {
+  const handleCheckBox = (e,name) => {
     if (e.target.checked) {
       setSelectedSubCats([...selectedSubCats, e.target.value]);
+      setSubCategoryName([...subCategoryName,name])
     } else {
       const newArr = selectedSubCats.filter((item) => item !== e.target.value);
       setSelectedSubCats(newArr);
+     const namesArr = subCategoryName.filter((item) => item !== name)
+     setSubCategoryName(namesArr)
     }
   };
   useEffect(() => {
     console.log(selectedSubCats);
-  }, [selectedSubCats]);
+    console.log(subCategoryName)
+  }, [selectedSubCats,subCategoryName]);
 
   const toggleActive = () => {
     setActive((isActive) => !isActive);
@@ -198,8 +155,8 @@ const ProductList = ({ categories }) => {
       const { data } = await axios.get(
         `http://localhost:5000/api/categories/${category}`
       );
-      //  setSubCategories(data.data.categories)
-
+      console.log(data)
+      setCategoryName(data.data.category.name)
       setSubCategories(data.data.category.subcategories);
     }
     fetchSubCategories();
@@ -226,8 +183,20 @@ const ProductList = ({ categories }) => {
               <div className="category-checkbox" key={index}>
                 <CheckBoxButton
                   id={item.id}
+                  name={item.name}
                   value={item.id}
-                  onChange={handleCheckBox}
+                  onChange={(e)=>{
+                    if (e.target.checked) {
+                      setSelectedSubCats([...selectedSubCats, e.target.value]);
+                      setSubCategoryName([...subCategoryName,e.target.name])
+                    } else {
+                      const newArr = selectedSubCats.filter((item) => item !== e.target.value);
+                      setSelectedSubCats(newArr);
+                     const namesArr = subCategoryName.filter((item) => item !== e.target.name)
+                     setSubCategoryName(namesArr)
+                    }
+
+                  }}
                   text={item.name}
                 />
               </div>
@@ -272,9 +241,13 @@ const ProductList = ({ categories }) => {
             <h6 className="filter-name">Customer Review</h6>
             <ul className="review-filter">
               {ratings.map((r) => (
-                <li key={r.name} onClick={() => {
-                  console.log(r.rating)
-                  setRating(r.rating)}}>
+                <li
+                  key={r.name}
+                  onClick={() => {
+                    console.log(r.rating);
+                    setRating(r.rating);
+                  }}
+                >
                   <Rating value={r.rating} text={r.name}></Rating>
                 </li>
               ))}
@@ -283,7 +256,12 @@ const ProductList = ({ categories }) => {
         </div>
         <div className="right">
           <div className="sort">
-            <div className="sort-options">sort options</div>
+            <div className="filter-clear-wrapper">
+                 {category && (<p>{categoryName}</p>)}
+                 {subCategoryName && (subCategoryName.map((name,index)=>(
+                  <p key={index}>{name}</p>
+                 )))}
+            </div>
             <div className="dropdown">
               <div className="dropdown-btn" onClick={toggleActive}>
                 {sortFeatures ? sortFeatures : "Sort"}
@@ -309,9 +287,15 @@ const ProductList = ({ categories }) => {
             </div>
           </div>
           <div className="products">
-           
-            <List catId={category} minPrice={minPrice} maxPrice={maxPrice} sort={selectedSort} subCats={selectedSubCats} colors={selectedColor} ratingsAverage={rating}/>
-            
+            <List
+              catId={category}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              sort={selectedSort}
+              subCats={selectedSubCats}
+              colors={selectedColor}
+              ratingsAverage={rating}
+            />
           </div>
         </div>
       </div>
