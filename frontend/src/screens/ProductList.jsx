@@ -10,6 +10,7 @@ import RadioButton from "../components/ui/RadioButton";
 import CheckBoxButton from "../components/ui/CheckBoxButton";
 import ColorButton from "../components/ui/ColorButton";
 import List from "../components/List";
+import { useRef } from "react";
 
 const prices = [
   {
@@ -80,6 +81,51 @@ const sortMenu = [
 ];
 
 const ProductList = ({ categories }) => {
+
+
+
+  const [checkList, setCheckList] = useState([]);
+  const [arr, setArr] = useState([]);
+  const [shwArr,setShwAr] = useState([])
+  const handleCheck = (event) => {
+ 
+    if (event.target.checked) {
+      const index = checkList.findIndex((list) => list.id == event.target.name);
+      checkList[index].checked = event.target.checked;
+      setCheckList([...checkList]);
+      setArr([...arr, event.target.name]);
+      setShwAr([...shwArr,{id:event.target.name,name:event.target.value,checked:event.target.checked}])
+    } else {
+      console.log("this is unchecking checkbox ", event.target.checked);
+      const index = checkList.findIndex((list) => list.id == event.target.name);
+      checkList[index].checked = false;
+      setCheckList([...checkList]);
+      const newArr = arr.filter((item) => item !== event.target.name);
+      setArr(newArr);
+      const newShwAr = shwArr.filter((item)=> item.id !== event.target.name )
+      setShwAr(newShwAr)
+    }
+  };
+
+  const resetClick = () => {
+    for (const item of checkList) {
+      item.checked = false;
+    }
+
+    setCheckList([...checkList]);
+    setArr([]);
+    setShwAr([])
+  };
+
+  const clearCheckbox = (subcat) => {
+   
+    const index = checkList.findIndex((list) => list.id == subcat);
+    checkList[index].checked = false;
+    setCheckList([...checkList]);
+    const newShwAr = shwArr.filter((item)=> item.id !== subcat )
+      setShwAr(newShwAr)
+
+  } 
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleChange = (e) => {
@@ -95,9 +141,9 @@ const ProductList = ({ categories }) => {
 
   const { width } = useViewport();
   const breakpoint = 500;
-  const [categoryName,setCategoryName] = useState('')
+  const [categoryName, setCategoryName] = useState("");
   const [subCategories, setSubCategories] = useState([]);
-  const [selectedSubCats, setSelectedSubCats] = useState([]);
+
   const [sortFeatures, setSortFeatures] = useState("");
   const [selectedSort, setSelectedSort] = useState("");
   const [colors, setColors] = useState([]);
@@ -106,9 +152,11 @@ const ProductList = ({ categories }) => {
   const [rating, setRating] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [isActive, setActive] = useState(false);
-  const [subCategoryName,setSubCategoryName] = useState([])
+  const [selectedSubCats, setSelectedSubCats] = useState([]);
+  const [subCategoryName, setSubCategoryName] = useState([]);
 
-  const handleClick = (color) => {
+
+  const handleColor = (color) => {
     setSelectedColor(color);
   };
 
@@ -119,21 +167,21 @@ const ProductList = ({ categories }) => {
     setMaxPrice(myArray[1]);
   };
 
-  const handleCheckBox = (e,name) => {
+  const handleCheckBox = (e, name) => {
     if (e.target.checked) {
       setSelectedSubCats([...selectedSubCats, e.target.value]);
-      setSubCategoryName([...subCategoryName,name])
+      setSubCategoryName([...subCategoryName, name]);
     } else {
       const newArr = selectedSubCats.filter((item) => item !== e.target.value);
       setSelectedSubCats(newArr);
-     const namesArr = subCategoryName.filter((item) => item !== name)
-     setSubCategoryName(namesArr)
+      const namesArr = subCategoryName.filter((item) => item !== name);
+      setSubCategoryName(namesArr);
     }
   };
   useEffect(() => {
     console.log(selectedSubCats);
-    console.log(subCategoryName)
-  }, [selectedSubCats,subCategoryName]);
+    // console.log(subCategoryName);
+  }, [selectedSubCats]);
 
   const toggleActive = () => {
     setActive((isActive) => !isActive);
@@ -155,12 +203,22 @@ const ProductList = ({ categories }) => {
       const { data } = await axios.get(
         `http://localhost:5000/api/categories/${category}`
       );
-      console.log(data)
-      setCategoryName(data.data.category.name)
+      console.log(data);
+      setCategoryName(data.data.category.name);
       setSubCategories(data.data.category.subcategories);
+      const result = data.data.category.subcategories.map((item) => ({
+        id: item.id,
+        name: item.name,
+        checked: false,
+      }));
+      console.log('this is result ',result)
+
+      setCheckList(result);
     }
     fetchSubCategories();
   }, []);
+
+
 
   useEffect(() => {
     async function fetchColors() {
@@ -179,26 +237,27 @@ const ProductList = ({ categories }) => {
         <div className="left">
           <div className="filter-1">
             <h6 className="filter-name">Filter By Category</h6>
-            {subCategories?.map((item, index) => (
+            {checkList?.map((item, index) => (
               <div className="category-checkbox" key={index}>
                 <CheckBoxButton
                   id={item.id}
                   name={item.name}
                   value={item.id}
-                  onChange={(e)=>{
+                  onChange={(e) => {
                     if (e.target.checked) {
-                      setSelectedSubCats([...selectedSubCats, e.target.value]);
-                      setSubCategoryName([...subCategoryName,e.target.name])
+                      console.log(e.target.checked);
+                      setSelectedSubCats([...selectedSubCats, e.target.name]);
                     } else {
-                      const newArr = selectedSubCats.filter((item) => item !== e.target.value);
+                      console.log(e.target.checked);
+                      const newArr = selectedSubCats.filter(
+                        (item) => item !== e.target.name
+                      );
                       setSelectedSubCats(newArr);
-                     const namesArr = subCategoryName.filter((item) => item !== e.target.name)
-                     setSubCategoryName(namesArr)
                     }
-
                   }}
                   text={item.name}
                 />
+                
               </div>
             ))}
           </div>
@@ -227,7 +286,7 @@ const ProductList = ({ categories }) => {
                   <button
                     value={color}
                     type="submit"
-                    onClick={() => handleClick(color)}
+                    onClick={() => handleColor(color)}
                     style={{
                       backgroundColor: `${color}`,
                     }}
@@ -257,10 +316,52 @@ const ProductList = ({ categories }) => {
         <div className="right">
           <div className="sort">
             <div className="filter-clear-wrapper">
-                 {category && (<p>{categoryName}</p>)}
-                 {subCategoryName && (subCategoryName.map((name,index)=>(
-                  <p key={index}>{name}</p>
-                 )))}
+              {category && <h4>{categoryName}</h4>}
+              {shwArr && (shwArr.map((item,index)=>(
+                <span key={index} className="filter-clear-container">
+                  <button className="clear-btn" type='submit'>
+                    <span>{item.name}</span>
+                    <AiOutlineClose className="icon-filter" onClick={()=>clearCheckbox(item.id)}/> 
+                  </button>
+                </span>
+              )))}
+              {/* {shwArr &&
+                shwArr.map((item, index) => (
+                  <span key={index} className="filter-clear-container">
+                    <button className="clear-btn" type="submit">
+                      <span>{item}</span>
+                      <AiOutlineClose className="icon-filter" />
+                    </button>
+                  </span>
+                ))} */}
+              {minPrice && maxPrice && (
+                <span className="filter-clear-container">
+                  <span>Price:From</span>{" "}
+                  <button className="clear-btn" type="submit">
+                    <span>{`${minPrice} to ${maxPrice}`}</span>
+                    <AiOutlineClose className="icon-filter" />
+                  </button>
+                </span>
+              )}
+              {selectedColor && (
+                <span className="filter-clear-container">
+                  <span>Color:</span>
+                  <button className="clear-btn" type="submit">
+                    <span>{selectedColor}</span>
+                    <AiOutlineClose className="icon-filter" />
+                  </button>
+                </span>
+              )}
+              {rating && (
+                <span className="filter-clear-container">
+                  {" "}
+                  <span>Rating</span>
+                  <button className="clear-btn" type="submit">
+                    <span>{`${rating}` + "" + "stars"}</span>
+                    <AiOutlineClose className="icon-filter" />
+                  </button>
+                </span>
+              )}
             </div>
             <div className="dropdown">
               <div className="dropdown-btn" onClick={toggleActive}>
@@ -296,6 +397,33 @@ const ProductList = ({ categories }) => {
               colors={selectedColor}
               ratingsAverage={rating}
             />
+       
+             
+       
+
+            <div className="checkList">
+              <div className="title">Your CheckList:</div>
+              <div className="list-container">
+                {checkList.map((item, index) => (
+                  <div key={index}>
+                    <input
+                      name={item.id}
+                      value={item.name}
+                      checked={item.checked}
+                      type="checkbox"
+                      onChange={handleCheck}
+                    />
+                    <span>{item.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <button onClick={resetClick}>Reset all checkbox</button>
+            </div>
+
+           
           </div>
         </div>
       </div>

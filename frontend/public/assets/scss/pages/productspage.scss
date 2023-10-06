@@ -200,6 +200,39 @@
           align-items: center;
           justify-content: space-between;
           gap:1rem;
+          .filter-clear-container{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap:.3rem;
+            span{
+              font-family: 'lato',sans-serif;
+              font-size: 1.2rem;
+              font-weight: 400;
+            }
+            .clear-btn{
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              border: none;
+              border-radius: 3px;
+              background-color: var(--color-grey-light-1);
+              padding:8px 12px;
+             
+             
+              span{
+                font-family: 'lato',sans-serif;
+              font-size: 1.2rem;
+              font-weight: 300;
+              text-transform: capitalize;
+              }
+              .icon-filter{
+                font-size: 1.2rem;
+               margin-left: .7rem !important;
+
+              }
+            }
+          }
         }
       
      
