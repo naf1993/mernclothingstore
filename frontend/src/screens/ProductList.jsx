@@ -11,6 +11,7 @@ import CheckBoxButton from "../components/ui/CheckBoxButton";
 import ColorButton from "../components/ui/ColorButton";
 import List from "../components/List";
 import { useRef } from "react";
+import CheckBox from "../components/ui/CheckBox";
 
 const prices = [
   {
@@ -81,20 +82,23 @@ const sortMenu = [
 ];
 
 const ProductList = ({ categories }) => {
-
-
-
   const [checkList, setCheckList] = useState([]);
   const [arr, setArr] = useState([]);
-  const [shwArr,setShwAr] = useState([])
+  const [shwArr, setShwAr] = useState([]);
   const handleCheck = (event) => {
- 
     if (event.target.checked) {
       const index = checkList.findIndex((list) => list.id == event.target.name);
       checkList[index].checked = event.target.checked;
       setCheckList([...checkList]);
       setArr([...arr, event.target.name]);
-      setShwAr([...shwArr,{id:event.target.name,name:event.target.value,checked:event.target.checked}])
+      setShwAr([
+        ...shwArr,
+        {
+          id: event.target.name,
+          name: event.target.value,
+          checked: event.target.checked,
+        },
+      ]);
     } else {
       console.log("this is unchecking checkbox ", event.target.checked);
       const index = checkList.findIndex((list) => list.id == event.target.name);
@@ -102,8 +106,8 @@ const ProductList = ({ categories }) => {
       setCheckList([...checkList]);
       const newArr = arr.filter((item) => item !== event.target.name);
       setArr(newArr);
-      const newShwAr = shwArr.filter((item)=> item.id !== event.target.name )
-      setShwAr(newShwAr)
+      const newShwAr = shwArr.filter((item) => item.id !== event.target.name);
+      setShwAr(newShwAr);
     }
   };
 
@@ -114,18 +118,16 @@ const ProductList = ({ categories }) => {
 
     setCheckList([...checkList]);
     setArr([]);
-    setShwAr([])
+    setShwAr([]);
   };
 
   const clearCheckbox = (subcat) => {
-   
     const index = checkList.findIndex((list) => list.id == subcat);
     checkList[index].checked = false;
     setCheckList([...checkList]);
-    const newShwAr = shwArr.filter((item)=> item.id !== subcat )
-      setShwAr(newShwAr)
-
-  } 
+    const newShwAr = shwArr.filter((item) => item.id !== subcat);
+    setShwAr(newShwAr);
+  };
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleChange = (e) => {
@@ -154,7 +156,6 @@ const ProductList = ({ categories }) => {
   const [isActive, setActive] = useState(false);
   const [selectedSubCats, setSelectedSubCats] = useState([]);
   const [subCategoryName, setSubCategoryName] = useState([]);
-
 
   const handleColor = (color) => {
     setSelectedColor(color);
@@ -211,14 +212,12 @@ const ProductList = ({ categories }) => {
         name: item.name,
         checked: false,
       }));
-      console.log('this is result ',result)
+      console.log("this is result ", result);
 
       setCheckList(result);
     }
     fetchSubCategories();
   }, []);
-
-
 
   useEffect(() => {
     async function fetchColors() {
@@ -257,7 +256,23 @@ const ProductList = ({ categories }) => {
                   }}
                   text={item.name}
                 />
-                
+              </div>
+            ))}
+          </div>
+
+          <div className="filter-1">
+            <h6 className="filter-name">Filter By Category</h6>
+            {checkList?.map((item, index) => (
+              <div className="category-checkbox" key={index}>
+                <input
+                  name={item.id}
+                  value={item.name}
+                  checked={item.checked}
+                  className="input-checkbox"
+                  type="checkbox"
+                  onChange={handleCheck}
+                />
+                <label className="input-label">{item.name}</label>
               </div>
             ))}
           </div>
@@ -317,14 +332,18 @@ const ProductList = ({ categories }) => {
           <div className="sort">
             <div className="filter-clear-wrapper">
               {category && <h4>{categoryName}</h4>}
-              {shwArr && (shwArr.map((item,index)=>(
-                <span key={index} className="filter-clear-container">
-                  <button className="clear-btn" type='submit'>
-                    <span>{item.name}</span>
-                    <AiOutlineClose className="icon-filter" onClick={()=>clearCheckbox(item.id)}/> 
-                  </button>
-                </span>
-              )))}
+              {shwArr &&
+                shwArr.map((item, index) => (
+                  <span key={index} className="filter-clear-container">
+                    <button className="clear-btn" type="submit">
+                      <span>{item.name}</span>
+                      <AiOutlineClose
+                        className="icon-filter"
+                        onClick={() => clearCheckbox(item.id)}
+                      />
+                    </button>
+                  </span>
+                ))}
               {/* {shwArr &&
                 shwArr.map((item, index) => (
                   <span key={index} className="filter-clear-container">
@@ -388,7 +407,25 @@ const ProductList = ({ categories }) => {
             </div>
           </div>
           <div className="products">
-            <List
+            <div
+             
+            >
+              <div className="checkbox-wrapper1"  style={{
+                display: "flex",
+                alignItems: "center",
+                flexDirection: "column",
+                gap:'1rem'
+              }}>
+              <CheckBox label="Apple" checked={false} />
+              <CheckBox
+                label="Orange"
+                checked={false}
+                disabled
+              />
+              <CheckBox label="Mango" />
+              </div>
+            </div>
+            {/* <List
               catId={category}
               minPrice={minPrice}
               maxPrice={maxPrice}
@@ -396,10 +433,7 @@ const ProductList = ({ categories }) => {
               subCats={selectedSubCats}
               colors={selectedColor}
               ratingsAverage={rating}
-            />
-       
-             
-       
+            /> */}
 
             <div className="checkList">
               <div className="title">Your CheckList:</div>
@@ -413,7 +447,16 @@ const ProductList = ({ categories }) => {
                       type="checkbox"
                       onChange={handleCheck}
                     />
-                    <span>{item.name}</span>
+                    <label>{item.name}</label>
+                    {/* <input
+        type="checkbox"
+        name={item.id}
+        value={item.name}
+        checked={item.checked}
+        className="input-checkbox"
+       onChange={handleCheck}
+      />
+      <label className="input-label" htmlFor={item.id}>{item.name}</label> */}
                   </div>
                 ))}
               </div>
@@ -422,8 +465,6 @@ const ProductList = ({ categories }) => {
             <div>
               <button onClick={resetClick}>Reset all checkbox</button>
             </div>
-
-           
           </div>
         </div>
       </div>
