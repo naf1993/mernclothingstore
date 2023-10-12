@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import Loader from "./Loader";
+import ProductCard from "./ProductCard";
+import Message from './Message'
 const List = ({
   catId,
   minPrice,
@@ -11,7 +13,7 @@ const List = ({
   ratingsAverage,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
   const [data, setData] = useState([]);
   let [products, setProducts] = useState([]);
   // const params = subCats.map((item) => {
@@ -21,12 +23,22 @@ const List = ({
   const price = "price";
 
   const getAllProductsByCategory = async () => {
-    await axios
-      .get(`http://localhost:5000/api/products?Category=${catId}`)
-      .then((response) => {
-        setProducts(response.data.data.products);
-      });
+    try {
+      setLoading(true);
+
+      const { data } = await axios.get(
+        `http://localhost:5000/api/products?Category=${catId}`
+      );
+      setProducts(data.data.products);
+      setLoading(false);
+    } catch (err) {
+      setError(err.response.data.message);
+    }
   };
+
+  useEffect(() => {
+    console.log("these are products ", products);
+  }, [products]);
 
   useEffect(() => {
     if (
@@ -72,12 +84,20 @@ const List = ({
       }),
     };
 
-    const { data } = axios.get(`http://localhost:5000/api/products?`, {
-      params,
-      paramsSerializer: {
-        indexes: false,
-      },
-    });
+    try {
+      setLoading(true);
+      const { data } = await axios.get(`http://localhost:5000/api/products?`, {
+        params,
+        paramsSerializer: {
+          indexes: false,
+        },
+      });
+      console.log('these are filtered products ',data)
+      setProducts(data.data.products);
+      setLoading(false);
+    } catch (err) {
+      setError(err.response.data.message);
+    }
   };
   useEffect(() => {
     if (
@@ -98,11 +118,17 @@ const List = ({
     ratingsAverage.length,
   ]);
 
-  return (
-    <div className="list">
-     
-    </div>
-  );
+  return <div className="list">
+    {loading ? (<Loader/>) : error ? ( <Message severity="error" error={error} />) : (products.length === 0) ? (<p>no products</p>) : (
+     <>
+     {products.map((product,index)=>(
+      <div key={index}>
+        <ProductCard product={product}/>
+      </div>
+     ))}
+     </>
+    )}
+  </div>;
 };
 
 export default List;

@@ -21,11 +21,11 @@
     /* removing default appearance */
     -webkit-appearance: none;
     appearance: none;
-    width: 2.3em;
-    height: 2.3em;
-    border-radius: 0.15em;
+    width: 1.9em;
+    height: 1.9em;
+    border-radius: 0.25em;
     margin-right: 0.5em;
-    border: 0.15em solid var(--color-grey-light-1);
+    border: 0.15em solid var(--color-grey-light-4);
     outline: none;
     cursor: pointer;
   }
@@ -41,8 +41,8 @@
         font-size: 1.36em;
         color: var(--color-grey-dark-3);
         position: absolute;
-        right: 5px;
-        top: 2px;
+        right: 3px;
+        top: -2px;
     }
   
   /* input:checked {

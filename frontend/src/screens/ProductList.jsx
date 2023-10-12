@@ -85,6 +85,31 @@ const ProductList = ({ categories }) => {
   const [checkList, setCheckList] = useState([]);
   const [arr, setArr] = useState([]);
   const [shwArr, setShwAr] = useState([]);
+  let [searchParams, setSearchParams] = useSearchParams();
+  let term = searchParams.get("category");
+  //  const sp = new URLSearchParams(search)
+  //  const category = sp.get('category') || 'all'
+  const location = useLocation();
+  const category = location.pathname.split("/")[3];
+  const { width } = useViewport();
+  const breakpoint = 500;
+  const [categoryName, setCategoryName] = useState("");
+  const [subCategories, setSubCategories] = useState([]);
+
+  const [sortFeatures, setSortFeatures] = useState("");
+  const [selectedSort, setSelectedSort] = useState("");
+  const [colors, setColors] = useState([]);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [rating, setRating] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+  const [isActive, setActive] = useState(false);
+ 
+
+  const [checkedRadio, setCheckedRadio] = useState({
+    isChecked: "",
+  });
+
   const handleCheck = (event) => {
     if (event.target.checked) {
       const index = checkList.findIndex((list) => list.id == event.target.name);
@@ -100,7 +125,6 @@ const ProductList = ({ categories }) => {
         },
       ]);
     } else {
-      console.log("this is unchecking checkbox ", event.target.checked);
       const index = checkList.findIndex((list) => list.id == event.target.name);
       checkList[index].checked = false;
       setCheckList([...checkList]);
@@ -111,6 +135,7 @@ const ProductList = ({ categories }) => {
     }
   };
 
+
   const resetClick = () => {
     for (const item of checkList) {
       item.checked = false;
@@ -119,6 +144,11 @@ const ProductList = ({ categories }) => {
     setCheckList([...checkList]);
     setArr([]);
     setShwAr([]);
+    setCheckedRadio({ isChecked: "" });
+    setMinPrice("");
+    setMaxPrice("");
+    setSelectedColor("");
+    setRating("");
   };
 
   const clearCheckbox = (subcat) => {
@@ -127,35 +157,14 @@ const ProductList = ({ categories }) => {
     setCheckList([...checkList]);
     const newShwAr = shwArr.filter((item) => item.id !== subcat);
     setShwAr(newShwAr);
+    const newArr = arr.filter((item)=>item != subcat)
+    setArr(newArr)
   };
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleChange = (e) => {
     setSelectedCategory(e.target.value);
   };
-
-  let [searchParams, setSearchParams] = useSearchParams();
-  let term = searchParams.get("category");
-  //  const sp = new URLSearchParams(search)
-  //  const category = sp.get('category') || 'all'
-  const location = useLocation();
-  const category = location.pathname.split("/")[3];
-
-  const { width } = useViewport();
-  const breakpoint = 500;
-  const [categoryName, setCategoryName] = useState("");
-  const [subCategories, setSubCategories] = useState([]);
-
-  const [sortFeatures, setSortFeatures] = useState("");
-  const [selectedSort, setSelectedSort] = useState("");
-  const [colors, setColors] = useState([]);
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [rating, setRating] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
-  const [isActive, setActive] = useState(false);
-  const [selectedSubCats, setSelectedSubCats] = useState([]);
-  const [subCategoryName, setSubCategoryName] = useState([]);
 
   const handleColor = (color) => {
     setSelectedColor(color);
@@ -168,21 +177,12 @@ const ProductList = ({ categories }) => {
     setMaxPrice(myArray[1]);
   };
 
-  const handleCheckBox = (e, name) => {
-    if (e.target.checked) {
-      setSelectedSubCats([...selectedSubCats, e.target.value]);
-      setSubCategoryName([...subCategoryName, name]);
-    } else {
-      const newArr = selectedSubCats.filter((item) => item !== e.target.value);
-      setSelectedSubCats(newArr);
-      const namesArr = subCategoryName.filter((item) => item !== name);
-      setSubCategoryName(namesArr);
-    }
+
+  const handleCloseRadio = () => {
+    setCheckedRadio({ isChecked: "" });
+    setMinPrice("");
+    setMaxPrice("");
   };
-  useEffect(() => {
-    console.log(selectedSubCats);
-    // console.log(subCategoryName);
-  }, [selectedSubCats]);
 
   const toggleActive = () => {
     setActive((isActive) => !isActive);
@@ -204,7 +204,7 @@ const ProductList = ({ categories }) => {
       const { data } = await axios.get(
         `http://localhost:5000/api/categories/${category}`
       );
-      console.log(data);
+
       setCategoryName(data.data.category.name);
       setSubCategories(data.data.category.subcategories);
       const result = data.data.category.subcategories.map((item) => ({
@@ -212,8 +212,6 @@ const ProductList = ({ categories }) => {
         name: item.name,
         checked: false,
       }));
-      console.log("this is result ", result);
-
       setCheckList(result);
     }
     fetchSubCategories();
@@ -236,45 +234,31 @@ const ProductList = ({ categories }) => {
         <div className="left">
           <div className="filter-1">
             <h6 className="filter-name">Filter By Category</h6>
-            {checkList?.map((item, index) => (
-              <div className="category-checkbox" key={index}>
-                <CheckBoxButton
-                  id={item.id}
-                  name={item.name}
-                  value={item.id}
-                  onChange={(e) => {
-                    if (e.target.checked) {
-                      console.log(e.target.checked);
-                      setSelectedSubCats([...selectedSubCats, e.target.name]);
-                    } else {
-                      console.log(e.target.checked);
-                      const newArr = selectedSubCats.filter(
-                        (item) => item !== e.target.name
-                      );
-                      setSelectedSubCats(newArr);
-                    }
-                  }}
-                  text={item.name}
-                />
-              </div>
-            ))}
-          </div>
 
-          <div className="filter-1">
-            <h6 className="filter-name">Filter By Category</h6>
-            {checkList?.map((item, index) => (
-              <div className="category-checkbox" key={index}>
-                <input
-                  name={item.id}
-                  value={item.name}
-                  checked={item.checked}
-                  className="input-checkbox"
-                  type="checkbox"
-                  onChange={handleCheck}
-                />
-                <label className="input-label">{item.name}</label>
-              </div>
-            ))}
+            <div
+              className="checkbox-wrapper1"
+              style={{
+                display: "flex",
+                gap: "0.5rem",
+                flexDirection: "column",
+              }}
+            >
+              {checkList.map((item, index) => (
+                <div key={index}>
+                  <label>
+                    <input
+                      name={item.id}
+                      className={item.checked ? "checked" : ""}
+                      value={item.name}
+                      checked={item.checked}
+                      type="checkbox"
+                      onChange={handleCheck}
+                    />
+                    <span>{item.name}</span>
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="filter-2">
@@ -284,10 +268,12 @@ const ProductList = ({ categories }) => {
               <div key={index}>
                 <RadioButton
                   id={item.id}
-                  name="price"
-                  value={item.array}
-                  text={item.name}
                   onChange={handleRadio}
+                  value={item.array}
+                  name="price"
+                  text={item.name}
+                  checkedRadio={checkedRadio}
+                  setCheckedRadio={setCheckedRadio}
                 />
               </div>
             ))}
@@ -331,7 +317,6 @@ const ProductList = ({ categories }) => {
         <div className="right">
           <div className="sort">
             <div className="filter-clear-wrapper">
-              {category && <h4>{categoryName}</h4>}
               {shwArr &&
                 shwArr.map((item, index) => (
                   <span key={index} className="filter-clear-container">
@@ -344,21 +329,16 @@ const ProductList = ({ categories }) => {
                     </button>
                   </span>
                 ))}
-              {/* {shwArr &&
-                shwArr.map((item, index) => (
-                  <span key={index} className="filter-clear-container">
-                    <button className="clear-btn" type="submit">
-                      <span>{item}</span>
-                      <AiOutlineClose className="icon-filter" />
-                    </button>
-                  </span>
-                ))} */}
+
               {minPrice && maxPrice && (
                 <span className="filter-clear-container">
                   <span>Price:From</span>{" "}
                   <button className="clear-btn" type="submit">
                     <span>{`${minPrice} to ${maxPrice}`}</span>
-                    <AiOutlineClose className="icon-filter" />
+                    <AiOutlineClose
+                      className="icon-filter"
+                      onClick={handleCloseRadio}
+                    />
                   </button>
                 </span>
               )}
@@ -367,7 +347,10 @@ const ProductList = ({ categories }) => {
                   <span>Color:</span>
                   <button className="clear-btn" type="submit">
                     <span>{selectedColor}</span>
-                    <AiOutlineClose className="icon-filter" />
+                    <AiOutlineClose
+                      className="icon-filter"
+                      onClick={() => setSelectedColor("")}
+                    />
                   </button>
                 </span>
               )}
@@ -377,9 +360,36 @@ const ProductList = ({ categories }) => {
                   <span>Rating</span>
                   <button className="clear-btn" type="submit">
                     <span>{`${rating}` + "" + "stars"}</span>
-                    <AiOutlineClose className="icon-filter" />
+                    <AiOutlineClose
+                      className="icon-filter"
+                      onClick={() => setRating("")}
+                    />
                   </button>
                 </span>
+              )}
+              {rating && selectedColor && minPrice && maxPrice && shwArr && (
+                <button
+                  type="submit"
+                  onClick={resetClick}
+                  className="btn-reset"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    border: "none",
+                    padding: "10px 15px",
+                    backgroundColor: "rebeccapurple",
+                    color: "white",
+                  }}
+                >
+                  Clear All
+                  <AiOutlineClose
+                    style={{
+                      fontSize: "1.2rem",
+                      marginLeft: ".7rem !important",
+                    }}
+                  />
+                </button>
               )}
             </div>
             <div className="dropdown">
@@ -407,64 +417,15 @@ const ProductList = ({ categories }) => {
             </div>
           </div>
           <div className="products">
-            <div
-             
-            >
-              <div className="checkbox-wrapper1"  style={{
-                display: "flex",
-                alignItems: "center",
-                flexDirection: "column",
-                gap:'1rem'
-              }}>
-              <CheckBox label="Apple" checked={false} />
-              <CheckBox
-                label="Orange"
-                checked={false}
-                disabled
-              />
-              <CheckBox label="Mango" />
-              </div>
-            </div>
-            {/* <List
+            <List
               catId={category}
               minPrice={minPrice}
               maxPrice={maxPrice}
               sort={selectedSort}
-              subCats={selectedSubCats}
+              subCats={arr}
               colors={selectedColor}
               ratingsAverage={rating}
-            /> */}
-
-            <div className="checkList">
-              <div className="title">Your CheckList:</div>
-              <div className="list-container">
-                {checkList.map((item, index) => (
-                  <div key={index}>
-                    <input
-                      name={item.id}
-                      value={item.name}
-                      checked={item.checked}
-                      type="checkbox"
-                      onChange={handleCheck}
-                    />
-                    <label>{item.name}</label>
-                    {/* <input
-        type="checkbox"
-        name={item.id}
-        value={item.name}
-        checked={item.checked}
-        className="input-checkbox"
-       onChange={handleCheck}
-      />
-      <label className="input-label" htmlFor={item.id}>{item.name}</label> */}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <button onClick={resetClick}>Reset all checkbox</button>
-            </div>
+            />
           </div>
         </div>
       </div>
