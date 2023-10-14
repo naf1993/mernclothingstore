@@ -140,9 +140,10 @@
     
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      //background-color: #ece7e7;
-      gap: 2rem;
+      gap:2rem;
+      //justify-content: space-between;
+     
+      
       .filter-1,
       .filter-2,
       .filter-3,
@@ -243,6 +244,7 @@
         position: relative;
         font-family: 'lato',sans-serif;
         user-select: none;
+        z-index: 400;
       }
       .dropdown .dropdown-btn{
         padding:8px 15px;
@@ -279,6 +281,12 @@
       }
     }
       
+    .products-wrapper{
+      //background-color: yellow;
+     
+      margin-top: 3rem;
+      padding:2rem;
+    }
     }
   
   }

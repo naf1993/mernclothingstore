@@ -416,7 +416,7 @@ const ProductList = ({ categories }) => {
               )}
             </div>
           </div>
-          <div className="products">
+          <div className="products-wrapper">
             <List
               catId={category}
               minPrice={minPrice}

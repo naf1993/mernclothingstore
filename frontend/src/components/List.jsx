@@ -37,6 +37,14 @@ const List = ({
   };
 
   useEffect(() => {
+    if (loading) {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
+    }
+  }, [loading]);
+
+  useEffect(() => {
     console.log("these are products ", products);
   }, [products]);
 
@@ -118,7 +126,7 @@ const List = ({
     ratingsAverage.length,
   ]);
 
-  return <div className="list">
+  return <div className="products">
     {loading ? (<Loader/>) : error ? ( <Message severity="error" error={error} />) : (products.length === 0) ? (<p>no products</p>) : (
      <>
      {products.map((product,index)=>(

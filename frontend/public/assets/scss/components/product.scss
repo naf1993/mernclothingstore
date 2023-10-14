@@ -1,20 +1,30 @@
 .product-card {
-  max-width: 300px;
+  //max-width: 300px;
 
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  border-radius: 20px;
+ 
+  border-radius: 5px;
   overflow:hidden;
   cursor:pointer;
- // box-shadow: 0 13px 27px -5px hsla(240, 30.1%, 28%, 0.25), 0 8px 16px -8px hsla(0, 0%, 0%, 0.3), 0 -6px 16px -6px hsla(0, 0%, 0%, 0.03);
-  transition: all ease 200ms;
+ 
   
   &__img {
     width: 100%;
     grid-row: 1/2;
     grid-column: 1/-1;
     z-index: 1;
+   
+    img{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  
+
   }
+ 
+  
   &__icons {
     background-color: transparent;
     grid-row: 1/2;
@@ -25,25 +35,25 @@
     justify-self: end;
     margin: 1rem 0.5rem;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    //flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-end;
 
-    &-item:first-child {
-      margin-bottom: 0.5rem;
-    }
+   
     &-item {
       cursor:pointer;
-      height: 3.5rem;
-      width: 3.5rem;
+      height: 3rem;
+      width: 3rem;
       padding: 0.5rem;
       border-radius: 50%;
-      background-color:#00a693;
+      background-color:black;
       position:relative;
       color: white;
       &:hover{
-        background-color: rgb(6, 1, 15)
+        color: black;
+        background-color: white;
       }
+     
       &::before,&::after{
         content:'';
         position:absolute;
@@ -55,82 +65,82 @@
       }
     }
   }
-  &__action {
-    grid-row: 1/2;
-    grid-column: 1/-1;
-    justify-self: center;
-    align-self: end;
-    z-index: 3;
+  // &__action {
+  //   grid-row: 1/2;
+  //   grid-column: 1/-1;
+  //   justify-self: center;
+  //   align-self: end;
+  //   z-index: 3;
 
    
-    width: 100%;
+  //   width: 100%;
 
     
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    &-btn{
-        width:80%;
-        outline: none;
-        border:none;
-        background-color: #00a693;
-        border-radius:4px;
-        color: white;
-        padding:8px 12px;
-        text-align: center;
-        cursor: pointer;
-        font-size: 1.2rem;
-        &-icon{
-            margin-right: .5rem;
-            width:2.2rem;
-            height:2.2rem;
-        }
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: center;
+  //   &-btn{
+  //       width:80%;
+  //       outline: none;
+  //       border:none;
+  //       background-color: #00a693;
+  //       border-radius:4px;
+  //       color: white;
+  //       padding:8px 12px;
+  //       text-align: center;
+  //       cursor: pointer;
+  //       font-size: 1.2rem;
+  //       &-icon{
+  //           margin-right: .5rem;
+  //           width:2.2rem;
+  //           height:2.2rem;
+  //       }
       
-        &:hover{
-          background-color: rgb(6, 1, 15)
+  //       &:hover{
+  //         background-color: rgb(6, 1, 15)
             
-        }
+  //       }
         
-    }
-  }
+  //   }
+  // }
   &__detail{
-    display: flex;
-    align-items: center;
+    grid-column:1/-1;
+    padding:0.8rem 2rem;
    
-    flex-direction: column;
+   div{
+    display: flex;
+    
+   
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+   }
     
     
     &-category{
-      margin-top: 0 !important;
-      margin-bottom: .5rem;
-      font-size: 1.3rem;
-      color:#777777
+     
+      font-size: 14px;
+      font-weight: 300;
+      color:#777777;
+      align-self: flex-end;
     }
     &-name{
       color:#333333;
-      font-size: 14px;
+      font-size: 15px;
+      align-self: flex-start;
+      font-weight: 400;
       
     }
     &-price{
       color:#ef837b;
       font-size: 1.2rem;
-      align-self: center;
-      margin:0 !important;
-      margin-bottom: .5rem !important;
+      align-self: flex-start;
+    
       font-weight: bold;
     }
-    &-icons{
-      padding:0 !important
-      
-    }
-    &-icons > * {
-      width: 1.5rem;
-      height: 1.5rem;
-      color:rgb(242, 245, 65);
-    }
+   .rating{
+   margin-left: 0.4rem;
+   align-self: flex-start;
+   }
   }
 }
-.product-card:hover{
-  transform:scale(1.03);
- 
-}
+
