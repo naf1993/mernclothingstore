@@ -68,7 +68,7 @@ const resizeImages = async (req, res, next) => {
       const newFilename = `product-${filename}-${Date.now()}.jpeg`;
 
       await sharp(file.buffer)
-        .resize(800, 700)
+        .resize(500, 500)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
         .toFile(`public/products/${newFilename}`);
@@ -113,7 +113,7 @@ const getAllProducts = catchAsync(async (req, res, next) => {
 });
 
 const getProductById = catchAsync(async (req, res, next) => {
-  const product = await Product.findById(req.params.id).populate("reviews");
+  const product = await Product.findById(req.params.id).populate("reviews Category SubCategory");
   if (!product) {
     return next(new AppError("No Product found with that ID", 404));
   }

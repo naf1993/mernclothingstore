@@ -1,0 +1,119 @@
+.product-detail-wrapper {
+  grid-column: 1/-1;
+  margin-top: 2rem;
+  display: grid;
+
+  grid-template-columns:
+    [full-start] minmax(13rem, 1fr) [center-start] repeat(
+      8,
+      [col-start] minmax(min-content, 14rem) [col-end]
+    )
+    [center-end] minmax(13rem, 1fr) [full-end];
+
+  .detail-wrapper {
+    grid-column: center-start/center-end;
+    display: flex;
+    margin-top: 3rem;
+    gap:3rem;
+    .productdisplay-left{
+      display: flex;
+      gap:10px;
+      .productdisplay-img-list{
+        display: flex;
+        flex-direction: column;
+       
+        gap:10px;
+        img{
+          height: 100px;
+          border-radius: 8px;
+        }
+      }
+      .productdisplay-main-img{
+        width:360px;
+        height:400px;
+      }
+    }
+    .productdisplay-right{
+      flex:1;
+      margin-top: 1.5rem;
+      font-family: 'lato';
+      
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      .product-category{
+        font-size: 18px;
+        font-weight: 300;
+        color:var(--color-grey-dark-3);
+        font-family: 'lato';
+
+      }
+      .product-name{
+        text-transform: capitalize;
+        font-size: 20px;
+        font-family: 'lato';
+        letter-spacing: .1rem;
+        font-weight: 400;
+      }
+      .product-color{
+        color:var(--color-grey-dark-3);
+        font-size: 18px;
+        font-weight: 400;
+        letter-spacing: .1rem;
+        padding:1rem 0;
+        border-bottom: 0.2px solid #cac2c2;
+        
+      }
+      .buttons-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-right: 3rem;
+        button {
+          width: 1.7rem;
+          height: 1.7rem;
+          border: none;
+          border-radius: 50%;
+        }
+      }
+      .product-size{
+        color:var(--color-grey-dark-3);
+        font-size: 18px;
+        font-weight: 400;
+        letter-spacing: .1rem;
+        padding:1rem 0;
+        border-bottom: 0.2px solid #cac2c2;
+
+      }
+      .product-details{
+        color:var(--color-grey-dark-3);
+        font-size: 18px;
+        font-weight: 400;
+        letter-spacing: .1rem;
+        padding:1rem 0;
+        border-bottom: 0.2px solid #cac2c2;
+        text-transform: uppercase;
+      }
+      .submit-btn{
+        border:none;
+        outline:none;
+        padding:1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #0073cf;
+        color:white;
+        border-radius: 3px;
+       span{
+        font-size: 1.4rem;
+        font-weight: 400;
+        letter-spacing: .1rem;
+        font-family: inherit;
+       }
+      }
+    }
+  
+  }
+}

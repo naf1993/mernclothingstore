@@ -33,12 +33,14 @@ export const listProductDetails = (id)=>  async(dispatch)=>{
     try{
         dispatch({type:PRODUCT_DETAIL_REQUEST})
         const {data} = await axios.get(`/api/products/${id}`)
+       
+       
 
         dispatch({
             type:PRODUCT_DETAIL_SUCCESS,
-            payload:data
+            payload:data.data.product
         })
-
+        
     }catch(error){
         dispatch({
             type:PRODUCT_DETAIL_FAIL,
