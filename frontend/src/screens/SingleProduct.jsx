@@ -6,19 +6,66 @@ import Loader from "../components/Loader";
 import Message from "../components/Message";
 import Rating from "../components/Rating";
 import { CiShoppingCart } from "react-icons/ci";
+import { AiOutlineCaretDown } from "react-icons/ai";
+import { AiOutlineClose } from "react-icons/ai";
+import axios from "axios";
 const SingleProduct = () => {
   const { id } = useParams();
-  console.log(id);
+
   const dispatch = useDispatch();
   const productDetails = useSelector((state) => state.productDetails);
   const { loading, error, product } = productDetails;
+  const [selectOptions, setSelectOptions] = useState([]);
+  const [ifSize, setifSize] = useState(false);
+  const [size,setSize] = useState()
+  const [isActive,setActive] = useState(false)
+
+  // const toggleActive = () => {
+  //   setActive((isActive) => !isActive);
+  // };
+
+  // const handleSize = (value, name) => {
+  //   setSize(name);
+  //   setSelectedSort(value);
+  //   setActive(false);
+  // };
+
+  // const handleCloseMenu = () => {
+  //   setSortFeatures("");
+  //   setActive(false);
+  // };
   useEffect(() => {
     dispatch(listProductDetails(`${id}`));
   }, [dispatch]);
 
   useEffect(() => {
-    console.log(product);
-  }, [product]);
+    fetchSizes();
+  }, []);
+
+  async function fetchSizes() {
+    const { data } = await axios.get(
+      `http://localhost:5000/api/products/${id}`
+    );
+    const sizes = data.data.product.size;
+    const options = [];
+
+    if (sizes[0] === 0) {
+      setSelectOptions([]);
+      setifSize(false);
+    } else {
+      setifSize(true);
+      sizes.forEach((size) => {
+        options.push({
+          value: size,
+          key: sizes.indexOf(size),
+        });
+      });
+    
+
+      setSelectOptions([...options]);
+      console.log(options)
+    }
+  }
 
   return (
     <>
@@ -52,28 +99,52 @@ const SingleProduct = () => {
               <h2 className="product-category">{product.SubCategory.name}</h2>
               <h1 className="product-name">{product.name}</h1>
               <Rating value={product.ratingsAverage} text={""} />
-              <h4 className="product-color">COLORS</h4>
-              <div className="buttons-wrapper">
-                {product.colors?.map((color, index) => (
-                  <span key={index} className="filter-color-btn">
-                    <button
-                      value={color}
-                      type="submit"
-                      style={{
-                        backgroundColor: `${color}`,
-                      }}
-                    />
-                  </span>
-                ))}
-              </div>
-              <h4 className="product-size">SIZE</h4>
-              <button type="submit" className="submit-btn"><CiShoppingCart className="addcart-icon" style={{width:'1.2rem',height:'1.2rem'}}/><span className="btn-title">Add to Cart</span></button>
-                      <p>Estimated Delivery Time: 21 November - 28 November</p>
-                      <h4 className="product-details">Product Details
-                        </h4>   
-                        <p>Product Details: 8834941</p>
-                        <p>Return within "30 days". For detailed information, Click.</p>
-                        <p>Fabric Info: 100% BARKCLOTH</p>
+              {product.colors && <h4 className="product-color">COLORS</h4>}
+              {product.colors && (
+                <div className="buttons-wrapper">
+                  {product.colors?.map((color, index) => (
+                    <span key={index} className="filter-color-btn">
+                      <button
+                        value={color}
+                        type="submit"
+                        style={{
+                          backgroundColor: `${color}`,
+                        }}
+                      />
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {ifSize && <h4 className="product-size">SIZE</h4>}
+              {ifSize && (
+                <div className="dropdown">
+                  <div className="dropdown-btn">
+                    
+                  </div>
+                  {isActive && (
+                    <div className="dropdown-content">
+                     {selectOptions.map((option,index)=>(
+                      <div key={index} className="dropdown-item">{option}</div>
+                     ))}
+
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button type="submit" className="submit-btn">
+                {/* <CiShoppingCart
+                  className="addcart-icon"
+                  style={{ width: "1.2rem", height: "1.2rem" }}
+                /> */}
+                <span className="btn-title">Add to Cart</span>
+              </button>
+              <p>Estimated Delivery Time: 21 November - 28 November</p>
+              <h4 className="product-details">Product Details</h4>
+              <p>Product Details: 8834941</p>
+              <p>Return within "30 days". For detailed information, Click.</p>
+              <p>Fabric Info: 100% BARKCLOTH</p>
             </div>
             {/* <div className="left">
               <div className="left__item left__item--1">

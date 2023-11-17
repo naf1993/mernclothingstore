@@ -90,10 +90,16 @@ const productSchema = new mongoose.Schema(
       type:Number,
       default:0
     },
-    size:[{
-      type:String,
-      default:0
-    }],
+   
+    size: {
+      type: [
+        {
+          type: Number,
+          // Another properties
+        },
+      ],
+      default: [0],
+    },
     colors:[{type:String}]
   },
   {
