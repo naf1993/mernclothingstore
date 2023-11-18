@@ -9,6 +9,7 @@ import { CiShoppingCart } from "react-icons/ci";
 import { AiOutlineCaretDown } from "react-icons/ai";
 import { AiOutlineClose } from "react-icons/ai";
 import axios from "axios";
+import Select from "react-select";
 const SingleProduct = () => {
   const { id } = useParams();
 
@@ -17,23 +18,13 @@ const SingleProduct = () => {
   const { loading, error, product } = productDetails;
   const [selectOptions, setSelectOptions] = useState([]);
   const [ifSize, setifSize] = useState(false);
-  const [size,setSize] = useState()
-  const [isActive,setActive] = useState(false)
+  const [selectedSize, setSelectedSize] = useState("");
+  const options = [];
+  const handleChange = (selectedOption) => {
+    setSelectedSize(selectedOption);
+    console.log(selectedOption);
+  };
 
-  // const toggleActive = () => {
-  //   setActive((isActive) => !isActive);
-  // };
-
-  // const handleSize = (value, name) => {
-  //   setSize(name);
-  //   setSelectedSort(value);
-  //   setActive(false);
-  // };
-
-  // const handleCloseMenu = () => {
-  //   setSortFeatures("");
-  //   setActive(false);
-  // };
   useEffect(() => {
     dispatch(listProductDetails(`${id}`));
   }, [dispatch]);
@@ -47,7 +38,6 @@ const SingleProduct = () => {
       `http://localhost:5000/api/products/${id}`
     );
     const sizes = data.data.product.size;
-    const options = [];
 
     if (sizes[0] === 0) {
       setSelectOptions([]);
@@ -57,13 +47,12 @@ const SingleProduct = () => {
       sizes.forEach((size) => {
         options.push({
           value: size,
-          key: sizes.indexOf(size),
+          label: size,
         });
       });
-    
 
       setSelectOptions([...options]);
-      console.log(options)
+      console.log("these is ", options);
     }
   }
 
@@ -118,19 +107,12 @@ const SingleProduct = () => {
 
               {ifSize && <h4 className="product-size">SIZE</h4>}
               {ifSize && (
-                <div className="dropdown">
-                  <div className="dropdown-btn">
-                    
-                  </div>
-                  {isActive && (
-                    <div className="dropdown-content">
-                     {selectOptions.map((option,index)=>(
-                      <div key={index} className="dropdown-item">{option}</div>
-                     ))}
-
-                    </div>
-                  )}
-                </div>
+                <Select
+                  isClearable={true}
+                  options={selectOptions}
+                  defaultValue={{ label: "Select Size", value: 0 }}
+                  onChange={handleChange}
+                />
               )}
 
               <button type="submit" className="submit-btn">
