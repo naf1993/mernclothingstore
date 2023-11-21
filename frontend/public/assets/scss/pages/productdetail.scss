@@ -2,6 +2,9 @@
   grid-column: 1/-1;
   margin-top: 2rem;
   display: grid;
+  @media only screen and (max-width: $bp-smallest) {
+   
+  }
 
   grid-template-columns:
     [full-start] minmax(13rem, 1fr) [center-start] repeat(
@@ -9,18 +12,33 @@
       [col-start] minmax(min-content, 14rem) [col-end]
     )
     [center-end] minmax(13rem, 1fr) [full-end];
+   
 
   .detail-wrapper {
     grid-column: center-start/center-end;
     display: flex;
     margin-top: 3rem;
     gap:3rem;
+    @media only screen and (max-width: $bp-smallest) {
+   grid-column: full-start/full-end;
+      flex-direction: column;
+      gap:1.5rem;
+      margin:0 auto;
+    }
+    
     .productdisplay-left{
       display: flex;
       gap:10px;
+      @media only screen and (max-width: $bp-smallest) {
+      flex-direction: column-reverse;
+         }
+     
       .productdisplay-img-list{
         display: flex;
         flex-direction: column;
+        @media only screen and (max-width: $bp-smallest) {
+         flex-direction: row;
+           }
        
         gap:10px;
         img{
@@ -40,7 +58,10 @@
       
       display: flex;
       flex-direction: column;
-     
+      @media only screen and (max-width: $bp-smallest) {
+        display: none;
+          }
+      
       .product-category{
         font-size: 18px;
         font-weight: 300;
@@ -162,6 +183,47 @@
         font-family: inherit;
        }
       }
+    }
+    .product-display-mobile{
+      margin-top: 2rem;
+      display: none;
+     .mobile-wrapper{
+      display:flex;
+      flex-direction:column;
+      gap:1rem;
+      .product-category{
+        font-size: 18px;
+        font-weight: 300;
+        color:var(--color-grey-dark-3);
+        font-family: 'lato';
+        margin-bottom:.5rem;
+
+      }
+      .product-name{
+        text-transform: capitalize;
+        font-size: 20px;
+        font-family: 'lato';
+        letter-spacing: .1rem;
+        font-weight: 400;
+        margin-bottom:.5rem;
+      }
+      .accord-item{
+        width:100%;
+        display: flex;
+        cursor: pointer;
+        .accord-header{
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+
+     }
+      @media only screen and (max-width: $bp-smallest) {
+        display: flex;
+          }
+
     }
   
   }

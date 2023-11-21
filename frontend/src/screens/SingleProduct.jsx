@@ -10,6 +10,8 @@ import { AiOutlineCaretDown } from "react-icons/ai";
 import { AiOutlineClose } from "react-icons/ai";
 import axios from "axios";
 import Select from "react-select";
+import ProductImage from "../components/ProductImage";
+import MobileDisplay from "../components/MobileDisplay";
 const SingleProduct = () => {
   const { id } = useParams();
 
@@ -19,7 +21,18 @@ const SingleProduct = () => {
   const [selectOptions, setSelectOptions] = useState([]);
   const [ifSize, setifSize] = useState(false);
   const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
+
   const options = [];
+  const images = [];
+  images.push(product.imageCover);
+
+  if (product.images.length > 0) {
+    for (let i = 0; i < product.images.length; i++) {
+      images.push(product.images[i]);
+    }
+  }
+
   const handleChange = (selectedOption) => {
     setSelectedSize(selectedOption);
     console.log(selectedOption);
@@ -32,6 +45,15 @@ const SingleProduct = () => {
   useEffect(() => {
     fetchSizes();
   }, []);
+
+  useEffect(() => {
+    console.log("these is size ", selectedSize);
+    console.log("these is color ", selectedColor);
+  }, [selectedSize, selectedColor]);
+
+  const handleColor = (color) => {
+    setSelectedColor(color);
+  };
 
   async function fetchSizes() {
     const { data } = await axios.get(
@@ -66,23 +88,7 @@ const SingleProduct = () => {
         <div className="product-detail-wrapper">
           <div className="detail-wrapper">
             <div className="productdisplay-left">
-              <div className="productdisplay-img-list">
-                <img
-                  src={`http://localhost:3000/public/products/${product.imageCover}`}
-                />
-                <img
-                  src={`http://localhost:3000/public/products/${product.imageCover}`}
-                />
-                <img
-                  src={`http://localhost:3000/public/products/${product.imageCover}`}
-                />
-              </div>
-              <div className="productdisplay-img">
-                <img
-                  className="productdisplay-main-img"
-                  src={`http://localhost:3000/public/products/${product.imageCover}`}
-                />
-              </div>
+              <ProductImage images={images} />
             </div>
             <div className="productdisplay-right">
               <h2 className="product-category">{product.SubCategory.name}</h2>
@@ -96,6 +102,7 @@ const SingleProduct = () => {
                       <button
                         value={color}
                         type="submit"
+                        onClick={() => handleColor(color)}
                         style={{
                           backgroundColor: `${color}`,
                         }}
@@ -128,17 +135,10 @@ const SingleProduct = () => {
               <p>Return within "30 days". For detailed information, Click.</p>
               <p>Fabric Info: 100% BARKCLOTH</p>
             </div>
-            {/* <div className="left">
-              <div className="left__item left__item--1">
-              
-                <img className="left__img"
-                  src={`http://localhost:3000/public/products/${product.imageCover}`}
-                />
-              
-              </div>
-             
+
+            <div className="product-display-mobile">
+            <MobileDisplay product={product} ifSize={ifSize}/>
             </div>
-            <div className="right">right</div> */}
           </div>
         </div>
       )}
