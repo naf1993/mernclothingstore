@@ -22,6 +22,7 @@ const SingleProduct = () => {
   const [ifSize, setifSize] = useState(false);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
+  const [imagesList, setImagesList] = useState([]);
 
   const options = [];
   const images = [];
@@ -34,22 +35,21 @@ const SingleProduct = () => {
   }
 
   const handleChange = (selectedOption) => {
+    console.log('hello')
     setSelectedSize(selectedOption);
-    console.log(selectedOption);
   };
 
   useEffect(() => {
+    console.log('hello')
     dispatch(listProductDetails(`${id}`));
   }, [dispatch]);
 
   useEffect(() => {
+    console.log('hello')
     fetchSizes();
   }, []);
 
-  useEffect(() => {
-    console.log("these is size ", selectedSize);
-    console.log("these is color ", selectedColor);
-  }, [selectedSize, selectedColor]);
+
 
   const handleColor = (color) => {
     setSelectedColor(color);
@@ -74,7 +74,6 @@ const SingleProduct = () => {
       });
 
       setSelectOptions([...options]);
-      console.log("these is ", options);
     }
   }
 
@@ -137,7 +136,7 @@ const SingleProduct = () => {
             </div>
 
             <div className="product-display-mobile">
-            <MobileDisplay product={product} ifSize={ifSize}/>
+              <MobileDisplay product={product} options={selectOptions} handleSelect={handleChange} ifSize={ifSize} />
             </div>
           </div>
         </div>

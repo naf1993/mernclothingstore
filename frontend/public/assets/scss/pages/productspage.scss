@@ -135,12 +135,19 @@
 
     display: grid;
     grid-template-columns: 0.2fr 1fr;
+    @media only screen and (max-width: $bp-smallest) {
+      grid-column: full-start/full-end;
+      grid-template-columns: 1fr;
+    }
     .left {
       margin-top: 2rem;
     
       display: flex;
       flex-direction: column;
       gap:2rem;
+      @media only screen and (max-width: $bp-smallest) {
+       display: none;
+      }
       //justify-content: space-between;
      
       
@@ -286,6 +293,12 @@
      
       margin-top: 3rem;
       padding:2rem;
+     
+      @media only screen and (max-width: $bp-smallest) {
+        
+       padding:1rem;
+      }
+      
     }
     }
   
