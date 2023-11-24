@@ -12,6 +12,8 @@ import axios from "axios";
 import Select from "react-select";
 import ProductImage from "../components/ProductImage";
 import MobileDisplay from "../components/MobileDisplay";
+import RelatedProducts from "../components/RelatedProducts";
+import ReviewsList from "../components/ReviewsList";
 const SingleProduct = () => {
   const { id } = useParams();
 
@@ -138,6 +140,13 @@ const SingleProduct = () => {
             <div className="product-display-mobile">
               <MobileDisplay product={product} options={selectOptions} handleSelect={handleChange} ifSize={ifSize} />
             </div>
+          </div>
+          <div className='related-products'>
+            <RelatedProducts categoryId={product.Category.id} productId={product.id} categoryName={product.Category.name}/>
+          </div>
+
+          <div className="reviews-container">
+            <ReviewsList product={product} reviews={product.reviews}/>
           </div>
         </div>
       )}

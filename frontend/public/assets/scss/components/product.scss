@@ -4,7 +4,7 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
  
-  border-radius: 5px;
+  
   overflow:hidden;
   cursor:pointer;
  
@@ -49,9 +49,13 @@
       background-color:black;
       position:relative;
       color: white;
+      color: black;
+      background-color: white;
       &:hover{
-        color: black;
-        background-color: white;
+       
+        background-color:black;
+     
+      color: white;
       }
      
       &::before,&::after{
@@ -106,6 +110,11 @@
   &__detail{
     grid-column:1/-1;
     padding:0.8rem 2rem;
+    @media only screen and (max-width: $bp-smallest) {
+     padding:.2rem .2rem;
+     
+    }
+   
    
    div{
     display: flex;
@@ -128,6 +137,11 @@
       font-size: 15px;
       align-self: flex-start;
       font-weight: 400;
+      @media only screen and (max-width: $bp-smallest) {
+        font-size: 14px;
+     
+     
+      }
       
     }
     &-price{
@@ -136,10 +150,21 @@
       align-self: flex-start;
     
       font-weight: bold;
+      @media only screen and (max-width: $bp-smallest) {
+        font-size: 1.4rem;
+     
+     
+      }
     }
    .rating{
    margin-left: 0.4rem;
    align-self: flex-start;
+   @media only screen and (max-width: $bp-smallest) {
+   display: none;
+ 
+ 
+  }
+
    }
   }
 }
