@@ -31,9 +31,6 @@ const RelatedProducts = ({ categoryId, productId,categoryName }) => {
     }
   };
 
-  useEffect(() => {
-    console.log("these are related products ", relatedProducts);
-  }, [relatedProducts]);
 
   useEffect(() => {
     getRelatedProducts();

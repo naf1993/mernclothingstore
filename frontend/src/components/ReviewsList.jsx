@@ -21,7 +21,7 @@ const ReviewsList = ({ product, reviews }) => {
               <h3 className="review-date">{new Date(review.createdAt).toLocaleDateString()}</h3>
             </div>
 
-            <p>{review.review}</p>
+            <p className="review-details">{review.review}</p>
           </div>
         ))}
       </div>

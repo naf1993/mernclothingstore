@@ -183,6 +183,7 @@ const protect = catchAsync(async (req, res, next) => {
 
 const restrictToUser = (req, res, next) => {
   if (req.user && !req.user.isAdmin) {
+    console.log('authenticating ',req.user)
     next();
   } else {
     return next(new AppError("Normal users only", 401));

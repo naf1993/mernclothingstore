@@ -172,6 +172,7 @@ const updateUserStatusByAdmin = catchAsync(async (req, res, next) => {
 
 const getWishlist = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
+  console.log(_id)
 
   const user = await User.findById(_id).populate("wishList");
   if (!user) {

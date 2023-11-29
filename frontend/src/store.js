@@ -4,12 +4,13 @@ import thunk from 'redux-thunk'
 import {persistStore,persistReducer,FLUSH,REHYDRATE,PAUSE,PERSIST,PURGE,REGISTER} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import {modalReducer} from './reducers/productModalReducer.js'
-
+import {addToCartReducer} from './reducers/cartReducer.js'
 import { productDetailReducer,productListReducer } from "./reducers/productReducer";
 import { authReducer } from './reducers/authReducer.js'
 const reducer = combineReducers({
     auth:authReducer,
     productModal:modalReducer,
+    cartAdd:addToCartReducer,
 
   
     productList:productListReducer,

@@ -1,4 +1,4 @@
-import React,{useState,useRef} from "react";
+import React,{useState,useRef,forwardRef,useImperativeHandle} from "react";
 import Rating from "../components/Rating";
 import {gsap} from 'gsap'
 import { FaAngleDown, FaAngleUp,FaAngleRight } from "react-icons/fa";
@@ -40,7 +40,9 @@ const customStyles = {
   singleValue: (defaultStyles) => ({ ...defaultStyles, color: "black" }),
 };
 
-const MobileDisplay = ({ product, ifSize,options,handleSelect }) => {
+
+
+const MobileDisplay =({ product, ifSize,options,handleSelect,handleClick }) => {
   const [openAccordion, setOpenAccordion] = useState(null);
   const [isOpen,setIsOpen] = useState(false)
   const accordionRefs = useRef([]);
@@ -104,7 +106,7 @@ const MobileDisplay = ({ product, ifSize,options,handleSelect }) => {
                   <span key={index} className="filter-color-btn">
                     <button
                       value={color}
-                      type="submit"
+                      type="submit" 
                       style={{
                         backgroundColor: `${color}`,
                       }}
@@ -139,7 +141,7 @@ const MobileDisplay = ({ product, ifSize,options,handleSelect }) => {
          />
         )}
        
-        <button type="submit" className="submit-btn">
+        <button type="submit" className="submit-btn" onClick={()=> handleClick(product.id)}>
                 <CiShoppingCart
                   className="addcart-icon"
                  

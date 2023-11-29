@@ -368,14 +368,20 @@
           display: flex;
           align-items: center;
           .review-user{
-            font-size: 1.4rem;
+            font-size: 1.25rem;
             font-weight: 400;
             margin-right: .5rem;
-            align-self: flex-start;
+            color:var(--color-pink-dark);
+            
           }
           .ratreview{
-            align-self: flex-start;
+            align-self: flex-end;
           }
+          .review-date{
+            font-size: 1rem;
+            font-weight: 400;
+          }
+          
           
           
           
@@ -386,8 +392,16 @@
 
 
         }
+        .review-details{
+          text-transform:capitalize;
+          font-size: 1.2rem;
+          margin-top: .5rem;
+          margin-bottom: .5rem;
+          font-weight: 400;
+        }
       }
     }
 
   }
 }
+
