@@ -16,9 +16,10 @@ export const createCart = (cart) => async (dispatch, getState) => {
       type: CART_ADD_ITEM_REQUEST,
     });
     const token = getState().auth.token;
+    console.log(token)
     const config = {
       headers: {
-        "Authorization": `Bearer ${token}`,
+        'authorization': `Bearer ${token}`,
       },
     };
 

@@ -19,6 +19,7 @@ import axios from "axios";
 import SingleProduct from "./screens/SingleProduct";
 import { loginUserWithOauth,loadUser } from "./actions/authActions";
 import SearchScreen from "./screens/SearchScreen";
+import ProductDetail from "./screens/ProductDetail";
 
 
 const App = () => {

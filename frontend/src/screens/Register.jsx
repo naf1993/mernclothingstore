@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { registerWithEmail } from '../actions/authActions';
 
-const image1 = require("../images/loginimage.jpg");
+const image1 = require("../img/loginimage.jpg");
 const Register = () => {
   const history = useNavigate()
   const [name,setName] = useState('')

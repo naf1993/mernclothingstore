@@ -44,9 +44,7 @@ const List = ({
     }
   }, [loading]);
 
-  useEffect(() => {
-    console.log("these are products ", products);
-  }, [products]);
+  
 
   useEffect(() => {
     if (
@@ -100,7 +98,7 @@ const List = ({
           indexes: false,
         },
       });
-      console.log('these are filtered products ',data)
+     
       setProducts(data.data.products);
       setLoading(false);
     } catch (err) {

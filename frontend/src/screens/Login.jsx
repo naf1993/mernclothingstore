@@ -8,7 +8,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import { FcGoogle } from "react-icons/fc";
-const image1 = require("../images/loginimage.jpg");
+const image1 = require("../img/loginimage.jpg");
+
 
 const Login = () => {
   const history = useNavigate();

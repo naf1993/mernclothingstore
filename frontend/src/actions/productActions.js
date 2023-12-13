@@ -16,7 +16,7 @@ export const listProducts = ()=>  async(dispatch)=>{
         const allProducts = data.data.products
                dispatch({
             type:PRODUCT_LIST_SUCCESS,
-            payload:allProducts
+            payload:allProducts//action object containing type and payload
         })
 
     }catch(error){
@@ -33,6 +33,7 @@ export const listProductDetails = (id)=>  async(dispatch)=>{
     try{
         dispatch({type:PRODUCT_DETAIL_REQUEST})
         const {data} = await axios.get(`/api/products/${id}`)
+        console.log('these is detailed product ',data)
        
        
 
@@ -42,9 +43,10 @@ export const listProductDetails = (id)=>  async(dispatch)=>{
         })
         
     }catch(error){
+        console.log(error)
         dispatch({
             type:PRODUCT_DETAIL_FAIL,
-            payload:error.response.data.message
+            payload:error.response.statusText
         })
 
     }

@@ -29,6 +29,7 @@ const ProductCard = ({ product }) => {
             }
             onMouseEnter={handleHover}
             onMouseLeave={handleHover}
+           
           />
         </figure>
 
