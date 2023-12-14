@@ -1,8 +1,7 @@
-import React,{useState,useRef} from "react";
-import Rating from "../components/Rating";
+import React,{useState,useRef,useEffect} from "react";
 import {gsap} from 'gsap'
 import { FaAngleRight } from "react-icons/fa";
-import { CiShoppingCart } from "react-icons/ci";
+
 import Select from "react-select";
 
 const customStyles = {
@@ -42,7 +41,11 @@ const customStyles = {
 
 
 
-const MobileScreenDetails =({colors,onHandleColor}) => {
+const MobileScreenDetails =({ onSizeChange,sizeOptions,colors,onHandleColor,ifSize }) => {
+
+  useEffect(()=>{
+    console.log('mobile view rendered')
+  },[])
   const [openAccordion, setOpenAccordion] = useState(null);
  
   const accordionRefs = useRef([]);
@@ -87,6 +90,7 @@ const MobileScreenDetails =({colors,onHandleColor}) => {
   return (
     <>
      
+        
         <div className="accord-container">
         <div className={`accord-item ${openAccordion === 0 ? 'open':''}`}  ref={(el) => (accordionRefs.current[0] = el)}>
           {colors && (
@@ -101,9 +105,8 @@ const MobileScreenDetails =({colors,onHandleColor}) => {
               <div className="buttons-wrapper">
                 {colors?.map((color, index) => (
                   <span key={index} className="filter-color-btn">
-                    <button
+                    <button  onClick={() => onHandleColor(color)}
                       value={color}
-                      onClick={() => onHandleColor(color)}
                       type="submit" 
                       style={{
                         backgroundColor: `${color}`,
@@ -130,9 +133,18 @@ const MobileScreenDetails =({colors,onHandleColor}) => {
 
         
         </div>
+     
+        {ifSize && (
+           <Select
+           isClearable={true}
+           options={sizeOptions}
+           defaultValue={{ label: "SIZE", value: 0 }}
+           onChange={onSizeChange} styles={customStyles}
+         />
+        )}
        
        
-       
+     
     </>
   );
 };

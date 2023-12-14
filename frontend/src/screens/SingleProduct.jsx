@@ -1,13 +1,9 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-} from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import MobileScreenDetails from "../components/MobileScreenDetails";
 import LargeScreenDetails from "../components/LargeScreenDetails";
-import { listProductDetails } from "../actions/productActions";
+
 import Loader from "../components/Loader";
 import Message from "../components/Message";
 import Rating from "../components/Rating";
@@ -18,13 +14,12 @@ import { AiOutlineClose } from "react-icons/ai";
 import axios from "axios";
 
 import ProductImage from "../components/ProductImage";
-import MobileDisplay from "../components/MobileDisplay";
+
 import RelatedProducts from "../components/RelatedProducts";
 import ReviewsList from "../components/ReviewsList";
 import { createCart } from "../actions/cartActions";
 const SingleProduct = () => {
   const { id } = useParams();
-  const childRef = useRef(null);
 
   const dispatch = useDispatch();
   const history = useNavigate();
@@ -37,15 +32,15 @@ const SingleProduct = () => {
   const [ifSize, setifSize] = useState(false);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  
+
   const [colorErr, setColorErr] = useState(null);
   const [sizeErr, setSizeErr] = useState(null);
   const [images, setImages] = useState([]);
-  const [isMobile,setIsMobile] = useState(false)
-
-  useEffect(()=>{
-    console.log('parent rendered')
-        },[])
+  const [isMobile, setIsMobile] = useState(false);
+  const [isValid,setIsValid] = useState(false)
+  useEffect(() => {
+    console.log("parent rendered");
+  }, []);
   const getSingleProduct = async (id) => {
     try {
       setLoading(true);
@@ -53,39 +48,39 @@ const SingleProduct = () => {
       const { data } = await axios.get(
         `http://localhost:5000/api/products/${id}`
       );
-     
+
       setProduct(data.data.product);
       setLoading(false);
-     
+
       setImages((images) => [...images, data.data.product.imageCover]);
       let newArr = [];
       if (data.data.product.images) {
         // newArr = data.data.product.images?.map((item) => {
         //   return item;
         // });
-        data.data.product.images.forEach((image)=>{
-          newArr.push(image)
-        })
+        data.data.product.images.forEach((image) => {
+          newArr.push(image);
+        });
         //setImages((images) => [...images, ...newArr]);
-        setImages([data.data.product.imageCover,...newArr])
+        setImages([data.data.product.imageCover, ...newArr]);
       }
 
       const sizes = data.data.product.size;
 
-    if (sizes[0] === 0) {
-      setSelectOptions([]);
-      setifSize(false);
-    } else {
-      setifSize(true);
-      sizes.forEach((size) => {
-        options.push({
-          value: size,
-          label: size,
+      if (sizes[0] === 0) {
+        setSelectOptions([]);
+        setifSize(false);
+      } else {
+        setifSize(true);
+        sizes.forEach((size) => {
+          options.push({
+            value: size,
+            label: size,
+          });
         });
-      });
 
-      setSelectOptions([...options]);
-    }
+        setSelectOptions([...options]);
+      }
     } catch (err) {
       setError(err.response.data.message);
     }
@@ -101,59 +96,66 @@ const SingleProduct = () => {
 
   const handleChange = (selectedOption) => {
     setSelectedSize(selectedOption.value);
+    console.log('size')
   };
-
-
 
   const handleColor = (color) => {
     setSelectedColor(color);
+    setIsValid(true)
   };
-
-  
 
   let cart = { productId: "", color: "", size: "", count: 1 };
 
   const addToCart = (id) => {
-    if (selectedColor && !selectedSize) {
-      cart = {
-        productId: id,
-        color: selectedColor,
-        size: "",
-      };
+    console.log(id)
+    if(!selectedColor){
+      setIsValid(false)
+      setColorErr('pls select color')
     }
-    if (selectedColor && selectedSize) {
-      cart = {
-        productId: id,
-        color: selectedColor,
-        size: selectedSize,
-      };
-    } else {
-      if (!selectedColor) {
-        setColorErr("Please Select Color");
-      } else {
-        setColorErr("");
-      }
-      if (ifSize && !selectedSize) {
-        setSizeErr("Please Select Size");
-      } else {
-        setSizeErr("");
-      }
+    else{
+      setColorErr(null)
+      console.log('color selected')
     }
-    dispatch(createCart(cart));
+
+    // if (selectedColor && !selectedSize) {
+    //   cart = {
+    //     productId: id,
+    //     color: selectedColor,
+    //     size: "",
+    //   };
+    // }
+    // if (selectedColor && selectedSize) {
+    //   cart = {
+    //     productId: id,
+    //     color: selectedColor,
+    //     size: selectedSize,
+    //   };
+    // } else {
+    //   if (!selectedColor) {
+    //     setColorErr("Please Select Color");
+    //   } else {
+    //     setColorErr("");
+    //   }
+    //   if (ifSize && !selectedSize) {
+    //     setSizeErr("Please Select Size");
+    //   } else {
+    //     setSizeErr("");
+    //   }
+    // }
+    // dispatch(createCart(cart));
   };
 
   const handleScreenSize = () => {
-    if(window.innerWidth < 400){
-      setIsMobile(true)
+    if (window.innerWidth < 400) {
+      setIsMobile(true);
+    } else {
+      setIsMobile(false);
     }
-    else{
-      setIsMobile(false)
-    }
-  }
+  };
 
-  useEffect(()=>{
-    window.addEventListener('resize',handleScreenSize)
-  })
+  useEffect(() => {
+    window.addEventListener("resize", handleScreenSize);
+  });
 
   return (
     <>
@@ -176,11 +178,29 @@ const SingleProduct = () => {
                 <h1 className="product-name">{product.name}</h1>
                 <Rating value={product.ratingsAverage} text={""} />
 
-                {isMobile ? (<MobileScreenDetails onSizeChange={handleChange} sizeOptions={selectOptions && selectOptions} colors={product.colors && product.colors } onHandleColor={handleColor} ifSize={ifSize && ifSize} />) : 
-                (<LargeScreenDetails onSizeChange={handleChange} sizeOptions={selectOptions && selectOptions} colors={product.colors && product.colors } onHandleColor={handleColor} ifSize={ifSize && ifSize} />)}
+                {isMobile ? (
+                  <MobileScreenDetails
+                    onSizeChange={handleChange}
+                    sizeOptions={selectOptions && selectOptions}
+                    colors={product.colors && product.colors}
+                    onHandleColor={handleColor}
+                    ifSize={ifSize && ifSize}
+                    setColorErr={setColorErr} colorErr={colorErr}
+                    setSizeErr={setSizeErr}
+                  />
+                ) : (
+                  <LargeScreenDetails
+                    onSizeChange={handleChange}
+                    sizeOptions={selectOptions && selectOptions}
+                    colors={product.colors && product.colors}
+                    onHandleColor={handleColor}
+                    ifSize={ifSize && ifSize}
+                    setColorErr={setColorErr} colorErr={colorErr}
+                    setSizeErr={setSizeErr}
+                  />
+                )}
 
-               
-                {colorErr !== "" && (
+                {/* {colorErr !== "" && (
                   <p
                     style={{
                       color: "#ffa07a",
@@ -191,10 +211,11 @@ const SingleProduct = () => {
                     {colorErr}
                   </p>
                 )}
-               
-                {sizeErr !== "" && <p className="text-danger">{sizeErr}</p>}
+                
 
-               
+                {sizeErr !== "" && <p className="text-danger">{sizeErr}</p>} */}
+
+                {sizeErr ? <p className="text-danger">{sizeErr}</p> : null}
                 <button
                   type="submit"
                   className="submit-btn"
@@ -202,8 +223,7 @@ const SingleProduct = () => {
                 >
                   <span className="btn-title">Add to Cart</span>
                 </button>
-                       <p>Estimated Delivery Time: 21 November - 28 November</p>
-             
+                <p>Estimated Delivery Time: 21 November - 28 November</p>
               </div>
             </div>
             {/* <div className="related-products">
@@ -217,13 +237,9 @@ const SingleProduct = () => {
             <div className="reviews-container">
               <ReviewsList product={product} reviews={product.reviews} />
             </div> */}
-
           </div>
         )
 
-       
-
-    
         //    </div>
         //    <div className="related-products">
         //      <RelatedProducts
