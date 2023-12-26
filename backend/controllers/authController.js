@@ -147,6 +147,7 @@ const loginAdmin = catchAsync(async (req, res, next) => {
   }
   createSendToken(user, 200, res);
 });
+
 const protect = catchAsync(async (req, res, next) => {
   //getting token
   let token;
@@ -183,7 +184,7 @@ const protect = catchAsync(async (req, res, next) => {
 
 const restrictToUser = (req, res, next) => {
   if (req.user && !req.user.isAdmin) {
-    console.log('authenticating ',req.user)
+  
     next();
   } else {
     return next(new AppError("Normal users only", 401));

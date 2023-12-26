@@ -41,7 +41,7 @@ const customStyles = {
 
 
 
-const MobileScreenDetails =({ onSizeChange,sizeOptions,colors,onHandleColor,ifSize }) => {
+const MobileScreenDetails =({ onSizeChange,sizeOptions,colors,onHandleColor,ifSize,setColorErr,setSizeErr,colorErr,sizeErr }) => {
 
   useEffect(()=>{
     console.log('mobile view rendered')
@@ -118,6 +118,7 @@ const MobileScreenDetails =({ onSizeChange,sizeOptions,colors,onHandleColor,ifSi
             </div>
           )}
         </div>
+        {colorErr ? <p className="text-danger">{colorErr}</p> : null}
        
         <div  ref={(el) => (accordionRefs.current[2] = el)} className={`accord-item ${openAccordion === 2 ? 'open':''}`}>
           <div className="accord-header" onClick={()=>handleAccordion(2)}>
@@ -142,6 +143,7 @@ const MobileScreenDetails =({ onSizeChange,sizeOptions,colors,onHandleColor,ifSi
            onChange={onSizeChange} styles={customStyles}
          />
         )}
+          {sizeErr ? <p className="text-danger">{sizeErr}</p>:null}
        
        
      

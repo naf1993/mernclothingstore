@@ -36,8 +36,10 @@ const SingleProduct = () => {
   const [colorErr, setColorErr] = useState(null);
   const [sizeErr, setSizeErr] = useState(null);
   const [images, setImages] = useState([]);
+  const [imageUrl,setimageUrl] = useState([])
   const [isMobile, setIsMobile] = useState(false);
-  const [isValid,setIsValid] = useState(false)
+  const [isValid, setIsValid] = useState(false);
+
   useEffect(() => {
     console.log("parent rendered");
   }, []);
@@ -53,7 +55,9 @@ const SingleProduct = () => {
       setLoading(false);
 
       setImages((images) => [...images, data.data.product.imageCover]);
+      setimageUrl((imageurl)=>[...imageurl,data.data.product.imageCover.url])
       let newArr = [];
+      let newImgUrl = []
       if (data.data.product.images) {
         // newArr = data.data.product.images?.map((item) => {
         //   return item;
@@ -61,8 +65,13 @@ const SingleProduct = () => {
         data.data.product.images.forEach((image) => {
           newArr.push(image);
         });
+
+        data.data.product.images.forEach((image)=>{
+          newImgUrl.push(image.url)
+        })
         //setImages((images) => [...images, ...newArr]);
         setImages([data.data.product.imageCover, ...newArr]);
+        setimageUrl([data.data.product.imageCover.url,...newImgUrl])
       }
 
       const sizes = data.data.product.size;
@@ -96,53 +105,39 @@ const SingleProduct = () => {
 
   const handleChange = (selectedOption) => {
     setSelectedSize(selectedOption.value);
-    console.log('size')
   };
 
   const handleColor = (color) => {
     setSelectedColor(color);
-    setIsValid(true)
+    console.log(color);
+    setIsValid(true);
   };
 
-  let cart = { productId: "", color: "", size: "", count: 1 };
-
   const addToCart = (id) => {
-    console.log(id)
-    if(!selectedColor){
-      setIsValid(false)
-      setColorErr('pls select color')
+    let color = ''
+    let size = ''
+    if (selectedColor && !selectedSize) {
+      color = selectedColor;
+      size = "";
     }
-    else{
-      setColorErr(null)
-      console.log('color selected')
+    if (selectedColor && selectedSize) {
+      color = selectedColor;
+      size = selectedSize;
+    } else {
+      if (!selectedColor) {
+        setColorErr("Please Select Color");
+      } else {
+        setColorErr("");
+      }
+      if (ifSize && !selectedSize) {
+        setSizeErr("Please Select Size");
+      } else {
+        setSizeErr("");
+      }
     }
 
-    // if (selectedColor && !selectedSize) {
-    //   cart = {
-    //     productId: id,
-    //     color: selectedColor,
-    //     size: "",
-    //   };
-    // }
-    // if (selectedColor && selectedSize) {
-    //   cart = {
-    //     productId: id,
-    //     color: selectedColor,
-    //     size: selectedSize,
-    //   };
-    // } else {
-    //   if (!selectedColor) {
-    //     setColorErr("Please Select Color");
-    //   } else {
-    //     setColorErr("");
-    //   }
-    //   if (ifSize && !selectedSize) {
-    //     setSizeErr("Please Select Size");
-    //   } else {
-    //     setSizeErr("");
-    //   }
-    // }
-    // dispatch(createCart(cart));
+    dispatch(createCart(id, color, size));
+    history('/cart')
   };
 
   const handleScreenSize = () => {
@@ -168,7 +163,7 @@ const SingleProduct = () => {
           <div className="product-detail-wrapper">
             <div className="detail-wrapper">
               <div className="productdisplay-left">
-                <ProductImage images={images} />
+                <ProductImage images={images} imageUrl={imageUrl} />
               </div>
 
               <div className="productdisplay-right">
@@ -185,8 +180,10 @@ const SingleProduct = () => {
                     colors={product.colors && product.colors}
                     onHandleColor={handleColor}
                     ifSize={ifSize && ifSize}
-                    setColorErr={setColorErr} colorErr={colorErr}
+                    setColorErr={setColorErr}
+                    colorErr={colorErr}
                     setSizeErr={setSizeErr}
+                    sizeErr={sizeErr}
                   />
                 ) : (
                   <LargeScreenDetails
@@ -195,27 +192,14 @@ const SingleProduct = () => {
                     colors={product.colors && product.colors}
                     onHandleColor={handleColor}
                     ifSize={ifSize && ifSize}
-                    setColorErr={setColorErr} colorErr={colorErr}
+                    setColorErr={setColorErr}
+                    colorErr={colorErr}
                     setSizeErr={setSizeErr}
+                    sizeErr={sizeErr}
                   />
                 )}
+               
 
-                {/* {colorErr !== "" && (
-                  <p
-                    style={{
-                      color: "#ffa07a",
-                      padding: "0.4rem 0rem",
-                      borderRadius: "5px",
-                    }}
-                  >
-                    {colorErr}
-                  </p>
-                )}
-                
-
-                {sizeErr !== "" && <p className="text-danger">{sizeErr}</p>} */}
-
-                {sizeErr ? <p className="text-danger">{sizeErr}</p> : null}
                 <button
                   type="submit"
                   className="submit-btn"

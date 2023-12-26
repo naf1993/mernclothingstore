@@ -14,7 +14,10 @@ const setUserIds = (req, res, next) => {
 const addToCart = catchAsync(async (req, res, next) => {
   const { cart } = req.body;
   const { _id } = req.user;
- console.log('this is req user ',_id)
+  console.log('this is cart ',cart)
+  console.log('this is user ',_id)
+  
+ 
   let products = [];
   const user = await User.findById(_id);
   const alreadyAddedproduct = await Cart.findOne({ user: user._id });

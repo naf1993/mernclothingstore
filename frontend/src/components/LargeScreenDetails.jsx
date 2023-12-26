@@ -7,10 +7,11 @@ const LargeScreenDetails = ({
   colors,
   onHandleColor,
   ifSize,
-  setColorErr,setSizeErr,colorErr
+  setColorErr,setSizeErr,colorErr,sizeErr
 }) => {
   useEffect(() => {
     console.log("large  view rendered");
+    console.log(colors)
   }, []);
   return (
     <>
@@ -44,6 +45,7 @@ const LargeScreenDetails = ({
           onChange={onSizeChange}
         />
       )}
+      {sizeErr ? <p className="text-danger">{sizeErr}</p>:null}
 
 <h4 className="product-details detail-name">Product Details</h4>
       <p>Product Details: 8834941</p>

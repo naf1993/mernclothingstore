@@ -8,6 +8,9 @@ import sharp from "sharp";
 import Category from "../models/categoryModel.js";
 import SubCategory from "../models/subCategory.js";
 
+import { uploadFiles, deleteFiles } from "../utils/cloudinary.js";
+import { dataUri } from "../utils/datauri.js";
+
 const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
@@ -17,32 +20,51 @@ const multerFilter = (req, file, cb) => {
     cb(new AppError("Not an image! Please upload only images.", 400), false);
   }
 };
+
 const upload = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
 });
 
-// const uploadProductImages = upload.fields([
-//   { name: 'imageCover', maxCount: 1 },
-//   { name: 'images', maxCount: 3 }
-// ])
-const uploadCoverImage = upload.single("imageCover");
+export const uploadProductImages = upload.fields([
+  { name: "imageCover", maxCount: 1 },
+  { name: "images", maxCount: 4 },
+]);
 
 const resizeCoverImage = catchAsync(async (req, res, next) => {
-  //console.log(req.file)
-
-  req.body.imageCover = `product-${req.user.id}-${Date.now()}-cover.jpeg`;
-  console.log(req.file.filename);
-  await sharp(req.file.buffer)
+  const imagecover = [];
+  const imagecoverbuffer = req.files.imageCover[0].buffer;
+  const resizedimage = await sharp(imagecoverbuffer)
     .resize(500, 500)
     .toFormat("jpeg")
     .jpeg({ quality: 90 })
-    .toFile(`public/products/${req.body.imageCover}`);
-
+    .toBuffer();
+  const base64imgcvr = dataUri(resizedimage);
+  const cloudimgcvr = await uploadFiles(base64imgcvr.content);
+  imagecover.push({
+    url: cloudimgcvr.url,
+    public_id: cloudimgcvr.public_id,
+  });
+  
+  req.body.imageCover = imagecover[0];
   next();
 });
 
-const uploadFiles = upload.array("images", 10);
+// const resizeCoverImage = catchAsync(async (req, res, next) => {
+//   //console.log(req.file)
+
+//   req.body.imageCover = `product-${req.user.id}-${Date.now()}-cover.jpeg`;
+//   console.log(req.file.filename);
+//   await sharp(req.file.buffer)
+//     .resize(500, 500)
+//     .toFormat("jpeg")
+//     .jpeg({ quality: 90 })
+//     .toFile(`public/products/${req.body.imageCover}`);
+
+//   next();
+// });
+
+//export const uploadProductImages = upload.array("images", 10);
 
 const uploadImages = (req, res, next) => {
   uploadFiles(req, res, (err) => {
@@ -58,27 +80,116 @@ const uploadImages = (req, res, next) => {
   });
 };
 
+// export const uploadProductImages = async (req,res,next) => {
+//   const imageLink = []
+//   const resizedbuffer  =[]
+//   for(let i = 0; i < req.files.images.length;i++){
+//     const image = req.files.images[i]
+//     const resizedImage = await sharp(image.buffer)
+//     .resize(500, 500)
+//     .toFormat("jpeg")
+//     .jpeg({ quality: 90 })
+//     .toBuffer()
+//     resizedbuffer.push(resizedImage)
+//   }
+//   for(const imagebuffer of resizedbuffer){
+//     const b64i = dataUri(imagebuffer)
+//     const uploadimage = await uploadFilesCloud(b64i.content)
+//     imageGallery.push(uploadimage)
+//   }
+
+// }
+
 const resizeImages = async (req, res, next) => {
-  if (!req.files) return next();
+  console.log("hi");
+  const imagegallery = [];
+  const resizedbuffer = [];
+  for (let i = 0; i < req.files.images.length; i++) {
+    const image = req.files.images[i];
+    const resizedimage = await sharp(image.buffer)
+      .resize(500, 500)
+      .toFormat("jpeg")
+      .jpeg({ quality: 90 })
+      .toBuffer();
+    resizedbuffer.push(resizedimage);
+  }
 
-  req.body.images = [];
-  await Promise.all(
-    req.files.map(async (file) => {
-      const filename = file.originalname.replace(/\..+$/, "");
-      const newFilename = `product-${filename}-${Date.now()}.jpeg`;
+  for (let imagebuffer of resizedbuffer) {
+    const b64i = dataUri(imagebuffer);
+    const uploadimage = await uploadFiles(b64i.content);
 
-      await sharp(file.buffer)
-        .resize(500, 500)
-        .toFormat("jpeg")
-        .jpeg({ quality: 90 })
-        .toFile(`public/products/${newFilename}`);
+    imagegallery.push({
+      public_id: uploadimage.public_id,
+      url: uploadimage.url,
+    });
+  }
 
-      req.body.images.push(newFilename);
-    })
-  );
-
+  console.log(imagegallery);
+  req.body.images = imagegallery;
   next();
+  //   const imagegallery  = []
+
+  //   const imagesLink = []
+  //   const resizedimages = []
+  //   let images = []
+  //   if (typeof req.body.images === "string") {
+  //     images.push(req.body.images);
+  // } else {
+  //     images = req.body.images;
+  // }
+
+  //   for(let i = 0;i < images.length;i++){
+  //     let path = images[i].path
+  //     const resizedimage = await sharp(path).resize(500,500).toFormat('jpeg').jpeg({quality:90})
+  //     resizedimages.push(resizedimage)
+
+  //   }
+  //   for(let i = 0;i < resizedimages.length; i++){
+  //     const result = await cloudinary.uploader.upload(resizedimages[i],{
+  //       folder:'products'
+  //     })
+  //     imagesLink.push({
+  //       public_id:result.public_id,
+  //       url:result.url
+  //     })
+  //   }
+  //   console.log(imagesLink)
+  //   req.body.images = imagesLink
+  //   next()
+  // await Promise.all(
+  //   req.files.map(async (file) => {
+  //     await sharp(file.path)
+  //       .resize(500, 500)
+  //       .toFormat("jpeg")
+  //       .jpeg({ quality: 90 })
+  //       .toFile(`public/images/products/${file.filename}`);
+  //     fs.unlinkSync(`public/images/products/${file.filename}`);
+  //   })
+  // );
+  // next();
+  // if (!req.files) return next();
+
+  // //req.body.images = [];
+  // await Promise.all(
+  //   req.files.map(async (file) => {
+  //     const filename = file.originalname.replace(/\..+$/, "");
+  //     const newFilename = `product-${filename}-${Date.now()}.jpeg`;
+
+  //     await sharp(file.buffer)
+  //       .resize(500, 500)
+  //       .toFormat("jpeg")
+  //       .jpeg({ quality: 90 })
+  //       .toFile(`public/products/${newFilename}`);
+  //       fs.unlinkSync(`public/products/${newFilename}`)
+
+  //     //req.body.images.push(newFilename);
+  //   })
+  // );
+
+  // next();
 };
+
+const uploadImageToCloud = async (req, res, next) => {};
 
 const createProduct = catchAsync(async (req, res, next) => {
   const product = await Product.create(req.body);
@@ -113,7 +224,9 @@ const getAllProducts = catchAsync(async (req, res, next) => {
 });
 
 const getProductById = catchAsync(async (req, res, next) => {
-  const product = await Product.findById(req.params.id).populate("reviews Category SubCategory");
+  const product = await Product.findById(req.params.id).populate(
+    "reviews Category SubCategory"
+  );
   if (!product) {
     return next(new AppError("No Product found with that ID", 404));
   }
@@ -148,6 +261,11 @@ const deleteProduct = catchAsync(async (req, res, next) => {
 
   if (!product) {
     return next(new AppError("No Product found with that ID", 404));
+  }
+  await deleteFiles(product.imageCover.public_id);
+
+  for(let i = 0;i<product.images.length;i++){
+    await deleteFiles(product.images[i].public_id)
   }
 
   res.status(204).json({
@@ -189,7 +307,6 @@ const addToWishList = catchAsync(async (req, res, next) => {
     throw new Error(error);
   }
 });
-
 
 const getProductsByCategory = catchAsync(async (req, res, next) => {
   const { categoryId } = req.body;
@@ -245,37 +362,39 @@ const getProductsBySubCategory = catchAsync(async (req, res, next) => {
   });
 });
 
-const getAllColorsOfAllProducts = catchAsync(async(req,res,next)=>{
+const getAllColorsOfAllProducts = catchAsync(async (req, res, next) => {
   const colors = await Product.aggregate([
-   
     {
-      $group:{
-        _id:null,
-        uniqueColors:{$push:'$colors'}
-      }
+      $group: {
+        _id: null,
+        uniqueColors: { $push: "$colors" },
+      },
     },
-    {$project:{
-      _id : 0,
-      uniqueColors : {
-        $reduce : {
-          input : "$uniqueColors", 
-          initialValue :[], 
-          in : {$let : {
-            vars : {elem : { $concatArrays : ["$$this", "$$value"] }},
-            in : {$setUnion : "$$elem"}
-          }}
-        }
-      }
-    }}
-  
-  ])
+    {
+      $project: {
+        _id: 0,
+        uniqueColors: {
+          $reduce: {
+            input: "$uniqueColors",
+            initialValue: [],
+            in: {
+              $let: {
+                vars: { elem: { $concatArrays: ["$$this", "$$value"] } },
+                in: { $setUnion: "$$elem" },
+              },
+            },
+          },
+        },
+      },
+    },
+  ]);
   res.status(200).json({
     status: "success",
     data: {
-      uniqueColors:colors[0].uniqueColors,
+      uniqueColors: colors[0].uniqueColors,
     },
   });
-})
+});
 
 const getProductStatistics = catchAsync(async (req, res, next) => {
   const stats = await Product.aggregate([
@@ -318,14 +437,14 @@ const getSoldProductCount = catchAsync(async (req, res, next) => {
   });
 });
 
-const productSearch = catchAsync(async(req,res,next)=>{
-  const {keyword} = req.params
+const productSearch = catchAsync(async (req, res, next) => {
+  const { keyword } = req.params;
   const products = await Product.find({
-    $or:[
-      { name:{$regex:keyword,$options:'i'}},
-      { description:{$regex:keyword,$options:'i'}}
-    ]
-  })
+    $or: [
+      { name: { $regex: keyword, $options: "i" } },
+      { description: { $regex: keyword, $options: "i" } },
+    ],
+  });
   if (products.length === 0) {
     return next(new AppError("No Products", 404));
   }
@@ -336,8 +455,7 @@ const productSearch = catchAsync(async(req,res,next)=>{
       products,
     },
   });
-  
-})
+});
 
 export {
   getProductsByCategory,
@@ -348,7 +466,6 @@ export {
   getProductById,
   updateProduct,
   deleteProduct,
-  uploadCoverImage,
   resizeCoverImage,
   uploadFiles,
   resizeImages,
@@ -356,5 +473,5 @@ export {
   getProductsBySubCategory,
   getSimilarProducts,
   productSearch,
-  getAllColorsOfAllProducts
+  getAllColorsOfAllProducts,
 };

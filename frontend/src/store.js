@@ -10,7 +10,7 @@ import { authReducer } from './reducers/authReducer.js'
 const reducer = combineReducers({
     auth:authReducer,
     productModal:modalReducer,
-    cartAdd:addToCartReducer,
+    cart:addToCartReducer,
 
   
     productList:productListReducer,
@@ -27,7 +27,26 @@ const persistConfig = {
 const persistedReducer = persistReducer(persistConfig,reducer)
 
 
-const initialState = {}
+const initialState = {
+    cart: {
+        cartItems: localStorage.getItem('cartItems')
+            ? JSON.parse(localStorage.getItem('cartItems'))
+            : [],
+        shippingInfo: localStorage.getItem("shippingInfo")
+            ? JSON.parse(localStorage.getItem("shippingInfo"))
+            : {},
+    },
+    // saveForLater: {
+    //     saveForLaterItems: localStorage.getItem('saveForLaterItems')
+    //         ? JSON.parse(localStorage.getItem('saveForLaterItems'))
+    //         : [],
+    // },
+    // wishlist: {
+    //     wishlistItems: localStorage.getItem('wishlistItems')
+    //         ? JSON.parse(localStorage.getItem('wishlistItems'))
+    //         : [],
+    // },
+}
 const middleware = composeWithDevTools(applyMiddleware(thunk))
 const store = createStore(persistedReducer,initialState,middleware)
 const persistor = persistStore(store)

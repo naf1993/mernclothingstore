@@ -24,8 +24,8 @@ const ProductCard = ({ product }) => {
           <img
             src={
               product.images.length > 0 && isHovered
-                ? `http://localhost:3000/public/products/${product.images[0]}`
-                : `http://localhost:3000/public/products/${product.imageCover}`
+                ? product.images[0].url
+                : product.imageCover.url
             }
             onMouseEnter={handleHover}
             onMouseLeave={handleHover}

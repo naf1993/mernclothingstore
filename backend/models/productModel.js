@@ -36,10 +36,10 @@ const productSchema = new mongoose.Schema(
       ref: "SubCategory",
       required: false,
     },
-    isFeatured:{
-      type:Boolean,
-      required:true,
-      default:false
+    isFeatured: {
+      type: Boolean,
+      required: true,
+      default: false,
     },
 
     description: {
@@ -52,10 +52,22 @@ const productSchema = new mongoose.Schema(
       minlength: [10, "Description must have more or equal then 10 characters"],
     },
     imageCover: {
-      type: String,
-      required: [true, "Product must have a cover image"],
+      public_id: {
+        type: String,
+        required: true,
+      },
+      url: {
+        type: String,
+        required: true,
+      },
     },
-    images: [String],
+
+    images: [
+      {
+        public_id: String,
+        url: String,
+      },
+    ],
     price: {
       type: Number,
       required: [true, "Product must have a price"],
@@ -86,11 +98,11 @@ const productSchema = new mongoose.Schema(
 
       max: [255, "Stock must be below 255"],
     },
-    sold:{
-      type:Number,
-      default:0
+    sold: {
+      type: Number,
+      default: 0,
     },
-   
+
     size: {
       type: [
         {
@@ -100,7 +112,7 @@ const productSchema = new mongoose.Schema(
       ],
       default: [0],
     },
-    colors:[{type:String}]
+    colors: [{ type: String }],
   },
   {
     toJSON: { virtuals: true },
