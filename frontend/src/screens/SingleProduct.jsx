@@ -40,9 +40,12 @@ const SingleProduct = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
-  useEffect(() => {
-    console.log("parent rendered");
-  }, []);
+  const {cartItems} = useSelector((state)=>state.cart)
+  const productId = id
+  
+  //const itemsInCart = cartItems.some((i)=> i.product === productId)
+
+  
   const getSingleProduct = async (id) => {
     try {
       setLoading(true);
@@ -113,6 +116,10 @@ const SingleProduct = () => {
     setIsValid(true);
   };
 
+  const goToCart = () => {
+    history('/cart');
+}
+
   const addToCart = (id) => {
     let color = ''
     let size = ''
@@ -136,9 +143,15 @@ const SingleProduct = () => {
       }
     }
 
+    
+
     dispatch(createCart(id, color, size));
     history('/cart')
   };
+  const buyNow = ()=>{
+    addToCart(id)
+    history('/shipping')
+  }
 
   const handleScreenSize = () => {
     if (window.innerWidth < 400) {
@@ -200,13 +213,31 @@ const SingleProduct = () => {
                 )}
                
 
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  onClick={() => addToCart(product.id)}
-                >
-                  <span className="btn-title">Add to Cart</span>
-                </button>
+                  <div className="btn-container">
+                    {product.countInStock > 0 && (
+                        <button
+                        type="submit"
+                        className="submit-btn"
+                        onClick={()=>addToCart(product.id)}
+                      >
+                        <span className="btn-title">
+                          Add to Cart</span>
+                      </button>
+                    )}
+                    <button
+                        type="submit"
+                        className="submit-btn"
+                        onClick={buyNow} disabled={product.countInStock < 1 ? true : false}
+                      >
+                        <span className="btn-title">
+                          {product.countInStock < 1 ? 'Out of Stock' : 'Buy Now'}</span>
+                      </button>
+
+                    
+                
+
+                  </div>
+              
                 <p>Estimated Delivery Time: 21 November - 28 November</p>
               </div>
             </div>

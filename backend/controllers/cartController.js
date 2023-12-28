@@ -9,58 +9,63 @@ const setUserIds = (req, res, next) => {
   next();
 };
 
-
-
 const addToCart = catchAsync(async (req, res, next) => {
-  const { cart } = req.body;
-  const { _id } = req.user;
-  console.log('this is cart ',cart)
-  console.log('this is user ',_id)
-  
- 
-  let products = [];
-  const user = await User.findById(_id);
-  const alreadyAddedproduct = await Cart.findOne({ user: user._id });
-  if (alreadyAddedproduct) {
-    alreadyAddedproduct.remove();
-  }
-  for (let i = 0; i < cart.length; i++) {
-    let object = {};
-    object.product = cart[i].productId;
-    let totalCount = await Product.findById(cart[i].productId).select('countInStock').exec()
-   
-    object.count = cart[i].count;
-    if(totalCount < object.count){
-      return next(new AppError("Sorry no enough stock", 404));
-    }
-
-    object.color = cart[i].color;
-    if(cart[i].hasOwnProperty('size'))
-    {
-      object.size = cart[i].size
-    }
-  
-    let getPrice = await Product.findById(cart[i].productId).select("price").exec();
-    object.price = getPrice.price;
-    products.push(object);
-  }
-  
-  let cartTotal = 0;
-  for (let i = 0; i < products.length; i++) {
-    cartTotal = cartTotal + products[i].price * products[i].count;
-  }
-  let newCart = await new Cart({
-    products,
-    cartTotal,
-    user: user?._id,
-  }).save();
+  const {productId,color,size,count} = req.body
+  const {_id} = req.user
+  const user = await User.findById(_id)
+  const product = await Product.findById(productId)
+  const cart = await new Cart({
+    color:color,
+    user:user,
+    product:product,
+    count:count,
+    size:size
+  })
   res.status(201).json({
-    status: "success",
-    data: {
-      newCart,
-    },
-  });
+    status:'success',
+    data:{
+      cart
+    }
+  })
 });
+
+  // let products = [];
+  //
+  // const alreadyAddedproduct = await Cart.findOne({ user: user._id });
+  // if (alreadyAddedproduct) {
+  //   alreadyAddedproduct.remove();
+  // }
+  // for (let i = 0; i < cart.length; i++) {
+  //   let object = {};
+  //   object.product = cart[i].productId;
+  //   let totalCount = await Product.findById(cart[i].productId).select('countInStock').exec()
+
+  //   object.count = cart[i].count;
+  //   if(totalCount < object.count){
+  //     return next(new AppError("Sorry no enough stock", 404));
+  //   }
+
+  //   object.color = cart[i].color;
+  //   if(cart[i].hasOwnProperty('size'))
+  //   {
+  //     object.size = cart[i].size
+  //   }
+
+  //   let getPrice = await Product.findById(cart[i].productId).select("price").exec();
+
+  //   object.price = getPrice.price;
+  //   products.push(object);
+  // }
+
+  // let cartTotal = 0;
+  // for (let i = 0; i < products.length; i++) {
+  //   cartTotal = cartTotal + products[i].price * products[i].count;
+  // }
+
+
+ 
+
+
 
 const getUserCart = catchAsync(async (req, res, next) => {
   const { _id } = req.user;

@@ -11,41 +11,43 @@ import {
 import axios from "axios";
 import { attachTokenToHeaders } from "./authActions";
 
-export const createCart = (id, color, size) => async (dispatch, getState) => {
+export const createCart = (id, color, size,count=1) => async (dispatch, getState) => {
   dispatch({
     type: CART_ADD_ITEM_REQUEST,
   });
   try {
     let postData = {
-       cart : [{
-        productId: id,
-        color: color,
-        size: size,
-        count: 1,
-      }]
-    }
-   
+      productId: id,
+      color: color,
+      size: size,
+      count: count,
+    };
+
     //const options = attachTokenToHeaders(getState);
     const token = getState().auth.token;
-    const {data} = await axios({
-      method:'POST',
-      url:'/api/cart',
-      data:postData,
-      headers:{'Authorization':`Bearer ${token}`}
-    })
-    
-    console.log(data.data.newCart.products)
-    let payloadData = []
-    data.data.newCart.products.map((item)=>{
-      payloadData.push(item)
-    })
-    console.log('this is paylaod ',payloadData)
+    const { data } = await axios({
+      method: "POST",
+      url: "/api/cart",
+      data: postData,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    console.log(data.data.cart.product);
    
-  
+
     dispatch({
       type: CART_ADD_ITEM_SUCCESS,
-      payload: payloadData,
+      payload: {
+        product:data.data.cart.product._id,
+        name:data.data.cart.product.name,
+        price:data.data.cart.product.price,
+        image:data.data.cart.product.imageCover.url,
+        stock:data.data.cart.product.countInStock,
+        count
+      },
     });
+    
+    localStorage.setItem('cartItems', JSON.stringify(getState().cart.cartItems))
   } catch (error) {
     dispatch({
       type: CART_ADD_ITEM_FAILURE,
@@ -54,5 +56,6 @@ export const createCart = (id, color, size) => async (dispatch, getState) => {
           ? error.response.data.message
           : error.message,
     });
+    console.log(error)
   }
 };

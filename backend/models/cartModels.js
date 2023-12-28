@@ -8,21 +8,21 @@ const cartSchema = mongoose.Schema(
       required: [true, "An order must belong to a user"],
       ref: "User",
     },
-    products: [
-      {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
+    product:{
+      type: mongoose.Schema.Types.ObjectId,
           required: [true, "An order must containe a product"],
           ref: "Product",
-        },
-        count: Number,
-        color: String,
-        price:Number,
-        size:Number
-      },
-    ],
-    cartTotal:Number,
-    totalAfterDiscount:Number
+    },
+    count:{
+      type:Number,
+      default:1
+    },
+    color:{
+      type:String
+    },
+    size:{
+      type:String
+    }
   },
   {
     timestamps: true,

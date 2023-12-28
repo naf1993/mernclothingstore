@@ -16,13 +16,26 @@ export const addToCartReducer = (state = { cartItems: [] }, action) => {
         loading: true,
       };
     case CART_ADD_ITEM_SUCCESS: {
-      return {
-        loading: false,
-        success: true,
-        ...state,
-        cartItems: [...state.cartItems, action.payload],
-      };
-    }
+      const item = action.payload;
+      // let itemExists;
+      // if (state.cartItems) {
+      //   itemExists = state.cartItems.find((el) => el.product === item.product);
+      //   return {
+      //     ...state,
+      //     cartItems: state.cartItems.map((el) =>
+      //       el.product === itemExists.product ? item : el
+      //     ),
+      //   };
+      // } 
+      // else {
+        return {
+          loading: false,
+          success: true,
+          ...state,
+          cartItems:[...state.cartItems,{...action.payload}]
+        };
+      }
+    //}
     case CART_ADD_ITEM_FAILURE: {
       return { loading: false, error: action.payload };
     }
