@@ -9,25 +9,36 @@ import { usernav } from "../usernav";
 import { useraccounts } from "../usernav";
 import UserNav from "./UserNav";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Navbar = ({ navItems }) => {
   const navigate = useNavigate();
-  const [query, setQuery] = useState("");
-  const submitHandler = (e) => {
- 
-    navigate(query ? `/search/?query=${query}` : `/search`);
-  };
+  const [searchText, setSearchText] = useState("");
   const depthLevel = 0;
   const { pathname } = useLocation();
-
   const auth = useSelector((state) => state.auth);
   const { user } = auth;
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    navigate(`/search/?searchText=${searchText}`);
+  };
+
+  useEffect(() => {
+    const keyDownHandler = (event) => {
+      if (event.key === "Enter") {      
+        handleSubmit();
+      }
+    };
+    document.addEventListener("keydown", keyDownHandler);
+    return () => {
+      document.removeEventListener("keydown", keyDownHandler);
+    };
+  }, []);
 
   if (pathname === "/login" || pathname === "/register") {
     return <></>;
   }
-
   return (
     <div className="navbar">
       <div className="navbar-wrapper">
@@ -37,24 +48,19 @@ const Navbar = ({ navItems }) => {
           </Link>
         </h1>
 
-        <form onSubmit={submitHandler}>
-          <div className="searchbox-wrapper">
-            <input
-              type="text"
-              name='query'
-              id='query'
-              className="search__input"
-              onSubmit={(e)=>{
-                setQuery(e.target.value)
-                console.log(e.target.value)
-              }}
-              placeholder="Search for Abaya,Hijabs.."
-            />
-            <button className="search__button">
-              <BsSearch className="search__icon" />
-            </button>
-          </div>
+        <form onSubmit={handleSubmit} className="searchbox-wrapper">
+          <input
+            type="text"
+            value={searchText}
+            className="search__input"
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder="Search for Abaya,Hijabs.."
+          />
+          <button className="search__button">
+            <BsSearch className="search__icon" />
+          </button>
         </form>
+
         <ul className="user-nav">
           {user
             ? useraccounts.map((menu, index) => {

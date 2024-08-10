@@ -92,26 +92,22 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    countInStock: {
-      type: Number,
-      required: true,
-
-      max: [255, "Stock must be below 255"],
-    },
+    
     sold: {
       type: Number,
       default: 0,
     },
 
-    size: {
-      type: [
-        {
-          type: Number,
-          // Another properties
-        },
-      ],
-      default: [0],
-    },
+    sizes: [{
+      size:{
+        type:Number,
+        default:0
+      },
+      qty:{
+        type:Number,
+        default:5
+      }
+    }],
     colors: [{ type: String }],
   },
   {

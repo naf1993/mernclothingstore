@@ -1,44 +1,37 @@
 import {
-  CART_ADD_ITEM_REQUEST,
-  CART_ADD_ITEM_SUCCESS,
-  CART_ADD_ITEM_FAILURE,
+  CART_ADD_ITEM,
   CART_REMOVE_ITEM,
   CART_ITEM_RESET,
   CART_SAVE_PAYMENT_METHOD,
   CART_SAVE_SHIPPING_ADDRESS,
 } from "../constants/cartConstants";
 
-export const addToCartReducer = (state = { cartItems: [] }, action) => {
+export const addToCartReducer = (
+  state = { cartItems: [], shippingAddress: {} },
+  action
+) => {
   switch (action.type) {
-    case CART_ADD_ITEM_REQUEST:
-      return {
-        ...state,
-        loading: true,
-      };
-    case CART_ADD_ITEM_SUCCESS: {
+    case CART_ADD_ITEM:
       const item = action.payload;
-      // let itemExists;
-      // if (state.cartItems) {
-      //   itemExists = state.cartItems.find((el) => el.product === item.product);
-      //   return {
-      //     ...state,
-      //     cartItems: state.cartItems.map((el) =>
-      //       el.product === itemExists.product ? item : el
-      //     ),
-      //   };
-      // } 
-      // else {
+      const existItem = state.cartItems.find((x) => x.product === item.product);
+      if (existItem) {
         return {
-          loading: false,
-          success: true,
           ...state,
-          cartItems:[...state.cartItems,{...action.payload}]
+          cartItems: state.cartItems.map((x) =>
+            x.product === existItem.product ? item : x
+          ),
+        };
+      } else {
+        return {
+          ...state,
+          cartItems: [...state.cartItems, item],
         };
       }
-    //}
-    case CART_ADD_ITEM_FAILURE: {
-      return { loading: false, error: action.payload };
-    }
+    case CART_REMOVE_ITEM:
+      return {
+        ...state,
+        cartItems:state.cartItems.filter((el)=>el.product !== action.payload)
+      }
     default:
       return state;
   }

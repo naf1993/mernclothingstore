@@ -3,6 +3,7 @@ import Carousel from "react-multi-carousel";
 import { useSelector, useDispatch } from "react-redux";
 import Loader from "./Loader";
 import Message from "./Message";
+import Headings from "./Headings";
 
 import Product from "./Product";
 import { openModal } from "../actions/productModalActions";
@@ -63,8 +64,8 @@ const [description,setDescription] = useState()
   }, []);
   return (
     <div className="products-slider">
-      <div>
-        <h2 className="slider-name">New Arrivals</h2>
+     <div className='heading'>
+     <Headings>New Products</Headings>
       </div>
       {modal && <ProductModel name={name} setName={setName} price={price} setPrice={setPrice} image={image} setImage={setImage} description={description} setDescription={setDescription}/>}
       <div className="slider">

@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Carousel from "react-multi-carousel";
+import Headings from "./Headings";
 import { useSelector, useDispatch } from "react-redux";
 import Loader from "./Loader";
 import Message from "./Message";
 
 import Product from "./Product";
 
-import axios from 'axios'
+import axios from "axios";
 
 export const responsive = {
   superLargeDesktop: {
@@ -30,7 +31,7 @@ export const responsive = {
 };
 
 const ProductsSlider = () => {
- let [featuredProducts,setFeaturedProducts] = useState([])
+  let [featuredProducts, setFeaturedProducts] = useState([]);
 
   useEffect(() => {
     async function fetchFeaturedProducts() {
@@ -38,35 +39,22 @@ const ProductsSlider = () => {
         "http://localhost:5000/api/products?isFeatured=true"
       );
 
-      setFeaturedProducts(data.data.products)
-      
-
-     
+      setFeaturedProducts(data.data.products);
     }
     fetchFeaturedProducts();
   }, [setFeaturedProducts]);
   return (
     <div className="products-slider">
-      <div>
-        <h2 className="slider-name">Top Sellers</h2>
+      <div className='heading'>
+     <Headings>Top Sellers</Headings>
       </div>
       <div className="slider">
-        <Carousel 
-         
-          responsive={responsive}
-         
-          containerClass="carousel-container"
-        
-        >
+        <Carousel responsive={responsive} containerClass="carousel-container">
           {featuredProducts.map((product) => (
-            <Product
-              key={product.id}
-             product={product}
-            />
+            <Product key={product.id} product={product} />
           ))}
         </Carousel>
       </div>
-    
     </div>
   );
 };

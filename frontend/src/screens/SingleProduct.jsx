@@ -22,11 +22,14 @@ const SingleProduct = () => {
   const { id } = useParams();
 
   const dispatch = useDispatch();
-  const history = useNavigate();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [product, setProduct] = useState({});
+  const [categoryId,setCategoryId] = useState(null)
+  const [categoryName,setCategoryName] = useState(null)
+
 
   const [selectOptions, setSelectOptions] = useState([]);
   const [ifSize, setifSize] = useState(false);
@@ -36,16 +39,13 @@ const SingleProduct = () => {
   const [colorErr, setColorErr] = useState(null);
   const [sizeErr, setSizeErr] = useState(null);
   const [images, setImages] = useState([]);
-  const [imageUrl,setimageUrl] = useState([])
+  const [imageUrl, setimageUrl] = useState([]);
   const [isMobile, setIsMobile] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
-  const {cartItems} = useSelector((state)=>state.cart)
-  const productId = id
-  
-  //const itemsInCart = cartItems.some((i)=> i.product === productId)
 
-  
+  const { cartItems } = useSelector((state) => state.cart);
+
   const getSingleProduct = async (id) => {
     try {
       setLoading(true);
@@ -56,11 +56,17 @@ const SingleProduct = () => {
 
       setProduct(data.data.product);
       setLoading(false);
+      setCategoryId(data.data.product.Category.id)
+      setCategoryName(data.data.product.Category.name)
+     
 
       setImages((images) => [...images, data.data.product.imageCover]);
-      setimageUrl((imageurl)=>[...imageurl,data.data.product.imageCover.url])
+      setimageUrl((imageurl) => [
+        ...imageurl,
+        data.data.product.imageCover.url,
+      ]);
       let newArr = [];
-      let newImgUrl = []
+      let newImgUrl = [];
       if (data.data.product.images) {
         // newArr = data.data.product.images?.map((item) => {
         //   return item;
@@ -69,12 +75,12 @@ const SingleProduct = () => {
           newArr.push(image);
         });
 
-        data.data.product.images.forEach((image)=>{
-          newImgUrl.push(image.url)
-        })
+        data.data.product.images.forEach((image) => {
+          newImgUrl.push(image.url);
+        });
         //setImages((images) => [...images, ...newArr]);
         setImages([data.data.product.imageCover, ...newArr]);
-        setimageUrl([data.data.product.imageCover.url,...newImgUrl])
+        setimageUrl([data.data.product.imageCover.url, ...newImgUrl]);
       }
 
       const sizes = data.data.product.size;
@@ -117,12 +123,12 @@ const SingleProduct = () => {
   };
 
   const goToCart = () => {
-    history('/cart');
-}
+    navigate("/cart");
+  };
 
   const addToCart = (id) => {
-    let color = ''
-    let size = ''
+    let color = "";
+    let size = "";
     if (selectedColor && !selectedSize) {
       color = selectedColor;
       size = "";
@@ -143,15 +149,13 @@ const SingleProduct = () => {
       }
     }
 
-    
-
     dispatch(createCart(id, color, size));
-    history('/cart')
+    navigate("/cart");
   };
-  const buyNow = ()=>{
-    addToCart(id)
-    history('/shipping')
-  }
+  const buyNow = () => {
+    addToCart(id);
+    navigate("/shipping");
+  };
 
   const handleScreenSize = () => {
     if (window.innerWidth < 400) {
@@ -211,64 +215,47 @@ const SingleProduct = () => {
                     sizeErr={sizeErr}
                   />
                 )}
-               
 
-                  <div className="btn-container">
-                    {product.countInStock > 0 && (
-                        <button
-                        type="submit"
-                        className="submit-btn"
-                        onClick={()=>addToCart(product.id)}
-                      >
-                        <span className="btn-title">
-                          Add to Cart</span>
-                      </button>
-                    )}
+                <div className="btn-container">
+                  {product.countInStock > 1 && (
                     <button
-                        type="submit"
-                        className="submit-btn"
-                        onClick={buyNow} disabled={product.countInStock < 1 ? true : false}
-                      >
-                        <span className="btn-title">
-                          {product.countInStock < 1 ? 'Out of Stock' : 'Buy Now'}</span>
-                      </button>
+                      type="submit"
+                      className="submit-btn"
+                      onClick={() =>
+                        cartItems &&
+                        cartItems.some((item) => item.product === product.id)
+                          ? goToCart
+                          : addToCart(product.id)
+                      }
+                    >
+                      <span className="btn-title">
+                        {cartItems &&
+                        cartItems.some((item) => item.product === product.id)
+                          ? "Go to cart"
+                          : "add to cart"}
+                      </span>
+                    </button>
+                  )}
+                </div>
 
-                    
-                
-
-                  </div>
-              
                 <p>Estimated Delivery Time: 21 November - 28 November</p>
               </div>
             </div>
-            {/* <div className="related-products">
-            <RelatedProducts
-                categoryId={product.Category.id}
-                productId={product.id}
-                categoryName={product.Category.name}
-              />
+            <div className="related-products">
+              {product && (
+                <RelatedProducts
+                 product={product} categoryId={categoryId} categoryName={categoryName}
+                />
+              )}
             </div>
 
             <div className="reviews-container">
-              <ReviewsList product={product} reviews={product.reviews} />
-            </div> */}
+              {product && (
+                <ReviewsList product={product} />
+              )}
+            </div>
           </div>
         )
-
-        //    </div>
-        //    <div className="related-products">
-        //      <RelatedProducts
-        //        categoryId={product.Category.id}
-        //        productId={product.id}
-        //        categoryName={product.Category.name}
-        //      />
-        //    </div>
-
-        //    <div className="reviews-container">
-        //      <ReviewsList product={product} reviews={product.reviews} />
-        //    </div>
-        //  </div>
-        //     )
       )}
     </>
   );

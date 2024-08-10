@@ -79,7 +79,7 @@ function App() {
               />
 
               <Route
-                path="/customers"
+                path="/customers/table"
                 element={
                   <Protected>
                     <Customers />

@@ -1,6 +1,7 @@
-import { applyMiddleware, combineReducers, createStore } from "redux";
+import { applyMiddleware, combineReducers, createStore,compose } from "redux";
 import { composeWithDevTools } from "redux-devtools-extension";
 import thunk from "redux-thunk";
+
 import {
   persistStore,
   persistReducer,
@@ -35,14 +36,20 @@ const persistConfig = {
 };
 const persistedReducer = persistReducer(persistConfig, reducer);
 
+// const getFromLocalStorage = (key)=>{
+//   if(!key || typeof window === 'undefined'){
+//     return ''
+//   }
+//   return localStorage.getItem(key)
+// }
+
+const cartItemsFromStorage = localStorage.getItem('cartItems') ? JSON.parse(localStorage.getItem('cartItems')) : []
+const shippingAddressFromStorage = localStorage.getItem('shippingAddress') ? JSON.parse(localStorage.getItem('shippingAddress')) : {}
+
 const initialState = {
-  cart: {
-    cartItems:
-      localStorage.getItem("cartItems") !== undefined
-        ? JSON.parse(localStorage.getItem("cartItems"))
-        : [],
-  },
+    cart:{cartItems:cartItemsFromStorage,shippingAddress:shippingAddressFromStorage}
 };
+
 const middleware = composeWithDevTools(applyMiddleware(thunk));
 const store = createStore(persistedReducer, initialState, middleware);
 const persistor = persistStore(store);

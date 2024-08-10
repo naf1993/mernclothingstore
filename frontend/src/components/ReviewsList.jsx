@@ -3,7 +3,8 @@ import RatingReview from "./RatingReview";
 import Rating from "./Rating";
 import moment from "moment";
 
-const ReviewsList = ({ product, reviews }) => {
+const ReviewsList = ({ product}) => {
+  const {reviews} = product
   return (
     <>
       <div className="reviews-summary">
@@ -12,7 +13,7 @@ const ReviewsList = ({ product, reviews }) => {
         <h3 className="ratings-number">{`${product.ratingsQuantity} reviews`}</h3>
       </div>
       <div className="reviews-wrapper">
-        {reviews.map((review, index) => (
+        {reviews?.map((review, index) => (
           <div key={index} className="single-review">
             <div>
               <h4 className="review-user">{review.user.name}</h4>

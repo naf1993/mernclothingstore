@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from 'react'
 import axios from 'axios'
 import SingleCategory from './SingleCategory'
+import Headings from './Headings'
 
 const HomeCategories = () => {
 
@@ -16,8 +17,9 @@ const HomeCategories = () => {
       }, []);
   return (
     <>
+    
      <div className='heading'>
-        <h2>Explore Latest Categories</h2>
+     <Headings>Explore Latest Categories</Headings>
       </div>
     <div className='home-categories'>
      

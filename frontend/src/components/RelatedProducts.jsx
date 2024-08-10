@@ -4,25 +4,20 @@ import Loader from "./Loader";
 import ProductCard from "./ProductCard";
 import Message from './Message'
 
-const RelatedProducts = ({ categoryId, productId,categoryName }) => {
+const RelatedProducts = ({ categoryId, product,categoryName  }) => {
+  const { id } = product
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   let [relatedProducts, setRelatedProducts] = useState([]);
 
-  useEffect(() => {
-    if (loading) {
-      setTimeout(() => {
-        setLoading(false);
-      }, 2000);
-    }
-  }, [loading]);
+
 
   const getRelatedProducts = async () => {
     try {
       setLoading(true);
 
       const { data } = await axios.get(
-        `http://localhost:5000/api/products/relatedproducts/${productId}/${categoryId}`
+        `http://localhost:5000/api/products/relatedproducts/${id}/${categoryId}`
       );
       setRelatedProducts(data.data.products);
       setLoading(false);
@@ -38,7 +33,7 @@ const RelatedProducts = ({ categoryId, productId,categoryName }) => {
 
   return <>
   <div className='heading'>
-        <h2>DISCOVER NEW {categoryName.toUpperCase()}</h2>
+        <h2>DISCOVER NEW {(categoryName?.toUpperCase())}</h2>
       </div>
   
   <div className="related-products-wrapper">

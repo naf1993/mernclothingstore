@@ -1,10 +1,12 @@
 import dotenv from "dotenv";
 dotenv.config();
 import express from "express";
+import { createServer } from "node:http";
 import cors from "cors";
 import morgan from "morgan";
 import path from "path";
 import passport from "passport";
+import { Server } from "socket.io";
 
 import User from "./models/userModel.js";
 import AppError from "./utils/appError.js";
@@ -15,7 +17,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import xss from "xss-clean";
 import hpp from "hpp";
 
-import { googleStrategy } from './services/googleStrategy.js';
+import { googleStrategy } from "./services/googleStrategy.js";
 
 import productRoutes from "./routes/productRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
@@ -25,22 +27,22 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import subCategoryRoutes from "./routes/subCategoryRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
-import authRoutes from './routes/authRoutes.js'
+import authRoutes from "./routes/authRoutes.js";
 //import passportStrategy from "./passport.js";
 import { fileURLToPath } from "url";
 
-
-
 const app = express();
+const socketserver = createServer(app);
+const io = new Server(socketserver, {
+  transports: ["polling"],pingTimeout:60000,
+  cors: { origin: "http://localhost:3000" },
+});
 
-
-app.use(cors()) 
-
+app.use(cors());
 
 app.use(passport.initialize());
 
-passport.use(googleStrategy)
-
+passport.use(googleStrategy);
 
 app.use(helmet());
 
@@ -71,11 +73,9 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 // Data sanitization against XSS
 // app.use(xss());
 
-
 //app.use(compression())
 
-
-app.use('/',authRoutes)
+app.use("/", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/reviews", reviewRoutes);
@@ -88,7 +88,6 @@ app.use("/api/cart", cartRoutes);
 app.get("/", function (req, res) {
   res.render("home");
 });
-
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Cannot find ${req.originalUrl}`, 404));

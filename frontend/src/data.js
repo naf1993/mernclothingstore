@@ -30,3 +30,10 @@ export const categories = [
     name:'Skirts'
   },
 ];
+
+export const sliderData = [
+  {src:'/assets/images/abaya1.png',text:'Explore Latest Abayas'}
+  // {src:'/assets/images/jeanmain.png',text:'Modest Wear Collection'},
+  // {src:'/assets/images/skirt.png',text:'Modest Wear Collection'},
+
+]
