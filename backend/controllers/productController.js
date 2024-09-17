@@ -7,193 +7,91 @@ import multer from "multer";
 import sharp from "sharp";
 import Category from "../models/categoryModel.js";
 import SubCategory from "../models/subCategory.js";
+import cloudinary from "cloudinary";
 
 import { uploadFiles, deleteFiles } from "../utils/cloudinary.js";
 import { dataUri } from "../utils/datauri.js";
 
-const multerStorage = multer.memoryStorage();
+const storage = multer.memoryStorage(); // Store files in memory to process with Sharp
+const fileFilter = (req, file, cb) => {
+  const fileTypes = /jpeg|jpg|png|gif/;
+  const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = fileTypes.test(file.mimetype);
 
-const multerFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image")) {
-    cb(null, true);
+  if (mimetype && extname) {
+    return cb(null, true);
   } else {
-    cb(new AppError("Not an image! Please upload only images.", 400), false);
+    cb(new Error('Images only!'));
   }
 };
 
-const upload = multer({
-  storage: multerStorage,
-  fileFilter: multerFilter,
+export const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
 });
 
-export const uploadProductImages = upload.fields([
-  { name: "imageCover", maxCount: 1 },
-  { name: "images", maxCount: 4 },
-]);
-
-const resizeCoverImage = catchAsync(async (req, res, next) => {
-  const imagecover = [];
-  const imagecoverbuffer = req.files.imageCover[0].buffer;
-  const resizedimage = await sharp(imagecoverbuffer)
-    .resize(500, 500)
-    .toFormat("jpeg")
-    .jpeg({ quality: 90 })
-    .toBuffer();
-  const base64imgcvr = dataUri(resizedimage);
-  const cloudimgcvr = await uploadFiles(base64imgcvr.content);
-  imagecover.push({
-    url: cloudimgcvr.url,
-    public_id: cloudimgcvr.public_id,
-  });
-  
-  req.body.imageCover = imagecover[0];
-  next();
-});
-
-// const resizeCoverImage = catchAsync(async (req, res, next) => {
-//   //console.log(req.file)
-
-//   req.body.imageCover = `product-${req.user.id}-${Date.now()}-cover.jpeg`;
-//   console.log(req.file.filename);
-//   await sharp(req.file.buffer)
-//     .resize(500, 500)
-//     .toFormat("jpeg")
-//     .jpeg({ quality: 90 })
-//     .toFile(`public/products/${req.body.imageCover}`);
-
-//   next();
-// });
-
-//export const uploadProductImages = upload.array("images", 10);
-
-const uploadImages = (req, res, next) => {
-  uploadFiles(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      if (err.code === "LIMIT_UNEXPECTED_FILE") {
-        return res.send("Too many files to upload.");
-      }
-    } else if (err) {
-      return res.send(err);
-    }
-
-    next();
-  });
-};
-
-// export const uploadProductImages = async (req,res,next) => {
-//   const imageLink = []
-//   const resizedbuffer  =[]
-//   for(let i = 0; i < req.files.images.length;i++){
-//     const image = req.files.images[i]
-//     const resizedImage = await sharp(image.buffer)
-//     .resize(500, 500)
-//     .toFormat("jpeg")
-//     .jpeg({ quality: 90 })
-//     .toBuffer()
-//     resizedbuffer.push(resizedImage)
-//   }
-//   for(const imagebuffer of resizedbuffer){
-//     const b64i = dataUri(imagebuffer)
-//     const uploadimage = await uploadFilesCloud(b64i.content)
-//     imageGallery.push(uploadimage)
-//   }
-
-// }
-
-const resizeImages = async (req, res, next) => {
-  console.log("hi");
-  const imagegallery = [];
-  const resizedbuffer = [];
-  for (let i = 0; i < req.files.images.length; i++) {
-    const image = req.files.images[i];
-    const resizedimage = await sharp(image.buffer)
-      .resize(500, 500)
-      .toFormat("jpeg")
-      .jpeg({ quality: 90 })
-      .toBuffer();
-    resizedbuffer.push(resizedimage);
-  }
-
-  for (let imagebuffer of resizedbuffer) {
-    const b64i = dataUri(imagebuffer);
-    const uploadimage = await uploadFiles(b64i.content);
-
-    imagegallery.push({
-      public_id: uploadimage.public_id,
-      url: uploadimage.url,
-    });
-  }
-
-  console.log(imagegallery);
-  req.body.images = imagegallery;
-  next();
-  //   const imagegallery  = []
-
-  //   const imagesLink = []
-  //   const resizedimages = []
-  //   let images = []
-  //   if (typeof req.body.images === "string") {
-  //     images.push(req.body.images);
-  // } else {
-  //     images = req.body.images;
-  // }
-
-  //   for(let i = 0;i < images.length;i++){
-  //     let path = images[i].path
-  //     const resizedimage = await sharp(path).resize(500,500).toFormat('jpeg').jpeg({quality:90})
-  //     resizedimages.push(resizedimage)
-
-  //   }
-  //   for(let i = 0;i < resizedimages.length; i++){
-  //     const result = await cloudinary.uploader.upload(resizedimages[i],{
-  //       folder:'products'
-  //     })
-  //     imagesLink.push({
-  //       public_id:result.public_id,
-  //       url:result.url
-  //     })
-  //   }
-  //   console.log(imagesLink)
-  //   req.body.images = imagesLink
-  //   next()
-  // await Promise.all(
-  //   req.files.map(async (file) => {
-  //     await sharp(file.path)
-  //       .resize(500, 500)
-  //       .toFormat("jpeg")
-  //       .jpeg({ quality: 90 })
-  //       .toFile(`public/images/products/${file.filename}`);
-  //     fs.unlinkSync(`public/images/products/${file.filename}`);
-  //   })
-  // );
-  // next();
-  // if (!req.files) return next();
-
-  // //req.body.images = [];
-  // await Promise.all(
-  //   req.files.map(async (file) => {
-  //     const filename = file.originalname.replace(/\..+$/, "");
-  //     const newFilename = `product-${filename}-${Date.now()}.jpeg`;
-
-  //     await sharp(file.buffer)
-  //       .resize(500, 500)
-  //       .toFormat("jpeg")
-  //       .jpeg({ quality: 90 })
-  //       .toFile(`public/products/${newFilename}`);
-  //       fs.unlinkSync(`public/products/${newFilename}`)
-
-  //     //req.body.images.push(newFilename);
-  //   })
-  // );
-
-  // next();
-};
-
-const uploadImageToCloud = async (req, res, next) => {};
 
 const createProduct = catchAsync(async (req, res, next) => {
-  const product = await Product.create(req.body);
+  const { name, description, brand, Category, price, SubCategory, isFeatured } =
+    req.body;
+    const newVariants = JSON.parse(req.body.variants).map((variant, index) => ({
+      ...variant,
+      image: req.files[index].path, // Cloudinary URL
+    }));
 
+//   const parsedVariants = JSON.parse(req.body.variants);
+
+//   if (!req.files || req.files.length === 0) {
+//     return res.status(400).json({ error: "No images uploaded" });
+//   }
+
+//   const uploadedImages = [];
+
+//   // Loop through each variant and process its image
+//   for (let i = 0; i < req.files.length; i++) {
+    
+//     const file = req.files[i];
+
+//     // Resize the image using Sharp
+//     const resizedImageBuffer = await sharp(file.buffer)
+//       .resize(500, 500) // Resize to 500x500 pixels
+//       .toFormat("jpeg") // Convert to jpeg
+//       .jpeg({ quality: 90 }) // Set image quality to 90%
+//       .toBuffer();
+
+//     // Upload the resized image to Cloudinary
+//     const result = await new Promise((resolve, reject) => {
+//       cloudinary.uploader
+//         .upload_stream((error, result) => {
+//           if (error) {
+//             return res.status(500).json({ error: error.message });
+//           }
+//           resolve(result);
+//         })
+//         .end(resizedImageBuffer);
+//     });
+//     console.log("this is result", result);
+// console.log(uploadedImages)
+//     // Save the Cloudinary image URL for this variant
+//     uploadedImages.push({
+//       ...parsedVariants[i], // Attach variant color and size
+//       image: result.secure_url, // Store Cloudinary URL in the variant
+//     });
+//     console.log(uploadedImages);
+//   }
+
+  const product = new Product({
+    name,
+    description,
+    brand,
+    Category,
+    isFeatured,
+    SubCategory,
+    price,
+    variants: newVariants,
+  });
+  await product.save();
   res.status(201).json({
     status: "success",
     data: {
@@ -264,8 +162,8 @@ const deleteProduct = catchAsync(async (req, res, next) => {
   }
   await deleteFiles(product.imageCover.public_id);
 
-  for(let i = 0;i<product.images.length;i++){
-    await deleteFiles(product.images[i].public_id)
+  for (let i = 0; i < product.images.length; i++) {
+    await deleteFiles(product.images[i].public_id);
   }
 
   res.status(204).json({
@@ -466,9 +364,7 @@ export {
   getProductById,
   updateProduct,
   deleteProduct,
-  resizeCoverImage,
-  uploadFiles,
-  resizeImages,
+  uploadImage,
   addToWishList,
   getProductsBySubCategory,
   getSimilarProducts,

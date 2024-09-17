@@ -4,6 +4,26 @@ import Category from "./categoryModel.js";
 import SubCategory from "./subCategory.js";
 import validator from "validator";
 
+const variantSchema = new mongoose.Schema({
+  color: {
+    type: String,
+  },
+  size: {
+    type: String,
+
+    enum: ["S", "M", "L", "XL"],
+    default:'S' // Example sizes
+  },
+  image: {
+    type: String, // Cloudinary URL
+    required: true,
+  },
+  stock: {
+    type: Number,
+    default: 0,
+  },
+});
+
 const productSchema = new mongoose.Schema(
   {
     name: {
@@ -51,23 +71,7 @@ const productSchema = new mongoose.Schema(
       ],
       minlength: [10, "Description must have more or equal then 10 characters"],
     },
-    imageCover: {
-      public_id: {
-        type: String,
-        required: true,
-      },
-      url: {
-        type: String,
-        required: true,
-      },
-    },
 
-    images: [
-      {
-        public_id: String,
-        url: String,
-      },
-    ],
     price: {
       type: Number,
       required: [true, "Product must have a price"],
@@ -92,23 +96,8 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    
-    sold: {
-      type: Number,
-      default: 0,
-    },
 
-    sizes: [{
-      size:{
-        type:Number,
-        default:0
-      },
-      qty:{
-        type:Number,
-        default:5
-      }
-    }],
-    colors: [{ type: String }],
+    variants: [variantSchema],
   },
   {
     toJSON: { virtuals: true },

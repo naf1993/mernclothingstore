@@ -5,6 +5,8 @@ import colors from 'colors';
 import app from './app.js'
 import connectDB from './config/db.js';
 import {v2 as cloudinary} from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import multer from 'multer';
           
 
 
@@ -20,9 +22,19 @@ cloudinary.config({
     api_key: process.env.API_KEY, 
     api_secret: process.env.API_SECRET 
   });
-
+  const storage = new CloudinaryStorage({
+    cloudinary: cloudinary.v2,
+    params: {
+      folder: 'ecommerce-products',
+      allowed_formats: ['jpg', 'png'],
+    },
+  });
   
-export const uploadFilesCloud = file => cloudinary.v2.uploader.upload(file)
+  const upload = multer({ storage });
+  
+  export { upload, cloudinary };
+  
+//export const uploadFilesCloud = file => cloudinary.v2.uploader.upload(file)
 
 
 const PORT = process.env.PORT || 5000
