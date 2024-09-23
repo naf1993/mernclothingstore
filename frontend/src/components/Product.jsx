@@ -41,7 +41,7 @@ const Product = ({product,selectedProduct}) => {
      
     >
       <img
-        src={`./public/products/${product.imageCover}`}
+        src={`${product.images[0]}`}
         alt="image"
         className="product-card__img"
       />

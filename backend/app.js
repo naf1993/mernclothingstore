@@ -1,24 +1,14 @@
-import dotenv from "dotenv";
-dotenv.config();
 import express from "express";
-import { createServer } from "node:http";
+import http from "node:http";
 import cors from "cors";
 import morgan from "morgan";
 import path from "path";
 import passport from "passport";
 import { Server } from "socket.io";
-
-import User from "./models/userModel.js";
 import AppError from "./utils/appError.js";
 import globalErrorHandler from "./controllers/errorController.js";
-import { rateLimit } from "express-rate-limit";
 import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
-import xss from "xss-clean";
-import hpp from "hpp";
-
 import { googleStrategy } from "./services/googleStrategy.js";
-
 import productRoutes from "./routes/productRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -28,14 +18,30 @@ import subCategoryRoutes from "./routes/subCategoryRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-//import passportStrategy from "./passport.js";
+
 import { fileURLToPath } from "url";
 
 const app = express();
-const socketserver = createServer(app);
-const io = new Server(socketserver, {
-  transports: ["polling"],pingTimeout:60000,
-  cors: { origin: "http://localhost:3000" },
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+  transports:['websocket','polling']
+}).listen(5000)
+
+io.on("connection", (socket) => {
+  console.log("New client connected");
+
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+});
+
+app.use((req, res, next) => {
+  req.io = io;
+  next();
 });
 
 app.use(cors());
@@ -46,7 +52,6 @@ passport.use(googleStrategy);
 
 app.use(helmet());
 
-// Development logging
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
@@ -56,24 +61,8 @@ app.set("view engine", "ejs");
 
 app.use("/public", express.static("public"));
 
-// Limit requests from same API
-// const limiter = rateLimit({
-//   max: 100,
-//   windowMs: 60 * 60 * 1000,
-//   message: "Too many requests from this IP, please try again in an hour!",
-// });
-// app.use("/api", limiter);
-
-// Body parser, reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
-// Data sanitization against NoSQL query injection
-// app.use(mongoSanitize());
-
-// Data sanitization against XSS
-// app.use(xss());
-
-//app.use(compression())
 
 app.use("/", authRoutes);
 app.use("/api/products", productRoutes);

@@ -19,12 +19,12 @@ export const adminLoginReducer = (state={},action)=>{
     }
 }
 
-export const userListReducer = (state={users:[]},action)=>{
+export const userListReducer = (state={items:[]},action)=>{
     switch(action.type){
         case USER_LIST_REQUEST:
-            return {loading:true,users:[]}
+            return {loading:true,items:[]}
         case USER_LIST_SUCCESS:
-            return {loading:false,users:action.payload}
+            return {loading:false,items:action.payload}
         case USER_LIST_FAIL:
             return {loading:false,error:action.payload}
         default:

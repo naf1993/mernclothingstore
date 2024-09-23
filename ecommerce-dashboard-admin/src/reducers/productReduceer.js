@@ -15,12 +15,12 @@ import { PRODUCT_UPDATE_FAIL } from "../constants/productConstants"
 import { PRODUCT_UPDATE_REQUEST } from "../constants/productConstants"
 import { PRODUCT_UPDATE_SUCCESS } from "../constants/productConstants"
 import { PRODUCT_UPDATE_RESET } from "../constants/productConstants"
-export const productListReducer = (state={products:[]},action)=>{
+export const productListReducer = (state={items:[]},action)=>{
     switch(action.type){
         case PRODUCT_LIST_REQUEST:
-            return {loading:true,products:[]}
+            return {loading:true,items:[]}
         case PRODUCT_LIST_SUCCESS:
-            return {loading:false,products:action.payload}
+            return {loading:false,items:action.payload}
         case PRODUCT_LIST_FAIL:
             return {loading:false,error:action.payload}
         default:

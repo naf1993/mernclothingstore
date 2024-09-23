@@ -48,7 +48,7 @@ const ProductsCards = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const productList = useSelector((state) => state.productList);
-  const { loading, error, products } = productList;
+  const { loading, error, items } = productList;
   const [searchQuery, setSearchQuery] = useState("");
   const userLogin = useSelector((state) => state.userLogin);
   const { userInfo } = userLogin;
@@ -72,9 +72,9 @@ const ProductsCards = () => {
 
       
       if (searchQuery === "") {
-        return products;
+        return items;
       } else {
-        return products.filter((product) =>
+        return items.filter((product) =>
           product.name.toLowerCase().includes(searchQuery)
         );
       }
@@ -82,38 +82,38 @@ const ProductsCards = () => {
     
     
       if(sortFeatures === 'priceAscending'){
-       return products.sort((a,b)=>{
+       return items.sort((a,b)=>{
         return a.price - b.price
        })  
       }
       else if(sortFeatures === 'priceDesceding'){
-        return products.sort((a,b)=>{
+        return items.sort((a,b)=>{
           return b.price - a.price
          })  
       }
       else if(sortFeatures === 'ratingHigh'){
-        return products.sort((a,b)=>{
+        return items.sort((a,b)=>{
           return b.ratingsAverage - a.ratingsAverage
         })
       }
       else if(sortFeatures === 'featured'){
-        return products.filter((product)=>product.isFeatured)
+        return items.filter((product)=>product.isFeatured)
       }
       else if(sortFeatures === 'new'){
-        return products.sort((a,b)=>{
+        return items.sort((a,b)=>{
           return new Date(b.createdAt) - new Date(a.createdAt)
         })
       }
-      else return products
+      else return items
     }
     } else {
-      console.log(category);
-      return products.filter(
+      //console.log(category);
+      return items.filter(
         (product) =>
           product.Category.name.toLowerCase() === category.toLowerCase()
       );
     }
-  }, [category, searchQuery, products,sortFeatures]);
+  }, [category, searchQuery, items,sortFeatures]);
   useEffect(() => {
     dispatch(listProducts());
 

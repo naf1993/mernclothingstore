@@ -38,7 +38,7 @@ const Product = ({ product }) => {
     <Card sx={{ borderRadius: "0.55rem", margin: "0" }}>
       <CardMedia
         component="img"
-        image={`./public/products/${product.imageCover}`}
+        image={`${product.images[0]}`}
         alt={"alt"}
         title={"titleasdasdsada"}
         sx={{ height: 200, width: "100%", objectFit: "cover" }}

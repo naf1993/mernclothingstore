@@ -8,7 +8,8 @@ const userSchema = new mongoose.Schema(
   {
     provider:{
       type:String,
-      required:true
+      required:true,
+      default:'email'
     },
     name: {
       type: String,

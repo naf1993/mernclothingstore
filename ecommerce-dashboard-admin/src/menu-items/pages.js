@@ -55,16 +55,8 @@ const pages = {
       title: "Orders",
       type:'collapse',
       icon:icons.order,
-      children:[
-        {
-            id:'table',
-            title:'Table',
-            type:'item',
-            url:'/orders/table',
-            
-        },
-       
-      ]
+      url:'/orders'
+      
     },
     
   

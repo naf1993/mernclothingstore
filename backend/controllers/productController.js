@@ -1,3 +1,4 @@
+import path from 'path'
 import Product from "../models/productModel.js";
 import User from "../models/userModel.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -7,7 +8,6 @@ import multer from "multer";
 import sharp from "sharp";
 import Category from "../models/categoryModel.js";
 import SubCategory from "../models/subCategory.js";
-import cloudinary from "cloudinary";
 
 import { uploadFiles, deleteFiles } from "../utils/cloudinary.js";
 import { dataUri } from "../utils/datauri.js";
@@ -21,65 +21,56 @@ const fileFilter = (req, file, cb) => {
   if (mimetype && extname) {
     return cb(null, true);
   } else {
-    cb(new Error('Images only!'));
+    cb(new Error("Images only!"));
   }
 };
 
 export const upload = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 1024 * 1024 * 5 }, // Limit file size to 5MB
-});
+  limits: { fileSize: 1024 * 1024 * 5 },
+  // Limit file size to 5MB
+}).fields([{ name: "images", maxCount: 5 }]);
 
+export const resizeImages = async (req, res, next) => {
+  const imagegallery = [];
+  const resizedBuffer = [];
+  try {
+    if (req.files) {
+      for (let i = 0; i < req.files.images.length; i++) {
+        const image = req.files.images[i];
+        const resizedImage = await sharp(image.buffer)
+          .resize(500, 500)
+          .toFormat("jpeg")
+          .jpeg({ quality: 90 })
+          .toBuffer();
+        resizedBuffer.push(resizedImage);
+      }
+      for (const imagebuffer of resizedBuffer) {
+        const b64i = dataUri(imagebuffer);
+        const uploadimage = await uploadFiles(b64i.content);
+        imagegallery.push(uploadimage.url);
+      }
+    }
+    req.body.images = imagegallery;
+    next();
+  } catch (err) {
+    next(err);
+  }
+};
 
 const createProduct = catchAsync(async (req, res, next) => {
-  const { name, description, brand, Category, price, SubCategory, isFeatured } =
-    req.body;
-    const newVariants = JSON.parse(req.body.variants).map((variant, index) => ({
-      ...variant,
-      image: req.files[index].path, // Cloudinary URL
-    }));
-
-//   const parsedVariants = JSON.parse(req.body.variants);
-
-//   if (!req.files || req.files.length === 0) {
-//     return res.status(400).json({ error: "No images uploaded" });
-//   }
-
-//   const uploadedImages = [];
-
-//   // Loop through each variant and process its image
-//   for (let i = 0; i < req.files.length; i++) {
-    
-//     const file = req.files[i];
-
-//     // Resize the image using Sharp
-//     const resizedImageBuffer = await sharp(file.buffer)
-//       .resize(500, 500) // Resize to 500x500 pixels
-//       .toFormat("jpeg") // Convert to jpeg
-//       .jpeg({ quality: 90 }) // Set image quality to 90%
-//       .toBuffer();
-
-//     // Upload the resized image to Cloudinary
-//     const result = await new Promise((resolve, reject) => {
-//       cloudinary.uploader
-//         .upload_stream((error, result) => {
-//           if (error) {
-//             return res.status(500).json({ error: error.message });
-//           }
-//           resolve(result);
-//         })
-//         .end(resizedImageBuffer);
-//     });
-//     console.log("this is result", result);
-// console.log(uploadedImages)
-//     // Save the Cloudinary image URL for this variant
-//     uploadedImages.push({
-//       ...parsedVariants[i], // Attach variant color and size
-//       image: result.secure_url, // Store Cloudinary URL in the variant
-//     });
-//     console.log(uploadedImages);
-//   }
+  const {
+    name,
+    description,
+    brand,
+    Category,
+    price,
+    SubCategory,
+    isFeatured,
+    countInStock,
+    images,
+  } = req.body;
 
   const product = new Product({
     name,
@@ -89,9 +80,14 @@ const createProduct = catchAsync(async (req, res, next) => {
     isFeatured,
     SubCategory,
     price,
-    variants: newVariants,
+    countInStock,
+    images,
   });
   await product.save();
+  req.io.emit('notification', {
+    message: 'New Product Added!',
+    product,
+  });
   res.status(201).json({
     status: "success",
     data: {
@@ -364,7 +360,6 @@ export {
   getProductById,
   updateProduct,
   deleteProduct,
-  uploadImage,
   addToWishList,
   getProductsBySubCategory,
   getSimilarProducts,

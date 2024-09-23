@@ -1,6 +1,6 @@
 .policy-wrapper{
     grid-column: center-start / center-end;
-    background-color: white;
+    
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
   grid-gap:1rem;
@@ -14,7 +14,7 @@
 //   }
   .item{
    padding:1.2rem 2rem;
-    background-color:rgb(240, 236, 236);
+    background-color:white;
     display: flex;
     align-items: center;
     justify-content: space-between;

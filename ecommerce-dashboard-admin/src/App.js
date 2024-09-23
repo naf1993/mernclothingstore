@@ -27,9 +27,9 @@ function App() {
 
   useMemo(() => {
     if (darkMode) {
-      setMode("dark");
-    } else {
       setMode("light");
+    } else {
+      setMode("dark");
     }
   }, [darkMode]);
 
@@ -54,10 +54,18 @@ function App() {
                 }
               />
               <Route
-                path="/products"
+                path="/products/grid"
                 element={
                   <Protected>
                     <ProductsCards/>
+                  </Protected>
+                }
+              />
+                <Route
+                path="/products/table"
+                element={
+                  <Protected>
+                    <Products/>
                   </Protected>
                 }
               />

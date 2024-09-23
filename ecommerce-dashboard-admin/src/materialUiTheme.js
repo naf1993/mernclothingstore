@@ -140,7 +140,7 @@ export const themeSettings = (mode)=>{
         secondary:{
           ...tokensLight.secondary,
           light:tokensLight.secondary[100],
-          main:'#ffffff',
+          main:tokensLight.secondary[100],
           dark:tokensLight.secondary[700]
         },
         
@@ -187,7 +187,7 @@ export const themeSettings = (mode)=>{
           alt:tokensLight.secondary[800],
           primary:tokensLight.darkBlue[400],
           sidebar:tokensLight.darkBlue[400],
-          table:tokensLight.secondary[400],
+          table:tokensLight.secondary[700],
           white:'#ffffff'
 
         }
@@ -202,7 +202,7 @@ export const themeSettings = (mode)=>{
         },
         secondary:{
           ...tokensDark.secondary,
-          main:tokensLight.grey[200],
+          main:tokensLight.secondary[200],
           dark:tokensLight.grey[900]
 
         },
