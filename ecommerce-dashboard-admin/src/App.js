@@ -20,6 +20,7 @@ import NotFound from "scenes/NotFound";
 import ProductCreate from "scenes/ProductCreate";
 import ProductsCards from "scenes/ProductsCards";
 import SingleProduct from "scenes/SingleProduct";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const [mode, setMode] = useState("light");
@@ -77,14 +78,7 @@ function App() {
                   </Protected>
                 }
               />
-              <Route
-                path="/createProduct"
-                element={
-                  <Protected>
-                    <ProductCreate />
-                  </Protected>
-                }
-              />
+             
 
               <Route
                 path="/customers/table"
@@ -124,6 +118,26 @@ function App() {
           </Routes>
         </ThemeProvider>
       </BrowserRouter>
+      <Toaster
+        position="top-center"
+        gutter={12}
+        containerStyle={{ margin: "8px" }}
+        toastOptions={{
+          success: {
+            duration: 3000,
+          },
+          error: {
+            duration: 5000,
+          },
+          style: {
+            fontSize: "16px",
+            maxWidth: "500px",
+            padding: "16px 24px",
+            backgroundColor: "#fff",
+            color: "#374151",
+          },
+        }}
+      />
     </div>
   );
 }

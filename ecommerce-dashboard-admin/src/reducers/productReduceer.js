@@ -23,10 +23,12 @@ export const productListReducer = (state={items:[]},action)=>{
             return {loading:false,items:action.payload}
         case PRODUCT_LIST_FAIL:
             return {loading:false,error:action.payload}
+       
         default:
             return state
     }
 }
+
 
 export const productDetailReducer = (state={product:{reviews:[]}},action)=>{
     switch(action.type){

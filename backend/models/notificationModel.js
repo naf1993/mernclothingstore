@@ -6,21 +6,14 @@ const notificationSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
     },
-    title: {
-      type: String,
-      require: true,
-    },
+    message: { type: String, required: true },
     type: {
-      type: Number,
-    },
-    text: {
       type: String,
-      require: true,
+      enum: ["product_created", "user_ordered"],
+      required: true,
     },
-    read: {
-      type: Boolean,
-      default: false,
-    },
+    isRead: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
   },
   {
     timestamps: true,

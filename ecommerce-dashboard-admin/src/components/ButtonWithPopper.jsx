@@ -1,25 +1,50 @@
-// components/ButtonWithPopper.js
-import React, { useState, forwardRef ,useRef} from "react";
+import React, { useState, forwardRef, useRef } from "react";
 import {
-  IconButton,
   Popper,
   Paper,
-  ClickAwayListener,
   Typography,
-  
+  Button,
   Menu,
   MenuItem,
-  ButtonBase,Avatar,List,ListItem,ListItemText,useTheme,Badge
+  ButtonBase,
+  Avatar,
+  List,
+  ListItem,
+  ListItemText,
+  useTheme,
+  Badge,
+  Divider,
+  Box,
 } from "@mui/material";
 
 const ButtonWithPopper = forwardRef(
-  ({ icon, badgeContent, popperContent, userMenu, onClick }, ref) => {
+  (
+    {
+      icon,
+  
+      popperContent,
+      userMenu,
+      onClick,
+  
+      setFilter,
+      handleRead,
+      markAllasRead, // Function to mark all as read
+    },
+    ref
+  ) => {
     const theme = useTheme();
     const [open, setOpen] = useState(false);
-    const anchorRef = React.useRef(null);
-    const popperRef = useRef(null);
+    const anchorRef = useRef(null);
+
     const handleToggle = () => {
       setOpen((prev) => !prev);
+      if (!open) {
+        if (typeof markAllasRead === 'function') {
+            markAllasRead(); // Call the function if it's defined
+        } else {
+            console.error("markAllAsRead is not a function");
+        }
+    }
     };
 
     const handleClose = (event) => {
@@ -28,8 +53,6 @@ const ButtonWithPopper = forwardRef(
       }
       setOpen(false);
     };
-
-    
 
     return (
       <>
@@ -42,7 +65,10 @@ const ButtonWithPopper = forwardRef(
           }}
           color="inherit"
         >
-            <Badge badgeContent={badgeContent} color="secondary">
+          <Badge
+            badgeContent={popperContent?.filter((n) => !n.isRead).length}
+            color="error"
+          >
             <Avatar
               variant="rounded"
               sx={{
@@ -60,25 +86,6 @@ const ButtonWithPopper = forwardRef(
               {icon}
             </Avatar>
           </Badge>
-          {/* {badgeContent !== undefined && (
-
-            <Avatar
-              variant="rounded"
-              sx={{
-                ...theme.typography.commonAvatar,
-                ...theme.typography.mediumAvatar,
-                transition: "all .2s ease-in-out",
-                background: theme.palette.secondary.light,
-                color: theme.palette.secondary.dark,
-                '&[aria-controls="menu-list-grow"],&:hover': {
-                  background: theme.palette.secondary.dark,
-                  color: theme.palette.secondary.light,
-                },
-              }}
-            >
-              {icon}
-            </Avatar>
-          )} */}
         </ButtonBase>
 
         {userMenu ? (
@@ -95,43 +102,85 @@ const ButtonWithPopper = forwardRef(
             ))}
           </Menu>
         ) : (
-          <Popper ref={popperRef}
+          <Popper
             open={open}
             anchorEl={anchorRef.current}
             placement="bottom"
-             disablePortal  
+            disablePortal
           >
-           
-                  <Paper
-                    sx={{
-                      maxHeight: 300,
-                      marginTop: "8px",
-                      zIndex: 1300,
-                      overflowY: "auto",
-                      width: 300,
-                      borderRadius: "8px", // Rounded corners
-                      boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)", // Custom shadow
-                      backgroundColor: "#ffffff", // Background color
-                    }}
-                  >
-                    <Typography variant="h6" style={{ padding: 16 }}>
-                      Notifications
-                    </Typography>
-                    <List>
-                      {popperContent.length === 0 ? (
-                        <ListItem>
-                          <ListItemText primary="No Notifications" />
-                        </ListItem>
-                      ) : (
-                        popperContent.map((notification, index) => (
-                          <ListItem key={index}>
-                            <ListItemText primary={notification.message} />
-                          </ListItem>
-                        ))
+            <Paper
+              sx={{
+                maxHeight: 300,
+                marginTop: "8px",
+                zIndex: 1300,
+                overflowY: "auto",
+                width: 300,
+                borderRadius: "8px",
+                boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
+                backgroundColor: "#ffffff",
+              }}
+            >
+              <Typography variant="h6" style={{ padding: 16 }}>
+                Notifications
+              </Typography>
+              <Box
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-around",
+                }}
+              >
+                <Button
+                  style={{ background: theme.palette.info.main, border: "none" }}
+                  onClick={() => setFilter("all")}
+                >
+                  All
+                </Button>
+                <Button
+                  style={{ background: theme.palette.success.main, border: "none" }}
+                  onClick={() => setFilter("read")}
+                >
+                  Read
+                </Button>
+                <Button
+                  style={{ background: theme.palette.warning.main, border: "none" }}
+                  onClick={() => setFilter("unread")}
+                >
+                  Unread
+                </Button>
+              </Box>
+
+              <List>
+                {popperContent?.map((notification) => (
+                  <React.Fragment key={notification._id}>
+                    <ListItem
+                      style={{
+                        background: notification.isRead ? "#f1f1f1" : "#e7f3fe",
+                        borderLeft: `4px solid ${
+                          notification.type === "product_created"
+                            ? "#28a745"
+                            : "#dc3545"
+                        }`,
+                      }}
+                    >
+                      <ListItemText
+                        primary={notification.message}
+                        secondary={`Type: ${notification.type}`}
+                      />
+                      {!notification.isRead && (
+                        <Button
+                          variant="outlined"
+                          onClick={() => handleRead(notification._id)}
+                        >
+                          Mark as read
+                        </Button>
                       )}
-                    </List>
-                  </Paper>
-               
+                    </ListItem>
+                    <Divider />
+                  </React.Fragment>
+                ))}
+              </List>
+            </Paper>
           </Popper>
         )}
       </>

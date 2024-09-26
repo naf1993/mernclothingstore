@@ -4,48 +4,31 @@ import {
   LightModeOutlined,
   DarkModeOutlined,
   Menu as MenuIcon,
-  Search,
-  SettingsOutlined,
-  ArrowDropDownOutlined,
 } from "@mui/icons-material";
 import FlexBetween from "./FlexBetween";
-import profileImage from "../assets/profile.jpeg";
-import { AiOutlineBell, AiOutlineUser } from "react-icons/ai";
+import { AiOutlineUser } from "react-icons/ai";
 import { TOGGLE_LIGHT_DARK } from "../actions/themeActions";
-import {
-  AppBar,
-  Button,
-  Box,
-  Typography,
-  IconButton,
-  InputBase,
-  Toolbar,
-  Menu,
-  MenuItem,
-  useTheme,
-  ButtonBase,
-  Avatar,
-} from "@mui/material";
+import { Box, IconButton, useTheme, ButtonBase, Avatar } from "@mui/material";
 import { io } from "socket.io-client";
-import { fontSize, textTransform } from "@mui/system";
 import { BiMenu } from "react-icons/bi";
 import SearchSection from "./SearchSection";
-import ProfileSection from "./ProfileSection";
-import { addNotification } from "reducers/notificationReducer";
 
-import Notification from "./Notification";
-import NotificationAdmin from "./NotificationAdmin";
+import {
+  fetchAllNotifications,
+  addNotification,markAllAsRead
+} from "../actions/notificationAction";
+
 import ButtonWithPopper from "./ButtonWithPopper";
 import { BsBell } from "react-icons/bs";
 
 const Navbar = ({ handleLeftDrawerToggle }) => {
   const dispatch = useDispatch();
-  const darkMode = useSelector((state) => state.theme.darkMode);
   const theme = useTheme();
   const notifications = useSelector(
     (state) => state.allnotifications.notifications
   );
   const notificationList = Array.isArray(notifications) ? notifications : [];
+  const [filter, setFilter] = useState("all");
   const userMenu = [
     { label: "Profile" },
     { label: "Settings" },
@@ -66,22 +49,32 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
   });
 
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log('connected')
-    });
+    dispatch(fetchAllNotifications());
 
-    socket.on("notification", (data) => {
-      dispatch(addNotification(data));
+    socket.on("notification", (newNotification) => {
+      dispatch(addNotification(newNotification));
       setOpen(true);
       setAnchor(document.getElementById("notification-btn"));
     });
 
     return () => {
-      socket.disconnect(); // Clean up the socket connection
+      socket.off("notification");
     };
   }, [dispatch]);
 
+  const handleMarkAllAsRead = () => {
+    dispatch(markAllAsRead());
+  };
+  const filteredNotifications = notificationList
+    .filter((item) => {
+      if (filter === "read") return item.isRead;
+      if (filter === "unread") return !item.isRead;
+      return true; //all
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
  
+
   return (
     <>
       <Box
@@ -134,9 +127,10 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
         </IconButton>
 
         <ButtonWithPopper
-          badgeContent={notificationList.length}
+          markAllasRead={handleMarkAllAsRead}
           icon={<BsBell />}
-          popperContent={notificationList}
+          popperContent={filteredNotifications}
+          setFilter={setFilter}
         />
         <ButtonWithPopper icon={<AiOutlineUser />} userMenu={userMenu} />
       </FlexBetween>

@@ -20,6 +20,7 @@ import subCategoryRoutes from "./routes/subCategoryRoutes.js";
 import couponRoutes from "./routes/couponRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import notificationRoutes from './routes/notificationRoutes.js'
 import { fileURLToPath } from "url";
 import colors from "colors";
 import connectDB from "./config/db.js";
@@ -78,6 +79,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/cart", cartRoutes);
+app.use('/api/notifications',notificationRoutes)
 
 app.get("/", function (req, res) {
   res.render("home");

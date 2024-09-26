@@ -2,7 +2,7 @@ import { Token } from "@mui/icons-material";
 
 export const tokensLight = {
   grey: {
-    50: '#F8FAFC',
+    50: '#D3D3D3',
     100: '#EEF2F6',
   
     300: '#CDD5DF',
@@ -135,7 +135,8 @@ export const themeSettings = (mode)=>{
           light:tokensLight.grey[900],
           iconcolor:tokensLight.grey[800],
           iconcolor2:tokensLight.grey[500],
-          textcolor:tokensLight.grey[700]
+          textcolor:tokensLight.grey[700],
+          bordercolor:tokensLight.grey[50]
         },
         secondary:{
           ...tokensLight.secondary,

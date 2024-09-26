@@ -16,7 +16,7 @@ import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const NavCollapse = ({ menu, level }) => {
-  console.log(menu)
+ 
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -26,7 +26,7 @@ const NavCollapse = ({ menu, level }) => {
     setOpen(!open);
     setSelected(!selected ? menu.id : null);
 
-    console.log(menu.children[0]);
+  
     navigate(menu.children[0]?.url);
   };
   const checkOpenForParent = (child, id) => {

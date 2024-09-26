@@ -84,10 +84,12 @@ const createProduct = catchAsync(async (req, res, next) => {
     images,
   });
   await product.save();
-  req.io.emit('notification', {
-    message: 'New Product Added!',
-    product,
-  });
+  const notification = {
+    user:req.user._id,
+    message:`New Product created : ${product.name}`,
+    type:'product_created'
+  }
+  req.io.emit('notification', notification);
   res.status(201).json({
     status: "success",
     data: {
