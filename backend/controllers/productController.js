@@ -60,6 +60,7 @@ export const resizeImages = async (req, res, next) => {
 };
 
 const createProduct = catchAsync(async (req, res, next) => {
+  console.log(req.body)
   const {
     name,
     description,

@@ -16,16 +16,17 @@ import {
   Divider,
   Box,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const ButtonWithPopper = forwardRef(
   (
     {
       icon,
-  
+
       popperContent,
       userMenu,
       onClick,
-  
+
       setFilter,
       handleRead,
       markAllasRead, // Function to mark all as read
@@ -33,18 +34,19 @@ const ButtonWithPopper = forwardRef(
     ref
   ) => {
     const theme = useTheme();
+    const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const anchorRef = useRef(null);
 
     const handleToggle = () => {
       setOpen((prev) => !prev);
       if (!open) {
-        if (typeof markAllasRead === 'function') {
-            markAllasRead(); // Call the function if it's defined
+        if (typeof markAllasRead === "function") {
+          markAllasRead(); // Call the function if it's defined
         } else {
-            console.error("markAllAsRead is not a function");
+          console.error("markAllAsRead is not a function");
         }
-    }
+      }
     };
 
     const handleClose = (event) => {
@@ -52,6 +54,14 @@ const ButtonWithPopper = forwardRef(
         return;
       }
       setOpen(false);
+    };
+    const handleMenuItemClick = (item) => {
+      handleClose({target:null});
+      if (item.type === "link") {
+        navigate(item.path);
+      } else if (item.type === "button") {
+        item.onClick();
+      }
     };
 
     return (
@@ -96,7 +106,7 @@ const ButtonWithPopper = forwardRef(
             keepMounted
           >
             {userMenu.map((item, index) => (
-              <MenuItem key={index} onClick={handleClose}>
+              <MenuItem key={index} onClick={() => handleMenuItemClick(item)}>
                 {item.label}
               </MenuItem>
             ))}
@@ -131,19 +141,28 @@ const ButtonWithPopper = forwardRef(
                 }}
               >
                 <Button
-                  style={{ background: theme.palette.info.main, border: "none" }}
+                  style={{
+                    background: theme.palette.info.main,
+                    border: "none",
+                  }}
                   onClick={() => setFilter("all")}
                 >
                   All
                 </Button>
                 <Button
-                  style={{ background: theme.palette.success.main, border: "none" }}
+                  style={{
+                    background: theme.palette.success.main,
+                    border: "none",
+                  }}
                   onClick={() => setFilter("read")}
                 >
                   Read
                 </Button>
                 <Button
-                  style={{ background: theme.palette.warning.main, border: "none" }}
+                  style={{
+                    background: theme.palette.warning.main,
+                    border: "none",
+                  }}
                   onClick={() => setFilter("unread")}
                 >
                   Unread

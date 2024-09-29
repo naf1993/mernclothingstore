@@ -1,35 +1,36 @@
 import { createPortal } from "react-dom";
 import { HiXMark } from "react-icons/hi2";
 import styled from "styled-components";
-import { forwardRef } from "react";
+import { forwardRef, useEffect } from "react";
+import { Box } from "@mui/material";
 
-const StyledModal = styled.div`
+const StyledModal = styled(Box)`
   position: fixed;
-  top: 55%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fff;
-  border-radius: 9px;
+  width: 90%;
+  max-width: 600px;
+  background-color: ${({ theme }) => theme.palette.primary.main};
+  border-radius: 8px;
   box-shadow: 0 2.4rem 3.2rem rgba(0, 0, 0, 0.12);
-  padding: 2rem 2rem;
-  transition: all 0.5s;
-  max-height: 60vh; /* Limit max height */
-  
+  padding: 2rem;
+  max-height: 80vh;
   overflow-y: auto;
+  z-index: 1000;
+   display: flex;
+  flex-direction: column; 
 `;
 
-const Overlay = styled.div`
+const Overlay = styled(Box)`
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100vh;
-  background-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
-  transition: all 0.5s;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 900;
 `;
-
 const Button = styled.button`
   background: none;
   border: none;
@@ -38,8 +39,9 @@ const Button = styled.button`
   transform: translateX(0.8rem);
   transition: all 0.2s;
   position: absolute;
-  top: .4rem;
+  top: 0.4rem;
   right: 1rem;
+  z-index:1100;
 
   &:hover {
     background-color: #f3f4f6;
@@ -48,25 +50,49 @@ const Button = styled.button`
   & svg {
     width: 2rem;
     height: 2rem;
-    /* Sometimes we need both */
-    /* fill:  #6b7280;
-    stroke:  #6b7280; */
-    color:  #6b7280;
+    color: #6b7280;
   }
 `;
 
 const CustomModal = forwardRef(({ children, onClose }, ref) => {
+  // Close modal on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+    
+    window.addEventListener("keydown", handleKeyDown);
+    
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
+  // Close modal on overlay click
+  const handleOverlayClick = (event) => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  };
+
   return createPortal(
-    <Overlay>
+    <Overlay onClick={handleOverlayClick}>
       <StyledModal ref={ref}>
         <Button onClick={onClose}>
           <HiXMark />
         </Button>
-        <div>{children}</div>
+       
+        <Box sx={{ marginTop: "3rem" }}> {/* Add margin to push the form below the close button */}
+          {children}
+        </Box>
+        
+       
       </StyledModal>
     </Overlay>,
     document.body
   );
 });
 
-export default CustomModal
+export default CustomModal;

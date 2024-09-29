@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
+import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { createTheme } from "@mui/material/styles";
 import { useMemo } from "react";
 
@@ -40,6 +41,9 @@ function App() {
     <div className="app">
       <BrowserRouter>
         <ThemeProvider theme={theme}>
+          <StyledThemeProvider theme={theme}>
+
+        
           <CssBaseline />
           <Routes>
             <Route path="/login" element={<Login />} />
@@ -116,6 +120,7 @@ function App() {
             
             
           </Routes>
+          </StyledThemeProvider>
         </ThemeProvider>
       </BrowserRouter>
       <Toaster

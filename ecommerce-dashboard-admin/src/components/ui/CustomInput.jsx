@@ -3,7 +3,8 @@ import { TextField, InputLabel, FormControl } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
 const StyledTextField = styled(TextField)`
-  margin-bottom: 1rem;
+  margin-bottom: .4;
+  background-color:#FFF;
 `;
 
 

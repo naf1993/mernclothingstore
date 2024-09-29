@@ -104,6 +104,14 @@ orange:{
   100: '#fbe9e7',
   200: '#ffab91',
   300: '#d84315',
+},
+green:{
+  100:'#198450',
+  200:'#27a567',
+  300:'#2eb774',
+  400:'#38cb82',
+  500:'#41dc8e',
+  600:'#64e3a1'
 }
 };
 
@@ -180,6 +188,11 @@ export const themeSettings = (mode)=>{
           main:tokensLight.orange[200],
           light:tokensLight.orange[100],
           dark:tokensLight.orange[300]
+        },
+        green:{
+          ...tokensLight.green,
+          main:tokensLight.green[200],
+          light:tokensLight.green[100]
         },
 
        

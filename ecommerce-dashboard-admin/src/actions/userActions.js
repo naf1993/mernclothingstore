@@ -14,44 +14,28 @@ import {
 import axios from "axios";
 
 export const authenticateAdmin = (email, password) => async (dispatch) => {
+  dispatch({ type: USER_LOGIN_REQUEST });
+
+  const config = {
+    headers: { "Content-Type": "application/json" },
+  };
+
   try {
-    dispatch({
-      type: USER_LOGIN_REQUEST,
-    });
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
     const { data } = await axios.post(
       "/api/users/login",
       { email, password },
       config
     );
-    const isAdmin = data.data.user.isAdmin;
 
-    if (isAdmin) {
-      dispatch({
-        type: USER_LOGIN_SUCCESS,
-        payload: data,
-      });
-      localStorage.setItem("userInfo", JSON.stringify(data));
-    } else {
-      let errorAdmin = "Only Administrative Access";
-      dispatch({
-        type: USER_LOGIN_FAIL,
-        payload: errorAdmin,
-      });
-    }
+    dispatch({ type: USER_LOGIN_SUCCESS, payload: data });
+    localStorage.setItem("userInfo", JSON.stringify(data));
   } catch (error) {
-    dispatch({
-      type: USER_LOGIN_FAIL,
-      payload: error.response.data.message,
-    });
+    const errorMessage = error.response?.data?.message || "An error occurred";
+    dispatch({ type: USER_LOGIN_FAIL, payload: errorMessage });
   }
 };
 
-export const logoutAdmin = () => (dispatch) => {
+export const logout = () => (dispatch) => {
   localStorage.removeItem("userInfo");
   dispatch({ type: USER_LOGOUT });
 };

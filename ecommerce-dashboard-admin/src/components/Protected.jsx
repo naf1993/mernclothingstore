@@ -1,12 +1,15 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 
-function Protected({ children }) {
-  const userLogin = useSelector((state) => state.userLogin);
-  const { userInfo } = userLogin;
-
-  return <>{userInfo ? children : <Navigate to="/login" />}</>;
+const Protected = ({children}) => {
+  const userLogin = useSelector((state)=>state.userLogin)
+  const {userInfo} = userLogin
+  const isAdmin = userInfo && userInfo.data && userInfo.data.user.isAdmin
+return (
+  <>
+  {isAdmin ? children : <Navigate to='/login'/>}
+  </>
+)
 }
-export default Protected;
+export default Protected

@@ -12,13 +12,27 @@ export const markAllAsRead = () => {
     };
 };
 
-export const fetchAllNotifications = () =>async(dispatch)=>{
-    const response = await axios.get('/api/notifications')
+export const fetchAllNotifications = () =>async(dispatch,getState)=>{
+    const {userLogin:{userInfo}}=getState()
+    const config = {
+        headers:{
+           
+            Authorization: `Bearer ${userInfo.token} `
+        }
+    }
+    const response = await axios.get('/api/notifications',config)
     dispatch({type:FETCH_NOTIFICATIONS,payload:response.data.data})
 }
 
-export const markAsRead = (id) => async (dispatch) => {
-    const response = await axios.put(`/api/notifications/${id}/read`);
+export const markAsRead = (id) => async (dispatch,getState) => {
+    const {userLogin:{userInfo}}=getState()
+    const config = {
+        headers:{
+           
+            Authorization: `Bearer ${userInfo.token} `
+        }
+    }
+    const response = await axios.put(`/api/notifications/${id}/read`,config);
     dispatch({ type: MARK_AS_READ, payload: response.data.data });
 };
 

@@ -15,8 +15,10 @@ import SearchSection from "./SearchSection";
 
 import {
   fetchAllNotifications,
-  addNotification,markAllAsRead
+  addNotification,
+  markAllAsRead,
 } from "../actions/notificationAction";
+import { logout } from "actions/userActions";
 
 import ButtonWithPopper from "./ButtonWithPopper";
 import { BsBell } from "react-icons/bs";
@@ -30,9 +32,8 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
   const notificationList = Array.isArray(notifications) ? notifications : [];
   const [filter, setFilter] = useState("all");
   const userMenu = [
-    { label: "Profile" },
-    { label: "Settings" },
-    { label: "Logout" },
+    { label: "Settings", type: "link", path: "/settings" },
+    { label: "Logout", type: "button" },
   ];
 
   const [screenSize, setScreenSize] = useState(undefined);
@@ -59,6 +60,7 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
 
     return () => {
       socket.off("notification");
+      socket.disconnect();
     };
   }, [dispatch]);
 
@@ -72,8 +74,9 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
       return true; //all
     })
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
- 
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
   return (
     <>
@@ -132,7 +135,13 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
           popperContent={filteredNotifications}
           setFilter={setFilter}
         />
-        <ButtonWithPopper icon={<AiOutlineUser />} userMenu={userMenu} />
+        <ButtonWithPopper
+          icon={<AiOutlineUser />}
+          userMenu={userMenu.map((item) => ({
+            ...item,
+            onClick: item.type === "button" ? handleLogout : undefined,
+          }))}
+        />
       </FlexBetween>
     </>
   );
