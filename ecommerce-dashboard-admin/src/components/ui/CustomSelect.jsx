@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 
 const CustomSelect = forwardRef(({ label, options, error, value, onChange }, ref) => {
-  console.log('Options in CustomSelect:', options); // Check the options being received
+ 
 
   return (
     <FormControl fullWidth variant="outlined" sx={{ marginBottom: '0.7rem' }} error={Boolean(error)}>
@@ -17,7 +17,7 @@ const CustomSelect = forwardRef(({ label, options, error, value, onChange }, ref
         ref={ref}
         value={value || ''}
         onChange={(e) => {
-          console.log('Selected value:', e.target.value); // Check selected value
+        
           onChange(e); // Ensure this is called
         }}
         label={label} 

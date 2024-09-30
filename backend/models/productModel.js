@@ -36,7 +36,7 @@ const productSchema = new mongoose.Schema(
     SubCategory: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SubCategory",
-      required: false,
+      required: true,
     },
     isFeatured: {
       type: Boolean,
@@ -48,8 +48,8 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: true,
       maxlength: [
-        100,
-        "Description must have less or equal then 40 characters",
+        1000,
+        "Description must have less or equal then 1000 characters",
       ],
       minlength: [10, "Description must have more or equal then 10 characters"],
     },
@@ -80,9 +80,11 @@ const productSchema = new mongoose.Schema(
     },
     colors: {
       type: [String],
+      default:[]
     },
     sizes: {
       type: [String],
+      default:[]
     },
     images: {
       required: true,

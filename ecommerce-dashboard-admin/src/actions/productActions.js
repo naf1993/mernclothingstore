@@ -57,7 +57,7 @@ export const listProductDetails = (id)=>  async(dispatch)=>{
 
 }
 
-export const deleteProduct = (id)=>async(dispatch,getState)=>{
+export const deleteProductById = (id)=>async(dispatch,getState)=>{
     try{
         dispatch({
             type:PRODUCT_DELETE_REQUEST
@@ -93,7 +93,7 @@ export const createProduct = (productData) => async (dispatch, getState) => {
   
       const config = {
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${userInfo.token}`, // Add authorization token
         },
       };

@@ -2,41 +2,29 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
   Button,
-  FormControlLabel,
-  FormGroup,
   Typography,
   useTheme,
   Box,
   Grid,
-  Container,
+  TextField,
 } from "@mui/material";
-import Form from "../components/ui/Form";
 import CustomInput from "./ui/CustomInput";
 import CustomSelect from "./ui/CustomSelect";
 import ColorButton from "./ui/ColorButton";
 import axios from "axios";
-
-import FlexBetween from "./FlexBetween";
 import { HiXMark } from "react-icons/hi2";
-
 import CustomModal from "./CustomModal";
 import useOutsideClick from "hooks/useOutsideClick";
 import CustomCheckbox from "./ui/CustomCheckbox";
-
 import CustomFileInput from "./ui/CustomFileInput";
 import CloseButton from "./ui/CloseButton";
 import { colorsArray, sizesOptions } from "./data";
-import Header from "./Header";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct } from '../actions/productActions'
+import { createProduct } from "../actions/productActions";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
-const colorsObjectsArray = colorsArray.map((color) => ({
-  label: color,
-  value: color, // or any other transformation for the value
-}));
-
-const CreateProduct = () => {
+const CreateProduct = ({product = {},onCloseModal}) => {
   const theme = useTheme();
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubCategories] = useState([]);
@@ -49,8 +37,15 @@ const CreateProduct = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const modalRef = useRef(null);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const productCreate = useSelector((state) => state.productCreate);
   const { loading, success, error } = productCreate || {};
+useEffect(()=>{
+if(product){
+  console.log(product)
+}
+},[product])
+ 
   const {
     register,
     handleSubmit,
@@ -64,6 +59,11 @@ const CreateProduct = () => {
   });
   const selectedColors = watch("colors") || [];
   const images = watch("images");
+
+  const colorsObjectsArray = useMemo(
+    () => colorsArray.map((color) => ({ label: color, value: color })),
+    []
+  );
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -97,11 +97,10 @@ const CreateProduct = () => {
           label: category.name,
         }));
         setCategories(options);
-        console.log("these are options in parent", options);
-        setCategoryError(""); // Clear any previous error
+
+        // Clear any previous error
       } catch (error) {
-        console.error("Error fetching categories:", error);
-        setCategoryError("Failed to load categories. Please try again later.");
+        toast.error("Failed to load categories. Please try again later.");
       }
     }
 
@@ -122,13 +121,8 @@ const CreateProduct = () => {
             })
           );
           setSubCategories(options);
-          console.log("these are subcategories", options);
-          setSubcategoryError(""); // Clear any previous error
         } catch (error) {
-          console.error("Error fetching subcategories:", error);
-          setSubcategoryError(
-            "Failed to load subcategories. Please try again later."
-          );
+          toast.error("Failed to load subcategories. Please try again later.");
         }
       }
 
@@ -138,29 +132,50 @@ const CreateProduct = () => {
       setSubcategoryError(""); // Clear error if category is reset
     }
   }, [selectedCategory]);
-  useEffect(() => {
-    if (success) {
-      toast.success("Product created succesfully");
-      reset();
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    }
-    if (error) {
-      toast.error("Error creating product " + error);
-    }
-  }, [success, error, reset]);
-  const onSubmit = (data) => {
+
+  const onSubmit = async (data) => {
+    console.log(data)
+   
     const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((item) => formData.append(key, item));
+
+    // Append text fields
+    for (const key in data) {
+      if (Array.isArray(data[key])) {
+        data[key].forEach((item) => formData.append(key, item));
       } else {
-        formData.append(key, value);
+        formData.append(key, data[key]);
       }
-    });
-    dispatch(createProduct(formData));
-    window.location.reload();
+    }
+
+    // Append images
+    // images.forEach((image) => {
+    //   formData.append("images", image);
+    // });
+    // const flatColors = selectedColors.flat();
+    // flatColors.forEach((color) => {
+    //   formData.append("colors", color);
+    // });
+    // console.log('flat colors ',flatColors)
+    // console.log(formData);
+    try {
+      // Make API request with formData
+      await dispatch(createProduct(formData));
+      if(success){
+        toast.success("Product created successfully!");
+        reset();
+        // Delay navigation for better UX
+        setTimeout(() => {
+          navigate("/products/grid");
+        }, 2000); 
+      }
+      if(error){
+        toast.error(error)
+
+      }
+     // Delay for 2 seconds
+    } catch (err) {
+      toast.error("Error creating product:", err);
+    }
   };
   const clearColors = () => {
     setValue("colors", []); // Clear the colors array
@@ -171,9 +186,7 @@ const CreateProduct = () => {
   };
 
   useOutsideClick(modalRef, () => setIsOpenModal(false));
-  useEffect(() => {
-    console.log("Categories:", categories);
-  }, [categories]);
+ 
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -192,6 +205,31 @@ const CreateProduct = () => {
             label="Product Brand"
             {...register("brand", { required: "Brand name is required" })}
             error={errors.brand?.message}
+          />
+        </Grid>
+        <Grid item xs={12} sm={12}>
+          <Typography variant="h6">Feedback Form</Typography>
+
+          <Controller
+            name="description"
+            control={control}
+            defaultValue=""
+            rules={{ required: "Description is required" }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Description"
+                multiline
+                rows={3}
+                variant="outlined"
+                error={Boolean(errors.description)}
+                helperText={
+                  errors.description ? errors.description.message : ""
+                }
+                fullWidth
+                sx={{ marginBottom: 2 }}
+              />
+            )}
           />
         </Grid>
         <Grid item xs={6} sm={6}>
@@ -232,19 +270,19 @@ const CreateProduct = () => {
           )}
         </Grid>
         <Grid item xs={6} sm={6}>
-          {selectedCategory && subcategories.length > 0 && (
+          {categories.length > 0 && (
             <CustomSelect
               label="Choose SubCategory"
               options={subcategories} // Ensure this is populated
               value={selectedSubcategory || ""}
-              {...register("Subcategory", {
+              {...register("SubCategory", {
                 required: "SubCategory is required",
               })}
-              error={errors.Subcategory?.message}
+              error={errors.SubCategory?.message}
               onChange={(e) => {
                 const value = e.target.value;
                 setSelectedSubcategory(value); // Update local state
-                setValue("Subcategory", value); // Update react-hook-form state
+                setValue("SubCategory", value); // Update react-hook-form state
               }}
             />
           )}
@@ -485,9 +523,9 @@ const CreateProduct = () => {
               }}
               variant="contained"
               color="primary"
-              type="submit"
+              type="submit" disabled={loading}
             >
-              Submit
+            {loading ? 'Creating..' : 'Submit'}
             </Button>
             <Button
               sx={{

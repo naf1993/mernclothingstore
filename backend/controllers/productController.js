@@ -70,7 +70,7 @@ const createProduct = catchAsync(async (req, res, next) => {
     SubCategory,
     isFeatured,
     countInStock,
-    images,
+    images,colors,sizes
   } = req.body;
 
   const product = new Product({
@@ -83,6 +83,8 @@ const createProduct = catchAsync(async (req, res, next) => {
     price,
     countInStock,
     images,
+    colors:colors || [],
+    sizes:sizes || []
   });
   await product.save();
   const notification = {
@@ -101,7 +103,7 @@ const createProduct = catchAsync(async (req, res, next) => {
 
 const getAllProducts = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(
-    Product.find().populate("Category SubCategory"),
+    Product.find().populate("Category").populate('SubCategory'),
     req.query
   )
     .filter()
@@ -109,6 +111,7 @@ const getAllProducts = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
   const products = await features.query;
+ 
 
   // SEND RESPONSE
   res.status(200).json({
@@ -159,10 +162,10 @@ const deleteProduct = catchAsync(async (req, res, next) => {
   if (!product) {
     return next(new AppError("No Product found with that ID", 404));
   }
-  await deleteFiles(product.imageCover.public_id);
+  
 
   for (let i = 0; i < product.images.length; i++) {
-    await deleteFiles(product.images[i].public_id);
+    await deleteFiles(product.images[i]);
   }
 
   res.status(204).json({
