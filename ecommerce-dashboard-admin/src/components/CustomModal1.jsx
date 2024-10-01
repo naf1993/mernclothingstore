@@ -54,7 +54,7 @@ const Button = styled.button`
     color: #6b7280;
   }
 `;
-const ModalContext = createContext();
+export const ModalContext = createContext();
 
 function CustomModal1({ children }) {
   const [openName, setOpenName] = useState("");

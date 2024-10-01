@@ -22,6 +22,7 @@ import ProductCreate from "scenes/ProductCreate";
 import ProductsCards from "scenes/ProductsCards";
 import SingleProduct from "scenes/SingleProduct";
 import { Toaster } from "react-hot-toast";
+import CustomModal1 from "components/CustomModal1";
 
 function App() {
   const [mode, setMode] = useState("light");
@@ -39,6 +40,7 @@ function App() {
 
   return (
     <div className="app">
+      <CustomModal1>
       <BrowserRouter>
         <ThemeProvider theme={theme}>
           <StyledThemeProvider theme={theme}>
@@ -123,6 +125,8 @@ function App() {
           </StyledThemeProvider>
         </ThemeProvider>
       </BrowserRouter>
+      </CustomModal1>
+    
       <Toaster
         position="top-center"
         gutter={12}

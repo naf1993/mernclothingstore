@@ -55,10 +55,17 @@ if(product){
     formState: { errors },
     watch,
   } = useForm({
-    sizes: [],
+    defaultValues: {
+      sizes: [], // Initialize sizes as an empty array
+    },
   });
   const selectedColors = watch("colors") || [];
   const images = watch("images");
+  const selectedSizes = watch("sizes"); // Watch for sizes selection
+
+useEffect(() => {
+  console.log("Selected Sizes: ", selectedSizes);
+}, [selectedSizes]);
 
   const colorsObjectsArray = useMemo(
     () => colorsArray.map((color) => ({ label: color, value: color })),
@@ -146,6 +153,10 @@ if(product){
         formData.append(key, data[key]);
       }
     }
+    const sizesToSubmit = Array.isArray(data.sizes) ? data.sizes : [];
+    sizesToSubmit.forEach((size) => {
+      formData.append("sizes", size);
+    });
 
     // Append images
     // images.forEach((image) => {
@@ -165,8 +176,8 @@ if(product){
         reset();
         // Delay navigation for better UX
         setTimeout(() => {
-          navigate("/products/grid");
-        }, 2000); 
+          navigate("/products/table");
+        }, 1000); 
       }
       if(error){
         toast.error(error)

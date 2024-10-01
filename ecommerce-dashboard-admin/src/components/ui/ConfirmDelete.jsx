@@ -4,6 +4,9 @@ import React from 'react'
 
 const ConfirmDelete = ({productname,onConfirm,disabled,onCloseModal,loading}) => {
     const theme = useTheme()
+    const handleConfirm = () => {
+      onConfirm().then(() => onCloseModal()); // Call onCloseModal after onConfirm completes
+    };
   return (
 <Box sx={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
       <Typography variant="h5">Delete {productname}</Typography>
@@ -14,10 +17,10 @@ const ConfirmDelete = ({productname,onConfirm,disabled,onCloseModal,loading}) =>
         <Button
           variant="contained"
           sx={{
-            backgroundColor: theme.palette.error.main,
+            backgroundColor: theme.palette.orange[100],
             color: 'white',
           }}
-          onClick={onConfirm}
+          onClick={handleConfirm}
           disabled={disabled || loading}
           aria-label={`Confirm deletion of ${productname}`}
         >
@@ -26,7 +29,7 @@ const ConfirmDelete = ({productname,onConfirm,disabled,onCloseModal,loading}) =>
         <Button
           onClick={onCloseModal}
           sx={{
-            backgroundColor: theme.palette.success.main,
+            backgroundColor: theme.palette.green[400],
             color: 'white',
           }}
           variant="outlined"

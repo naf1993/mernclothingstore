@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Box,
@@ -8,6 +8,9 @@ import {
   Button,
   Rating,
   gridClasses,
+  Typography,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import Loader from "../components/loader/Loader";
@@ -25,10 +28,23 @@ import ConfirmDelete from "./ui/ConfirmDelete";
 import { maxWidth } from "@mui/system";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { ModalContext } from "./CustomModal1";
+import FilterComponent from "./ui/FilterComponent";
+
+const getRandomBackgroundColor = () => {
+  let letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+};
+
 const DataGridComponent = ({ type }) => {
   const [pageSize, setPageSize] = useState(5);
   const [rowId, setRowId] = useState(null);
   const [value, setValue] = useState(null);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme();
@@ -43,13 +59,34 @@ const DataGridComponent = ({ type }) => {
     }
   });
 
-  const onDelete = async (id, onCloseModal) => {
+  const categoryColors = {};
+  const subCategoryColors = {};
+  if (type === "products") {
+    items.forEach((item) => {
+      const category = item.Category?.name || "Unknown";
+      if (!categoryColors[category]) {
+        categoryColors[category] = getRandomBackgroundColor(); // Assign a random color if not already assigned
+      }
+    });
+    items.forEach((item) => {
+      const subCategory = item.SubCategory?.name || "Unknown";
+      if (!subCategoryColors[subCategory]) {
+        subCategoryColors[subCategory] = getRandomBackgroundColor();
+      }
+    });
+  }
+
+  const { close } = useContext(ModalContext);
+  const onDelete = async (id) => {
     console.log(id);
     setLoadDelete(true);
     try {
       await dispatch(deleteProductById(id));
       toast.success("Product Deleted");
-      onCloseModal();
+      close();
+      if (type === "products") {
+        dispatch(listProducts()); // This should refresh the product list
+      }
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -64,6 +101,11 @@ const DataGridComponent = ({ type }) => {
       dispatch(listUsers());
     }
   }, [dispatch, type]);
+  const [filteredProducts, setFilteredProducts] = useState(items);
+
+  const handleFilterChange = (filteredProducts) => {
+      setFilteredProducts(filteredProducts);
+  };
 
   const columns =
     type === "products"
@@ -92,31 +134,65 @@ const DataGridComponent = ({ type }) => {
             field: "name",
             headerName: "Name",
             width: 140,
+            filterable: true,
+            renderCell: (params) => {
+              let name = params.row.name;
+              return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+            },
           },
           {
             field: "category",
             headerName: "Category",
             width: 100,
             renderCell: (params) => {
-              const { name } = params.row.Category;
-              return <p>{name}</p>;
+              const category = params.row.Category?.name || "Unknown";
+              const backgroundColor = categoryColors[category] || "FFFFFF";
+              return (
+                <Box
+                  sx={{
+                    backgroundColor,
+                    padding: "4px",
+                    borderRadius: "8px",
+                    color: "white",
+                  }}
+                >
+                  {category}
+                </Box>
+              );
             },
+            filterable: true,
           },
           {
             field: "subcategory",
-            headerName: "Sub Category",
+            headerName: "SubCategory",
             width: 100,
             renderCell: (params) => {
-              const name = params.row.SubCategory
-                ? params.row.SubCategory.name
-                : "No category";
-              return <p>{name}</p>;
+              const subcategory = params.row.SubCategory?.name || "Unknown";
+              const backgroundColor =
+                subCategoryColors[subcategory] || "FFFFFF";
+              return (
+                <Box
+                  sx={{
+                    backgroundColor,
+                    padding: "4px",
+                    borderRadius: "8px",
+                    color: "white",
+                  }}
+                >
+                  {subcategory}
+                </Box>
+              );
             },
+            filterable: true,
           },
+
           {
             field: "price",
             headerName: "Price",
             width: 80,
+            renderCell: (params) => (
+              <Typography variant="h6">{params.row.price}</Typography>
+            ),
           },
           {
             field: "colors",
@@ -141,6 +217,25 @@ const DataGridComponent = ({ type }) => {
                       />
                     </Tooltip>
                   ))}
+                </Box>
+              );
+            },
+          },
+          {
+            field: "sizes",
+            headerName: "Size",
+            width: 100,
+            maxWidth: 120,
+            renderCell: (params) => {
+              const sizes = params.row.sizes || [];
+
+              return (
+                <Box sx={{ display: "flex", gap: 0.5 }}>
+                  {sizes.length === 0 && <Typography>Free Size</Typography>}
+                  {sizes.length > 0 &&
+                    sizes.map((size, index) => (
+                      <Typography key={index}>{size || "No Size"}</Typography>
+                    ))}
                 </Box>
               );
             },
@@ -172,34 +267,33 @@ const DataGridComponent = ({ type }) => {
             width: 120,
             sortable: false,
             disableClickEventBubbling: true,
-            renderCell: (params) => (           
-                <CustomModal1>
-                  <CustomModal1.Open opens="edit">
-                    <Button style={{ color: "green" }}>
-                      <AiOutlineEdit style={{ fontSize: "1rem" }} />
-                    </Button>
-                  </CustomModal1.Open>
-                  <CustomModal1.Window name="edit">
-                    <CreateProduct product={params.row} />
-                  </CustomModal1.Window>
+            renderCell: (params) => (
+              <CustomModal1>
+                <CustomModal1.Open opens="edit">
+                  <Button style={{ color: "green" }}>
+                    <AiOutlineEdit style={{ fontSize: "1rem" }} />
+                  </Button>
+                </CustomModal1.Open>
+                <CustomModal1.Window name="edit">
+                  <CreateProduct product={params.row} />
+                </CustomModal1.Window>
 
-                  <CustomModal1.Open opens="delete">
-                    <Button style={{ color: "red" }}>
-                      <AiOutlineDelete style={{ fontSize: "1rem" }} />
-                    </Button>
-                  </CustomModal1.Open>
-                  <CustomModal1.Window name="delete">
-                    <ConfirmDelete
-                      productname={params.row.name}
-                      onConfirm={() => onDelete(params.row.id, onCloseModal)} // Pass onCloseModal to the deletion logic
-                      disabled={loadingDelete}
-                      onCloseModal={onCloseModal} // Ensure the modal can be closed
-                      loading={loadDelete}
-                    />
-                  </CustomModal1.Window>
-                </CustomModal1>
-              )
-          }
+                <CustomModal1.Open opens="delete">
+                  <Button style={{ color: "red" }}>
+                    <AiOutlineDelete style={{ fontSize: "1rem" }} />
+                  </Button>
+                </CustomModal1.Open>
+                <CustomModal1.Window name="delete">
+                  <ConfirmDelete
+                    productname={params.row.name}
+                    onConfirm={() => onDelete(params.row.id)} // Pass onCloseModal to the deletion logic
+                    disabled={loadingDelete}
+                    loading={loadDelete}
+                  />
+                </CustomModal1.Window>
+              </CustomModal1>
+            ),
+          },
         ]
       : [
           {
@@ -245,6 +339,7 @@ const DataGridComponent = ({ type }) => {
         ];
   return (
     <>
+     <FilterComponent items={items} onFilterChange={handleFilterChange} />
       <Box
         mt="20px"
         height="75vh"
@@ -284,10 +379,10 @@ const DataGridComponent = ({ type }) => {
           <Loader />
         ) : error ? (
           <Message severity="error" error={error} />
-        ) : items ? (
+        ) : items.length > 0 ? (
           <DataGrid
             getRowId={(row) => row._id}
-            rows={items || []}
+            rows={filteredProducts || []}
             columns={columns}
             rowsPerPageOptions={[5, 10, 20]}
             pageSize={pageSize}
