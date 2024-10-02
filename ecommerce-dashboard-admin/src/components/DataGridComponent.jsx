@@ -58,6 +58,12 @@ const DataGridComponent = ({ type }) => {
       return state.userList;
     }
   });
+  const [filteredProducts, setFilteredProducts] = useState(items);
+  const [noResults, setNoResults] = useState(false);
+  const handleFilterChange = (filteredProducts) => {
+    setFilteredProducts(filteredProducts);
+    setNoResults(filteredProducts.length === 0);
+  };
 
   const categoryColors = {};
   const subCategoryColors = {};
@@ -101,11 +107,12 @@ const DataGridComponent = ({ type }) => {
       dispatch(listUsers());
     }
   }, [dispatch, type]);
-  const [filteredProducts, setFilteredProducts] = useState(items);
+  
+  useEffect(() => {
+    setFilteredProducts(items); // Update filteredProducts whenever items change
+  }, [items]);
 
-  const handleFilterChange = (filteredProducts) => {
-      setFilteredProducts(filteredProducts);
-  };
+ 
 
   const columns =
     type === "products"
@@ -192,6 +199,16 @@ const DataGridComponent = ({ type }) => {
             width: 80,
             renderCell: (params) => (
               <Typography variant="h6">{params.row.price}</Typography>
+            ),
+          },
+          {
+            field: "isFeatured",
+            headerName: "Featured",
+            width: 80,
+            renderCell: (params) => (
+              <Typography variant="h6">
+                {params.row.isFeatured ? "Yes" : "No"}
+              </Typography>
             ),
           },
           {
@@ -339,7 +356,7 @@ const DataGridComponent = ({ type }) => {
         ];
   return (
     <>
-     <FilterComponent items={items} onFilterChange={handleFilterChange} />
+      <FilterComponent items={items} onFilterChange={handleFilterChange} />
       <Box
         mt="20px"
         height="75vh"
@@ -379,10 +396,10 @@ const DataGridComponent = ({ type }) => {
           <Loader />
         ) : error ? (
           <Message severity="error" error={error} />
-        ) : items.length > 0 ? (
+        ) : filteredProducts.length > 0 ? (
           <DataGrid
             getRowId={(row) => row._id}
-            rows={filteredProducts || []}
+            rows={filteredProducts}
             columns={columns}
             rowsPerPageOptions={[5, 10, 20]}
             pageSize={pageSize}
@@ -408,7 +425,18 @@ const DataGridComponent = ({ type }) => {
             onCellEditCommit={(params) => setRowId(params.id)}
           />
         ) : (
-          []
+          noResults && (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              height="100%"
+            >
+              <Typography variant="h6" color="error">
+                No results found
+              </Typography>
+            </Box>
+          )
         )}
       </Box>
     </>

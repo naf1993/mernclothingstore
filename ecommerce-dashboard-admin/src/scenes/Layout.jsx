@@ -84,6 +84,7 @@ const Layout = () => {
           transition: leftDrawerOpened
             ? theme.transitions.create("width")
             : "none",
+            zIndex:500
         }}
       >
         <Toolbar sx={{padding:'16px'}}>

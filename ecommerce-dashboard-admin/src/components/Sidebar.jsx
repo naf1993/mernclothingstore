@@ -5,7 +5,17 @@ import { Box, Drawer, useMediaQuery } from "@mui/material";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import { BrowserView, MobileView } from "react-device-detect";
 import { drawerWidth } from "constants/theme";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import GradingIcon from "@mui/icons-material/Grading";
+import GroupIcon from "@mui/icons-material/Group";
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import MenuList from "./MenuList";
+const menuItems = [
+  { text: "Dashboard", icon: <DashboardIcon /> },
+  { text: "Products", icon: <Inventory2Icon /> },
+  { text: "Customers", icon: <GroupIcon /> },
+  {text:'Orders',icon:<GradingIcon/>}
+];
 const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
   const theme = useTheme();
 
@@ -25,7 +35,7 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
             paddingRight: "16px",
           }}
         >
-          <MenuList/>
+         <MenuList/>
         </PerfectScrollbar>
       </BrowserView>
       <MobileView>
@@ -51,6 +61,7 @@ const Sidebar = ({ drawerOpen, drawerToggle, window }) => {
         sx={{
           "& .MuiDrawer-paper": {
             width: drawerWidth,
+            zIndex:800,
             background: theme.palette.background.white,
             color: theme.palette.primary.textcolor,
             borderRight: "none",

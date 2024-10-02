@@ -6,7 +6,7 @@ import {
   useTheme,
   Box,
   Grid,
-  TextField,
+  TextField,Switch,FormControlLabel
 } from "@mui/material";
 import CustomInput from "./ui/CustomInput";
 import CustomSelect from "./ui/CustomSelect";
@@ -62,7 +62,7 @@ if(product){
   const selectedColors = watch("colors") || [];
   const images = watch("images");
   const selectedSizes = watch("sizes"); // Watch for sizes selection
-
+  const isFeatured = watch('isFeatured', false);
 useEffect(() => {
   console.log("Selected Sizes: ", selectedSizes);
 }, [selectedSizes]);
@@ -514,7 +514,17 @@ useEffect(() => {
             ))}
           </Box>
         </Grid>
-        <Grid item xs={6} sm={6}></Grid>
+        <Grid item xs={6} sm={6}>
+        <FormControlLabel
+        control={
+          <Switch
+            {...register('isFeatured')}
+            color="primary"
+          />
+        }
+        label="Is this product a featured product?"
+      />
+        </Grid>
 
         <Grid item xs={12}>
           <Box
