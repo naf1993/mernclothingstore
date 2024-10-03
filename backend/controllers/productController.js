@@ -1,4 +1,4 @@
-import path from 'path'
+import path from "path";
 import Product from "../models/productModel.js";
 import User from "../models/userModel.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -60,7 +60,7 @@ export const resizeImages = async (req, res, next) => {
 };
 
 const createProduct = catchAsync(async (req, res, next) => {
-  console.log(req.body)
+  console.log(req.body);
   const {
     name,
     description,
@@ -70,7 +70,9 @@ const createProduct = catchAsync(async (req, res, next) => {
     SubCategory,
     isFeatured,
     countInStock,
-    images,colors,sizes
+    images,
+    colors,
+    sizes,
   } = req.body;
 
   const product = new Product({
@@ -83,16 +85,16 @@ const createProduct = catchAsync(async (req, res, next) => {
     price,
     countInStock,
     images,
-    colors:colors || [],
-    sizes:sizes || []
+    colors: colors || [],
+    sizes: sizes || [],
   });
   await product.save();
   const notification = {
-    user:req.user._id,
-    message:`New Product created : ${product.name}`,
-    type:'product_created'
-  }
-  req.io.emit('notification', notification);
+    user: req.user._id,
+    message: `New Product created : ${product.name}`,
+    type: "product_created",
+  };
+  req.io.emit("notification", notification);
   res.status(201).json({
     status: "success",
     data: {
@@ -103,7 +105,7 @@ const createProduct = catchAsync(async (req, res, next) => {
 
 const getAllProducts = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(
-    Product.find().populate("Category").populate('SubCategory'),
+    Product.find().populate("Category").populate("SubCategory"),
     req.query
   )
     .filter()
@@ -111,7 +113,6 @@ const getAllProducts = catchAsync(async (req, res, next) => {
     .limitFields()
     .paginate();
   const products = await features.query;
- 
 
   // SEND RESPONSE
   res.status(200).json({
@@ -139,15 +140,25 @@ const getProductById = catchAsync(async (req, res, next) => {
 });
 
 const updateProduct = catchAsync(async (req, res, next) => {
-  const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
+  const { id } = req.params;
+  console.log(req.body)
+ 
   if (!product) {
     return next(new AppError("No product found with that ID", 404));
   }
+  const product = await Product.findById(id);
+  if(req.files){
+    for (const imageUrl of product.images) {
+      await deleteFiles(imageUrl);
+    }
+    upload();
+    resizeImages();
+  }
+  
+  Object.assign(product, req.body);
 
+  // Save the updated product
+  await product.save();
   res.status(200).json({
     status: "success",
     data: {
@@ -162,7 +173,6 @@ const deleteProduct = catchAsync(async (req, res, next) => {
   if (!product) {
     return next(new AppError("No Product found with that ID", 404));
   }
-  
 
   for (let i = 0; i < product.images.length; i++) {
     await deleteFiles(product.images[i]);

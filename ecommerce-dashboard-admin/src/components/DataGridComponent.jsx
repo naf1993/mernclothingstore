@@ -15,7 +15,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import Loader from "../components/loader/Loader";
 import Message from "../components/Message";
-import { deleteProductById, listProducts } from "actions/productActions";
+import { deleteProductById, listProducts, updateProduct } from "actions/productActions";
 import { listUsers } from "actions/userActions";
 import CustomerActions from "./CustomerActions";
 import moment from "moment";
@@ -50,7 +50,10 @@ const DataGridComponent = ({ type }) => {
   const theme = useTheme();
   const deleteProduct = useSelector((state) => state.deleteProduct);
   const { loading: loadingDelete, success, error: errorDelete } = deleteProduct;
+  const editProduct = useSelector((state)=>state.editProduct)
+  const {loading:loadingEdit,error:errorEdit} = editProduct
   const [loadDelete, setLoadDelete] = useState(false);
+  const [loadEdit,setLoadEdit] = useState(false)
   const { items, loading, error } = useSelector((state) => {
     if (type === "products") {
       return state.productList;
@@ -60,6 +63,7 @@ const DataGridComponent = ({ type }) => {
   });
   const [filteredProducts, setFilteredProducts] = useState(items);
   const [noResults, setNoResults] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const handleFilterChange = (filteredProducts) => {
     setFilteredProducts(filteredProducts);
     setNoResults(filteredProducts.length === 0);
@@ -83,6 +87,22 @@ const DataGridComponent = ({ type }) => {
   }
 
   const { close } = useContext(ModalContext);
+  const onEdit = async (id,product) => {
+    console.log(product);
+    setLoadEdit(true);
+    try {
+      await dispatch(updateProduct(id,product));
+      toast.success("Product Edited");
+      close();
+      if (type === "products") {
+        dispatch(listProducts()); // This should refresh the product list
+      }
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoadEdit(false);
+    }
+  };
   const onDelete = async (id) => {
     console.log(id);
     setLoadDelete(true);
@@ -287,12 +307,12 @@ const DataGridComponent = ({ type }) => {
             renderCell: (params) => (
               <CustomModal1>
                 <CustomModal1.Open opens="edit">
-                  <Button style={{ color: "green" }}>
+                  <Button style={{ color: "green" }} >
                     <AiOutlineEdit style={{ fontSize: "1rem" }} />
                   </Button>
                 </CustomModal1.Open>
                 <CustomModal1.Window name="edit">
-                  <CreateProduct product={params.row} />
+                  <CreateProduct productToEdit={params.row} onEdit={onEdit} isEditing={loadingEdit}  />
                 </CustomModal1.Window>
 
                 <CustomModal1.Open opens="delete">

@@ -114,7 +114,8 @@ export const createProduct = (productData) => async (dispatch, getState) => {
     }
   };
 
-export const updateProduct = (product)=>async(dispatch,getState)=>{
+export const updateProduct = (id,product)=>async(dispatch,getState)=>{
+    console.log(id,product)
     try{
         dispatch({
             type:PRODUCT_UPDATE_REQUEST
@@ -126,7 +127,7 @@ export const updateProduct = (product)=>async(dispatch,getState)=>{
                 Authorization: `Bearer ${userInfo.token} `
             }
         }
-       const {data} = await axios.put(`/api/products/${product._id}`,product,config)
+       const {data} = await axios.patch(`/api/products/${id}`,product,config)
 
         dispatch({
             type:PRODUCT_UPDATE_SUCCESS,

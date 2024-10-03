@@ -6,7 +6,9 @@ import {
   useTheme,
   Box,
   Grid,
-  TextField,Switch,FormControlLabel
+  TextField,
+  Switch,
+  FormControlLabel,
 } from "@mui/material";
 import CustomInput from "./ui/CustomInput";
 import CustomSelect from "./ui/CustomSelect";
@@ -20,18 +22,17 @@ import CustomFileInput from "./ui/CustomFileInput";
 import CloseButton from "./ui/CloseButton";
 import { colorsArray, sizesOptions } from "./data";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct } from "../actions/productActions";
+import { createProduct,updateProduct } from "../actions/productActions";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
-const CreateProduct = ({product = {},onCloseModal}) => {
+const CreateProduct = ({ productToEdit = {}, onCloseModal,onEdit,isEditing }) => {
   const theme = useTheme();
   const [categories, setCategories] = useState([]);
   const [subcategories, setSubCategories] = useState([]);
   const [categoryError, setCategoryError] = useState("");
   const [subcategoryError, setSubcategoryError] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSubcategory, setSelectedSubcategory] = useState("");
+ 
   const [imagePreviews, setImagePreviews] = useState([]);
   const [objectUrls, setObjectUrls] = useState([]);
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -39,13 +40,15 @@ const CreateProduct = ({product = {},onCloseModal}) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const productCreate = useSelector((state) => state.productCreate);
-  const { loading, success, error } = productCreate || {};
-useEffect(()=>{
-if(product){
-  console.log(product)
-}
-},[product])
- 
+  const { loading:isCreating, success, error } = productCreate || {};
+
+  const { _id: editId, ...editValues } = productToEdit;
+  const isEditSession = Boolean(editId);
+  const isWorking = isCreating || isEditing
+  const [selectedCategory, setSelectedCategory] =  useState(editValues.Category?._id || "");
+  const [selectedSubcategory, setSelectedSubcategory] = useState(editValues.SubCategory?._id || "");
+
+
   const {
     register,
     handleSubmit,
@@ -55,17 +58,31 @@ if(product){
     formState: { errors },
     watch,
   } = useForm({
-    defaultValues: {
-      sizes: [], // Initialize sizes as an empty array
-    },
+    defaultValues: isEditSession
+      ? {
+          ...editValues,
+          category: editValues.Category ? editValues.Category._id : "", // Extract ID
+          subcategory: editValues.SubCategory ? editValues.SubCategory._id : "", // Extract ID
+          sizes: editValues.sizes || [],
+          colors: editValues.colors || [],
+          images: editValues.images || [], // Make sure to include images
+        }
+      : {
+          sizes: [],
+          colors: [],
+          images: [],
+        },
   });
+  useEffect(() => {
+    if (isEditSession) {
+      setSelectedCategory(editValues.Category ? editValues.Category._id : ""); // Set the ID
+      setSelectedSubcategory(editValues.SubCategory ? editValues.SubCategory._id : ""); // Set the ID
+    }
+  }, [isEditSession, editValues]);
   const selectedColors = watch("colors") || [];
   const images = watch("images");
   const selectedSizes = watch("sizes"); // Watch for sizes selection
-  const isFeatured = watch('isFeatured', false);
-useEffect(() => {
-  console.log("Selected Sizes: ", selectedSizes);
-}, [selectedSizes]);
+  const isFeatured = watch("isFeatured", false);
 
   const colorsObjectsArray = useMemo(
     () => colorsArray.map((color) => ({ label: color, value: color })),
@@ -74,10 +91,9 @@ useEffect(() => {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    setValue("images", files);
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setImagePreviews((prev) => [...prev, ...previews]);
-    setObjectUrls((prev) => [...prev, ...previews]);
+  const previews = files.map((file) => URL.createObjectURL(file));
+  setValue("images", [...watch("images"), ...files]); // Append new files to existing images
+  setImagePreviews((prev) => [...prev, ...previews]); // Combine new previews with existing ones
   };
 
   const handleRemoveImage = (index) => {
@@ -128,6 +144,15 @@ useEffect(() => {
             })
           );
           setSubCategories(options);
+            // If you are in edit mode, set the selected subcategory if it exists
+        if (isEditSession && editValues.SubCategory) {
+          const subcategoryId = editValues.SubCategory._id;
+          if (options.some(option => option.value === subcategoryId)) {
+            setSelectedSubcategory(subcategoryId); // Set if match found
+          } else {
+            setSelectedSubcategory(""); // Reset if no match
+          }
+        }
         } catch (error) {
           toast.error("Failed to load subcategories. Please try again later.");
         }
@@ -141,11 +166,10 @@ useEffect(() => {
   }, [selectedCategory]);
 
   const onSubmit = async (data) => {
-    console.log(data)
-   
+    console.log("Submitting data:", data); // Debugging line
     const formData = new FormData();
-
-    // Append text fields
+    
+    // Append fields to formData
     for (const key in data) {
       if (Array.isArray(data[key])) {
         data[key].forEach((item) => formData.append(key, item));
@@ -153,41 +177,31 @@ useEffect(() => {
         formData.append(key, data[key]);
       }
     }
-    const sizesToSubmit = Array.isArray(data.sizes) ? data.sizes : [];
-    sizesToSubmit.forEach((size) => {
-      formData.append("sizes", size);
-    });
-
-    // Append images
-    // images.forEach((image) => {
-    //   formData.append("images", image);
-    // });
-    // const flatColors = selectedColors.flat();
-    // flatColors.forEach((color) => {
-    //   formData.append("colors", color);
-    // });
-    // console.log('flat colors ',flatColors)
-    // console.log(formData);
+  
     try {
-      // Make API request with formData
-      await dispatch(createProduct(formData));
-      if(success){
+      if (isEditSession) {
+        const { Category, SubCategory, ...restData } = data;
+        formData.append("Category", selectedCategory); // Use selectedCategory ID
+        formData.append("SubCategory", selectedSubcategory); // Use selectedSubcategory ID
+  
+        // Ensure other product data is correct
+        for (const key in restData) {
+          formData.append(key, restData[key]);
+        }
+        await dispatch(updateProduct(editId, formData));
+        toast.success("Product updated successfully!");
+      } else {
+        await dispatch(createProduct(formData));
         toast.success("Product created successfully!");
-        reset();
-        // Delay navigation for better UX
-        setTimeout(() => {
-          navigate("/products/table");
-        }, 1000); 
       }
-      if(error){
-        toast.error(error)
-
-      }
-     // Delay for 2 seconds
+      reset(); // Reset form after submission
+      setImagePreviews([]); // Clear image previews if necessary
+      navigate("/products/table"); // Redirect or perform any other action
     } catch (err) {
-      toast.error("Error creating product:", err);
+      toast.error("Error submitting form: " + err.message);
     }
   };
+  
   const clearColors = () => {
     setValue("colors", []); // Clear the colors array
   };
@@ -197,7 +211,6 @@ useEffect(() => {
   };
 
   useOutsideClick(modalRef, () => setIsOpenModal(false));
- 
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -272,6 +285,7 @@ useEffect(() => {
               {...register("Category", { required: "Category is required" })}
               error={errors.Category?.message}
               onChange={(e) => {
+                console.log(e.target.value)
                 const value = e.target.value;
                 setSelectedCategory(value); // Update local state
                 setValue("Category", value); // Update react-hook-form state
@@ -291,6 +305,7 @@ useEffect(() => {
               })}
               error={errors.SubCategory?.message}
               onChange={(e) => {
+                console.log(e.target.value)
                 const value = e.target.value;
                 setSelectedSubcategory(value); // Update local state
                 setValue("SubCategory", value); // Update react-hook-form state
@@ -515,15 +530,10 @@ useEffect(() => {
           </Box>
         </Grid>
         <Grid item xs={6} sm={6}>
-        <FormControlLabel
-        control={
-          <Switch
-            {...register('isFeatured')}
-            color="primary"
+          <FormControlLabel
+            control={<Switch {...register("isFeatured")} color="primary" />}
+            label="Is this product a featured product?"
           />
-        }
-        label="Is this product a featured product?"
-      />
         </Grid>
 
         <Grid item xs={12}>
@@ -544,9 +554,10 @@ useEffect(() => {
               }}
               variant="contained"
               color="primary"
-              type="submit" disabled={loading}
+              type="submit"
+              disabled={isWorking}
             >
-            {loading ? 'Creating..' : 'Submit'}
+              {isEditSession ? 'Edit Product':'Create Product'}
             </Button>
             <Button
               sx={{
