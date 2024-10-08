@@ -103,3 +103,4 @@ CustomModal1.Open = Open;
 CustomModal1.Window = Window;
 
 export default CustomModal1;
+

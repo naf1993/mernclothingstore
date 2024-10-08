@@ -33,31 +33,44 @@ export const upload = multer({
 }).fields([{ name: "images", maxCount: 5 }]);
 
 export const resizeImages = async (req, res, next) => {
+  // Check if files are present
+  if (!req.files || !req.files.images) {
+    // If no files, proceed to the next middleware
+    return next();
+  }
+
   const imagegallery = [];
   const resizedBuffer = [];
+
   try {
-    if (req.files) {
-      for (let i = 0; i < req.files.images.length; i++) {
-        const image = req.files.images[i];
-        const resizedImage = await sharp(image.buffer)
-          .resize(500, 500)
-          .toFormat("jpeg")
-          .jpeg({ quality: 90 })
-          .toBuffer();
-        resizedBuffer.push(resizedImage);
-      }
-      for (const imagebuffer of resizedBuffer) {
-        const b64i = dataUri(imagebuffer);
-        const uploadimage = await uploadFiles(b64i.content);
-        imagegallery.push(uploadimage.url);
-      }
+    // Loop through the images to resize them
+    for (let i = 0; i < req.files.images.length; i++) {
+      const image = req.files.images[i];
+      const resizedImage = await sharp(image.buffer)
+        .resize(500, 500)
+        .toFormat("jpeg")
+        .jpeg({ quality: 90 })
+        .toBuffer();
+      resizedBuffer.push(resizedImage);
     }
+
+    // Upload resized images
+    for (const imagebuffer of resizedBuffer) {
+      const b64i = dataUri(imagebuffer);
+      const uploadimage = await uploadFiles(b64i.content);
+      imagegallery.push(uploadimage.url);
+    }
+
+    // Add the image URLs to the request body
     req.body.images = imagegallery;
+
+    // Proceed to the next middleware
     next();
   } catch (err) {
-    next(err);
+    next(err); // Pass any errors to the error handling middleware
   }
 };
+
 
 const createProduct = catchAsync(async (req, res, next) => {
   console.log(req.body);
@@ -141,24 +154,34 @@ const getProductById = catchAsync(async (req, res, next) => {
 
 const updateProduct = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  console.log(req.body)
- 
+  console.log('Before fetching product');
+  const product = await Product.findById(id);
+  console.log('Product fetched:', product);
+  
+  // Check if the product exists
   if (!product) {
     return next(new AppError("No product found with that ID", 404));
   }
-  const product = await Product.findById(id);
-  if(req.files){
+
+  // Handle file uploads if they exist
+  if (req.files && req.files.images) {
+    // Delete existing images
     for (const imageUrl of product.images) {
       await deleteFiles(imageUrl);
     }
-    upload();
-    resizeImages();
+    
+    // Assuming upload() and resizeImages() are defined properly
+    await upload(); // Handle uploading the new images
+    await resizeImages(); // Resize the uploaded images
   }
-  
+
+  // Update the product properties with the request body
   Object.assign(product, req.body);
 
   // Save the updated product
   await product.save();
+
+  // Respond with the updated product
   res.status(200).json({
     status: "success",
     data: {
@@ -166,6 +189,7 @@ const updateProduct = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 
 const deleteProduct = catchAsync(async (req, res, next) => {
   const product = await Product.findByIdAndDelete(req.params.id);

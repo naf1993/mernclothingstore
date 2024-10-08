@@ -26,7 +26,7 @@ const FilterComponent = ({ items, onFilterChange }) => {
       new Set(items.map((item) => item.Category?.name))
     ).filter(Boolean);
     setCategories(uniqueCategories);
-    console.log("these are unique categories ", uniqueCategories);
+   
   }, [items]);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const FilterComponent = ({ items, onFilterChange }) => {
         ).filter(Boolean)
       : [];
     setSubcategories(uniqueSubcategories);
-    console.log("these are sucategrries", uniqueSubcategories);
+  
   }, [selectedCategory, items]);
   useEffect(() => {
     applyFiltersAndSort();

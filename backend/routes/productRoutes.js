@@ -15,7 +15,7 @@ router.route('/search/:keyword').get(productSearch)
 router.route('/allcolors').get(getAllColorsOfAllProducts)
 
 router.route('/').get(getAllProducts).post(protect,restrictToAdmin,upload,resizeImages,createProduct)
-router.route('/:id').get(getProductById).patch(protect,restrictToAdmin,updateProduct).delete(protect,restrictToAdmin,deleteProduct)
+router.route('/:id').get(getProductById).patch(protect,restrictToAdmin,upload,resizeImages,updateProduct).delete(protect,restrictToAdmin,deleteProduct)
 router.put('/wishlist',protect,addToWishList)
 
 router.route('/getproductcount').get(getSoldProductCount)

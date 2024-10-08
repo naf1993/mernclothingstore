@@ -114,32 +114,32 @@ export const createProduct = (productData) => async (dispatch, getState) => {
     }
   };
 
-export const updateProduct = (id,product)=>async(dispatch,getState)=>{
-    console.log(id,product)
-    try{
-        dispatch({
-            type:PRODUCT_UPDATE_REQUEST
-        })
-        const {userLogin:{userInfo}}=getState()
-        const config = {
-            headers:{
-               'Content-Type':'application/json',
-                Authorization: `Bearer ${userInfo.token} `
-            }
-        }
-       const {data} = await axios.patch(`/api/products/${id}`,product,config)
-
-        dispatch({
-            type:PRODUCT_UPDATE_SUCCESS,
-            payload:data
-           
-        })
-       
-    }catch(error){
-        dispatch({
-            type:PRODUCT_UPDATE_FAIL,
-            payload:error.response.data.message
-        })
-
+  export const updateProduct = (id,productData) => async (dispatch, getState) => {
+    try {
+      dispatch({ type: PRODUCT_UPDATE_REQUEST });
+  
+      const { userLogin: { userInfo } } = getState();
+  
+      const config = {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${userInfo.token}`, // Add authorization token
+        },
+      };
+  console.log('this is data before submitting',productData)
+      const { data } = await axios.patch(`/api/products/${id}`, productData, config);
+  
+      dispatch({
+        type: PRODUCT_UPDATE_SUCCESS,
+        payload: data,
+      });
+    } catch (error) {
+      dispatch({
+        type: PRODUCT_UPDATE_FAIL,
+        payload: error.response && error.response.data.message
+          ? error.response.data.message
+          : error.message,
+      });
     }
-}
+  };
+
