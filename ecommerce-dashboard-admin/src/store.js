@@ -5,7 +5,7 @@ import {persistStore,persistReducer,FLUSH,REHYDRATE,PAUSE,PERSIST,PURGE,REGISTER
 import storage from 'redux-persist/lib/storage'
 import { customizationReducer, themeReducer } from "./reducers/themeReducer";
 import { adminLoginReducer,userListReducer, userUpdateByAdminReducer } from "./reducers/userReducer";
-import { productCreateReducer,productDeleteReducer,productDetailReducer,productListReducer,productUpdateReducer } from "./reducers/productReduceer";
+import { productCreateReducer,productDeleteReducer,productDetailReducer,productImageDeleteReducer,productListReducer,productUpdateReducer } from "./reducers/productReduceer";
 import { dashboardStatsReducer } from "./reducers/dashboardStatsReducer";
 import notificationReducer from "reducers/notificationReducer";
 const reducer = combineReducers({
@@ -17,6 +17,7 @@ const reducer = combineReducers({
     productCreate:productCreateReducer,
     editProduct:productUpdateReducer,
     deleteProduct:productDeleteReducer,
+    deleteProductImage:productImageDeleteReducer,
     userList:userListReducer,
     userUpdateAdmin:userUpdateByAdminReducer,
     dashboardStats:dashboardStatsReducer,

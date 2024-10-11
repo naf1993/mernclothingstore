@@ -8,7 +8,7 @@ import multer from "multer";
 import sharp from "sharp";
 import Category from "../models/categoryModel.js";
 import SubCategory from "../models/subCategory.js";
-
+import cloudinary from "cloudinary";
 import { uploadFiles, deleteFiles } from "../utils/cloudinary.js";
 import { dataUri } from "../utils/datauri.js";
 
@@ -34,6 +34,7 @@ export const upload = multer({
 
 export const resizeImages = async (req, res, next) => {
   // Check if files are present
+  console.log("uploading");
   if (!req.files || !req.files.images) {
     // If no files, proceed to the next middleware
     return next();
@@ -70,7 +71,6 @@ export const resizeImages = async (req, res, next) => {
     next(err); // Pass any errors to the error handling middleware
   }
 };
-
 
 const createProduct = catchAsync(async (req, res, next) => {
   console.log(req.body);
@@ -154,10 +154,10 @@ const getProductById = catchAsync(async (req, res, next) => {
 
 const updateProduct = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  console.log('Before fetching product');
+  console.log("Before fetching product");
   const product = await Product.findById(id);
-  console.log('Product fetched:', product);
-  
+  console.log("Product fetched:", product);
+
   // Check if the product exists
   if (!product) {
     return next(new AppError("No product found with that ID", 404));
@@ -166,10 +166,12 @@ const updateProduct = catchAsync(async (req, res, next) => {
   // Handle file uploads if they exist
   if (req.files && req.files.images) {
     // Delete existing images
+    console.log("files.present");
     for (const imageUrl of product.images) {
       await deleteFiles(imageUrl);
     }
-    
+    console.log("image deleted");
+
     // Assuming upload() and resizeImages() are defined properly
     await upload(); // Handle uploading the new images
     await resizeImages(); // Resize the uploaded images
@@ -186,6 +188,41 @@ const updateProduct = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       product,
+    },
+  });
+});
+
+export const deleteImageFromProduct = catchAsync(async (req, res, next) => {
+  const { imageUrl } = req.body;
+  console.log(`Attempting to delete image: ${imageUrl}`);
+
+  try {
+    // Delete the file from storage
+    await deleteFiles(imageUrl);
+  } catch (error) {
+    console.error(`Failed to delete file: ${error.message}`);
+    return next(new AppError("Failed to delete file", 500));
+  }
+
+  // Log the image URL being searched for
+  console.log(`Searching for product with image URL: ${imageUrl}`);
+  const updatedProduct = await Product.findOneAndUpdate(
+    { images: imageUrl },
+    { $pull: { images: imageUrl } },
+    { new: true }
+  );
+
+  // Check if the product was found
+  if (!updatedProduct) {
+    console.warn(`No product found with image URL: ${imageUrl}`);
+    return next(new AppError("No Product found", 404));
+  }
+
+  // Respond with the updated product or a success message
+  res.status(200).json({
+    status: "success",
+    data: {
+      product: updatedProduct,
     },
   });
 });

@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
   Button,
@@ -22,7 +28,7 @@ import CustomFileInput from "./ui/CustomFileInput";
 import CloseButton from "./ui/CloseButton";
 import { colorsArray, sizesOptions } from "./data";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct, updateProduct } from "../actions/productActions";
+import { createProduct, deleteImageProduct } from "../actions/productActions";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -34,25 +40,33 @@ const CreateProduct = ({
 }) => {
   const theme = useTheme();
   const [categories, setCategories] = useState([]);
-  const [subcategories, setSubCategories] = useState([]);
-  const [categoryError, setCategoryError] = useState("");
-  const [subcategoryError, setSubcategoryError] = useState("");
-
+  const [subcategories, setSubcategories] = useState([]);
+  const [loadingCategory, setLoadingCategory] = useState(false);
+  const [errorCategory, setErrorCategory] = useState(false);
+  const [loadingSubCategory, setLoadingSubCategory] = useState(false);
+  const [errorSubCategory, setErrorSubCategory] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("");
   const [imagePreviews, setImagePreviews] = useState([]);
   const [objectUrls, setObjectUrls] = useState([]);
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [existingImages, setExistingImages] = useState([]);
   const modalRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const productCreate = useSelector((state) => state.productCreate);
-  const { loading: isCreating, success, error } = productCreate || {};
+  const { loading: isCreating } = productCreate || {};
 
   const { _id: editId, ...editValues } = productToEdit;
+  const deleteProductImage = useSelector((state) => state.deleteProductImage);
+  const {
+    loading: loadingDeleteimage,
+    success: successDeleteImage,
+    error: errorDeleteImage,
+  } = deleteProductImage;
+
   const isEditSession = Boolean(editId);
   const isWorking = isCreating || isEditing;
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedSubcategory, setSelectedSubcategory] = useState("");
-  const isMounted = useRef(true);
 
   const {
     register,
@@ -63,121 +77,78 @@ const CreateProduct = ({
     formState: { errors },
     watch,
   } = useForm({
-    defaultValues: isEditSession
-      ? {
-          ...editValues,
-
-          sizes: editValues.sizes || [],
-          colors: editValues.colors || [],
-          images: editValues.images || [], // Make sure to include images
-        }
-      : {
-          sizes: [],
-          colors: [],
-          images: [],
-        },
+    defaultValues: {
+      name: editValues.name || "",
+      brand: editValues.brand || "",
+      price: editValues.price || "",
+      description: editValues.description || "",
+      countInStock: editValues.countInStock || "",
+      isFeatured: editValues.isFeatured || false,
+      Category: editValues.Category?.id ? String(editValues.Category.id) : "",
+      SubCategory: editValues.SubCategory?.id
+        ? String(editValues.SubCategory.id)
+        : "",
+      sizes: editValues.sizes || [],
+      colors: editValues.colors || [],
+      images: editValues.images || [],
+    },
   });
 
   const selectedColors = watch("colors") || [];
-  const images = watch("images");
-  const selectedSizes = watch("sizes"); // Watch for sizes selection
-  const isFeatured = watch("isFeatured", false);
 
   const colorsObjectsArray = useMemo(
     () => colorsArray.map((color) => ({ label: color, value: color })),
     []
   );
+  useEffect(() => {
+    if (isEditSession && productToEdit.images) {
+      setExistingImages(productToEdit.images); // Set existing images
+      setImagePreviews(productToEdit.images); // Optionally show previews
+    }
+  }, [isEditSession, productToEdit.images]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setValue("images", [...watch("images"), ...files]); // Append new files to existing images
-    setImagePreviews((prev) => [...prev, ...previews]); // Combine new previews with existing ones
+    const newPreviews = files.map((file) => URL.createObjectURL(file));
+
+    setImagePreviews((prev) => [...prev, ...newPreviews]);
+    setValue("images", [...watch("images"), ...files]); // Maintain File objects
   };
 
-  const handleRemoveImage = (index) => {
-    const updatedPreviews = imagePreviews.filter((_, i) => i != index);
-    const updatedUrls = objectUrls.filter((_, i) => i != index);
-    URL.revokeObjectURL(objectUrls[index]);
-    setImagePreviews(updatedPreviews);
-    setObjectUrls(updatedUrls);
+  const handleRemoveImage = async (index) => {
+    const imageToRemove = imagePreviews[index];
+    console.log(imageToRemove)
+    if (isEditSession) {
+      try {
+        await dispatch(deleteImageProduct(imageToRemove));
+       
+
+        // Optionally revoke URL if it was created
+        URL.revokeObjectURL(imagePreviews[index]);
+        if (successDeleteImage) {
+          toast.success("Product Image Deleted");
+          const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
+          setImagePreviews(updatedPreviews);
+        }
+        if (errorDeleteImage) {
+          toast.error(errorDeleteImage);
+        }
+      } catch (error) {
+        toast.error("Unable to delete image from backend");
+      }
+    } else {
+      const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
+      setImagePreviews(updatedPreviews);
+
+      // Optionally revoke URL if it was created
+      URL.revokeObjectURL(imageToRemove);
+    }
   };
   useEffect(() => {
     return () => {
       objectUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [objectUrls]);
-
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const { data } = await axios.get(
-          "http://localhost:5000/api/categories"
-        );
-        const options = data.data.categories.map((category) => ({
-          value: category.id,
-          label: category.name,
-        }));
-        if (isMounted.current) {
-          setCategories(options);
-        }
-        if (editValues) {
-          const editCategoryId = editValues.Category
-            ? editValues.Category.id
-            : null;
-          if (options.some((category) => category.id === editCategoryId)) {
-            setSelectedCategory(editCategoryId);
-          } else {
-            console.error("Category not found");
-          }
-        }
-
-        // Clear any previous error
-      } catch (error) {
-        toast.error("Failed to load categories. Please try again later.");
-      }
-    }
-
-    fetchCategories();
-    return()=>{
-      isMounted.current = false
-    }
-  }, [editValues]);
-
-  useEffect(() => {
-    const fetchSubCategories = async () => {
-      if (!selectedCategory) {
-        setSubCategories([]);
-        setSelectedSubcategory("");
-        return;
-      }
-
-      try {
-        const { data } = await axios.get(`http://localhost:5000/api/categories/${selectedCategory}`);
-        const options = data.data.category.subcategories.map((subcategory) => ({
-          id: subcategory.id,
-          name: subcategory.name,
-        }));
-
-        if (isMounted.current) {
-          setSubCategories(options);
-
-          // Reset selected subcategory if it is not in the new options
-          if (!options.some((option) => option.id === selectedSubcategory)) {
-            setSelectedSubcategory("");
-          }
-        }
-      } catch (error) {
-        toast.error("Failed to load subcategories.");
-      }
-    };
-
-    fetchSubCategories();
-
-    return () => {
-      isMounted.current = false;
-    };
-  }, [selectedCategory]);
 
   const onSubmit = async (data) => {
     console.log("Submitting data", data);
@@ -190,7 +161,7 @@ const CreateProduct = ({
       formData.append("SubCategory", selectedSubcategory);
     }
     for (const key in restData) {
-      if (restData[key] != null && restData[key] != undefined) {
+      if (restData[key] !== null && restData[key] !== undefined) {
         if (Array.isArray(restData[key])) {
           restData[key].forEach((item) => formData.append(key, item));
         } else {
@@ -200,15 +171,15 @@ const CreateProduct = ({
     }
     try {
       if (isEditSession) {
-        await dispatch(updateProduct(editId, formData));
-        toast.success("Product Updated");
+        await onEdit(editId, formData);
+        reset();
       } else {
         await dispatch(createProduct(formData));
         toast.success("Product Created");
+        navigate("/products/grid");
       }
-      reset();
+
       setImagePreviews([]);
-      navigate("/products/grid");
     } catch (err) {
       toast.error("Error submitting form");
     }
@@ -217,11 +188,109 @@ const CreateProduct = ({
     setValue("colors", []); // Clear the colors array
   };
   const removeColor = (color) => {
-    const updatedColors = selectedColors.filter((col) => col != color);
+    const updatedColors = selectedColors.filter((col) => col !== color);
     setValue("colors", updatedColors);
   };
-
   useOutsideClick(modalRef, () => setIsOpenModal(false));
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoadingCategory(true);
+      try {
+        const { data } = await axios.get(
+          "http://localhost:5000/api/categories"
+        );
+        const options = data.data.categories.map((category) => ({
+          value: category.id,
+          label: category.name,
+        }));
+        setCategories(options);
+      } catch (err) {
+        setErrorCategory(err);
+        toast.error("Failed to load categories.");
+      } finally {
+        setLoadingCategory(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const fetchSubcategories = useCallback(async (categoryId) => {
+    if (!categoryId) {
+      setSubcategories([]);
+      return;
+    }
+    setLoadingSubCategory(true);
+    try {
+      console.log(
+        `Fetching subcategories from async function category ID: ${categoryId}`
+      );
+      const { data } = await axios.get(
+        `http://localhost:5000/api/categories/${categoryId}`
+      );
+      const options = data.data.category.subcategories.map((subcategory) => ({
+        value: subcategory.id,
+        label: subcategory.name,
+      }));
+      console.log("subcategory from api", options);
+
+      setSubcategories(options);
+    } catch (err) {
+      setErrorSubCategory(err);
+      toast.error("Failed to load subcategories.");
+    } finally {
+      setLoadingSubCategory(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isEditSession && editValues && categories.length > 0) {
+      const categoryId = String(editValues.Category?.id || "");
+      const categoryExists = categories.some((cat) => cat.value === categoryId);
+      if (categoryExists && !selectedCategory) {
+        setSelectedCategory(categoryId);
+      }
+    }
+  }, [
+    editValues,
+    categories,
+    isEditSession,
+    selectedCategory,
+    fetchSubcategories,
+  ]);
+  useEffect(() => {
+    if (isEditSession) {
+      if (selectedCategory) {
+        setSubcategories([]);
+        fetchSubcategories(selectedCategory);
+      }
+    } else {
+      if (selectedCategory) {
+        fetchSubcategories(selectedCategory);
+      }
+    }
+  }, [selectedCategory, isEditSession, fetchSubcategories]);
+
+  useEffect(() => {
+    console.log("effect 3");
+    if (
+      isEditSession &&
+      subcategories.length > 0 &&
+      subcategories.some(
+        (cat) => cat.value === String(editValues.SubCategory?.id)
+      )
+    ) {
+      const subcategoryId = String(editValues.SubCategory?.id || "");
+
+      const subcategoryExist = subcategories.some(
+        (cat) => cat.value === subcategoryId
+      );
+      if (subcategoryExist) {
+        setSelectedSubcategory(subcategoryId);
+      } else {
+        setSelectedSubcategory(""); //clearing
+      }
+    }
+  }, [isEditSession, subcategories, editValues]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -288,6 +357,8 @@ const CreateProduct = ({
           />
         </Grid>
         <Grid item xs={6} sm={6}>
+          {loadingCategory && <p>loading categories</p>}
+          {errorCategory && <p>error fetching category</p>}
           {categories.length > 0 && (
             <CustomSelect
               label="Category"
@@ -296,16 +367,20 @@ const CreateProduct = ({
               {...register("Category", { required: "Category is required" })}
               error={errors.Category?.message}
               onChange={(e) => {
-                console.log(e.target.value);
+                console.log("this is selected value", e.target.value);
                 const value = e.target.value;
-                setSelectedCategory(value); // Update local state
-                setValue("Category", value); // Update react-hook-form state
-                setSelectedSubcategory(""); // Reset subcategory when category changes
+                setSelectedCategory(value);
+                setSelectedSubcategory("");
+                setSubcategories([]); // Reset the subcategory
+                fetchSubcategories(value);
+                setValue("Category", value); // Sync with form state
               }}
             />
           )}
         </Grid>
         <Grid item xs={6} sm={6}>
+          {loadingSubCategory && <p>loading subcategrory</p>}
+          {errorSubCategory && <p>error loading subcategory</p>}
           {categories.length > 0 && (
             <CustomSelect
               label="Choose SubCategory"
@@ -316,7 +391,7 @@ const CreateProduct = ({
               })}
               error={errors.SubCategory?.message}
               onChange={(e) => {
-                console.log(e.target.value);
+                console.log("this is selected subcat ", e.target.value);
                 const value = e.target.value;
                 setSelectedSubcategory(value); // Update local state
                 setValue("SubCategory", value); // Update react-hook-form state

@@ -51,7 +51,7 @@ const DataGridComponent = ({ type }) => {
   const deleteProduct = useSelector((state) => state.deleteProduct);
   const { loading: loadingDelete, success, error: errorDelete } = deleteProduct;
   const editProduct = useSelector((state)=>state.editProduct)
-  const {loading:loadingEdit,error:errorEdit} = editProduct
+  const {loading:loadingEdit,error:errorEdit,success:successEdit} = editProduct
   const [loadDelete, setLoadDelete] = useState(false);
   const [loadEdit,setLoadEdit] = useState(false)
   const { items, loading, error } = useSelector((state) => {
@@ -92,7 +92,13 @@ const DataGridComponent = ({ type }) => {
     setLoadEdit(true);
     try {
       await dispatch(updateProduct(id,product));
-      toast.success("Product Edited");
+      if(successEdit){
+        toast.success("Product Edited");  
+      }
+      if(errorEdit){
+        toast.error(errorEdit)
+      }
+      
       close();
       if (type === "products") {
         dispatch(listProducts()); // This should refresh the product list
