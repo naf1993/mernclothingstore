@@ -1,5 +1,5 @@
 import express from 'express';
-import {  login, protect, register, resetPassword, restrictToAdmin, updatePassword } from '../controllers/authController.js';
+import {  login, protect,  restrictToAdmin } from '../controllers/authController.js';
 import { addToWishList, createProduct, deleteProduct ,getAllProducts, getProductById, getProductStatistics, getProductsByCategory, getProductsBySubCategory, getSimilarProducts, productSearch, updateProduct, upload, resizeImages, deleteImageFromProduct } from '../controllers/productController.js';
 import { getSoldProductCount,getAllColorsOfAllProducts } from '../controllers/productController.js';
 import reviewRoutes from './reviewRoutes.js'

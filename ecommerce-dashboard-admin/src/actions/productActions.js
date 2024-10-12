@@ -95,7 +95,10 @@ export const deleteImageProduct = (imageUrl) => async (dispatch, getState) => {
         Authorization: `Bearer ${userInfo.token} `,
       },
     };
-    await axios.delete(`/api/products/images`, config, imageUrl);
+    await axios.delete(`/api/products/images`, {
+      headers: config.headers,
+      data: { imageUrl }, // Include the imageUrl in the data field
+    });
 
     dispatch({
       type: PRODUCT_IMAGE_DELETE_SUCCESS,
@@ -103,7 +106,7 @@ export const deleteImageProduct = (imageUrl) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_IMAGE_DELETE_FAIL,
-      payload: error.response.data.message,
+      payload: error.response?.data?.message || error.message,
     });
   }
 };

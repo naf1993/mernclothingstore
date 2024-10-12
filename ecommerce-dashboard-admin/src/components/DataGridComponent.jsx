@@ -40,7 +40,7 @@ const getRandomBackgroundColor = () => {
   return color;
 };
 
-const DataGridComponent = ({ type }) => {
+const DataGridComponent = ({ type,refresh }) => {
   const [pageSize, setPageSize] = useState(5);
   const [rowId, setRowId] = useState(null);
   const [value, setValue] = useState(null);
@@ -54,13 +54,17 @@ const DataGridComponent = ({ type }) => {
   const {loading:loadingEdit,error:errorEdit,success:successEdit} = editProduct
   const [loadDelete, setLoadDelete] = useState(false);
   const [loadEdit,setLoadEdit] = useState(false)
-  const { items, loading, error } = useSelector((state) => {
+  const items = useSelector(state => (type === "products" ? state.productList.items : state.userList.items));
+  const loading = useSelector(state => (type === "products" ? state.productList.loading : state.userList.loading));
+  const error = useSelector(state => (type === "products" ? state.productList.error : state.userList.error));
+  useEffect(() => {
     if (type === "products") {
-      return state.productList;
+      console.log('refreshed data grid')
+      dispatch(listProducts());
     } else {
-      return state.userList;
+      dispatch(listUsers());
     }
-  });
+  }, [dispatch, type,refresh]);
   const [filteredProducts, setFilteredProducts] = useState(items);
   const [noResults, setNoResults] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -126,13 +130,7 @@ const DataGridComponent = ({ type }) => {
     }
   };
 
-  useEffect(() => {
-    if (type === "products") {
-      dispatch(listProducts());
-    } else {
-      dispatch(listUsers());
-    }
-  }, [dispatch, type]);
+
   
   useEffect(() => {
     setFilteredProducts(items); // Update filteredProducts whenever items change

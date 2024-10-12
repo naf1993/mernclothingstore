@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useRef,
   useMemo,
-  useCallback,
+  useCallback,useContext
 } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -28,11 +28,12 @@ import CustomFileInput from "./ui/CustomFileInput";
 import CloseButton from "./ui/CloseButton";
 import { colorsArray, sizesOptions } from "./data";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct, deleteImageProduct } from "../actions/productActions";
+import { createProduct, deleteImageProduct, listProducts } from "../actions/productActions";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { ModalContext } from "./CustomModal1";
 
-const CreateProduct = ({
+const CreateProduct = ({onSuccess = () => {},
   productToEdit = {},
   onCloseModal,
   onEdit,
@@ -54,6 +55,7 @@ const CreateProduct = ({
   const modalRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { close } = useContext(ModalContext);
   const productCreate = useSelector((state) => state.productCreate);
   const { loading: isCreating } = productCreate || {};
 
@@ -102,10 +104,17 @@ const CreateProduct = ({
   );
   useEffect(() => {
     if (isEditSession && productToEdit.images) {
+     
       setExistingImages(productToEdit.images); // Set existing images
       setImagePreviews(productToEdit.images); // Optionally show previews
+     
     }
   }, [isEditSession, productToEdit.images]);
+  useEffect(()=>{
+    if(imagePreviews){
+    console.log('this is image previews',imagePreviews)
+    }
+  },[imagePreviews])
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -118,7 +127,8 @@ const CreateProduct = ({
   const handleRemoveImage = async (index) => {
     const imageToRemove = imagePreviews[index];
     console.log(imageToRemove)
-    if (isEditSession) {
+    console.log(existingImages)
+    if (isEditSession && existingImages.includes(imageToRemove) ) {
       try {
         await dispatch(deleteImageProduct(imageToRemove));
        
@@ -129,10 +139,15 @@ const CreateProduct = ({
           toast.success("Product Image Deleted");
           const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
           setImagePreviews(updatedPreviews);
+          console.log('Calling onSuccess to refresh DataGrid');
+          dispatch(listProducts())
+          
         }
         if (errorDeleteImage) {
           toast.error(errorDeleteImage);
         }
+        close()
+    
       } catch (error) {
         toast.error("Unable to delete image from backend");
       }
@@ -160,7 +175,15 @@ const CreateProduct = ({
     if (selectedSubcategory) {
       formData.append("SubCategory", selectedSubcategory);
     }
+    const existingImages = productToEdit.images || [];
+    
+
+    // Collect new images
+    const newImages = watch("images").filter((file) => !existingImages.includes(file));
+  
+    // Append data to formData
     for (const key in restData) {
+      if(key === 'images') continue
       if (restData[key] !== null && restData[key] !== undefined) {
         if (Array.isArray(restData[key])) {
           restData[key].forEach((item) => formData.append(key, item));
@@ -169,20 +192,29 @@ const CreateProduct = ({
         }
       }
     }
+  
+    // Append only new images
+    newImages.forEach((file) => {
+      formData.append("images", file); // Append new images to FormData
+    });
     try {
       if (isEditSession) {
         await onEdit(editId, formData);
-        reset();
+      
       } else {
         await dispatch(createProduct(formData));
         toast.success("Product Created");
-        navigate("/products/grid");
+        
       }
 
-      setImagePreviews([]);
+      reset(); // Reset form fields after submission
+      setImagePreviews([]); // Clear image previews
+      close()
+      onSuccess(); // Call the onSuccess function to refresh the DataGrid
     } catch (err) {
-      toast.error("Error submitting form");
-    }
+      console.error("Error during form submission:", err); // Log the complete error
+      toast.error(err.response?.data?.message || "Error submitting form");
+  }
   };
   const clearColors = () => {
     setValue("colors", []); // Clear the colors array
@@ -275,13 +307,13 @@ const CreateProduct = ({
     if (
       isEditSession &&
       subcategories.length > 0 &&
-      subcategories.some(
+      subcategories.find(
         (cat) => cat.value === String(editValues.SubCategory?.id)
       )
     ) {
       const subcategoryId = String(editValues.SubCategory?.id || "");
 
-      const subcategoryExist = subcategories.some(
+      const subcategoryExist = subcategories.find(
         (cat) => cat.value === subcategoryId
       );
       if (subcategoryExist) {
