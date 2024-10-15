@@ -36,7 +36,6 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
     { label: "Logout", type: "button" },
   ];
 
-  const [screenSize, setScreenSize] = useState(undefined);
   const [anchorEl, setAnchorEl] = useState(null);
   const isOpen = Boolean(anchorEl);
   const handleClick = (event) => setAnchorEl(event.currentTarget);
@@ -129,12 +128,15 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
           )}
         </IconButton>
 
-        <ButtonWithPopper
-          markAllasRead={handleMarkAllAsRead}
-          icon={<BsBell />}
-          popperContent={filteredNotifications}
-          setFilter={setFilter}
-        />
+        {filteredNotifications.length > 0 && (
+          <ButtonWithPopper
+            markAllasRead={handleMarkAllAsRead}
+            icon={<BsBell />}
+            popperContent={filteredNotifications}
+            setFilter={setFilter}
+          />
+        )}
+
         <ButtonWithPopper
           icon={<AiOutlineUser />}
           userMenu={userMenu.map((item) => ({

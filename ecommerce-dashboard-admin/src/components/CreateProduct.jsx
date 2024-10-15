@@ -3,7 +3,8 @@ import React, {
   useEffect,
   useRef,
   useMemo,
-  useCallback,useContext
+  useCallback,
+  useContext,
 } from "react";
 import { useForm, Controller } from "react-hook-form";
 import {
@@ -18,22 +19,26 @@ import {
 } from "@mui/material";
 import CustomInput from "./ui/CustomInput";
 import CustomSelect from "./ui/CustomSelect";
-import ColorButton from "./ui/ColorButton";
 import axios from "axios";
 import { HiXMark } from "react-icons/hi2";
-import CustomModal from "./CustomModal";
 import useOutsideClick from "hooks/useOutsideClick";
 import CustomCheckbox from "./ui/CustomCheckbox";
 import CustomFileInput from "./ui/CustomFileInput";
 import CloseButton from "./ui/CloseButton";
-import { colorsArray, sizesOptions } from "./data";
+import {  sizesOptions } from "./data";
 import { useDispatch, useSelector } from "react-redux";
-import { createProduct, deleteImageProduct, listProducts } from "../actions/productActions";
+import {
+  createProduct,
+  deleteImageProduct,
+  listProducts,
+} from "../actions/productActions";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { ModalContext } from "./CustomModal1";
+import CustomModal1, { ModalContext } from "./CustomModal1";
+import ColorSelectionModal from "./ui/ColorSelectionModal";
 
-const CreateProduct = ({onSuccess = () => {},
+const CreateProduct = ({
+  onSuccess = () => {},
   productToEdit = {},
   onCloseModal,
   onEdit,
@@ -98,23 +103,18 @@ const CreateProduct = ({onSuccess = () => {},
 
   const selectedColors = watch("colors") || [];
 
-  const colorsObjectsArray = useMemo(
-    () => colorsArray.map((color) => ({ label: color, value: color })),
-    []
-  );
+
   useEffect(() => {
     if (isEditSession && productToEdit.images) {
-     
       setExistingImages(productToEdit.images); // Set existing images
       setImagePreviews(productToEdit.images); // Optionally show previews
-     
     }
   }, [isEditSession, productToEdit.images]);
-  useEffect(()=>{
-    if(imagePreviews){
-    console.log('this is image previews',imagePreviews)
+  useEffect(() => {
+    if (imagePreviews) {
+      console.log("this is image previews", imagePreviews);
     }
-  },[imagePreviews])
+  }, [imagePreviews]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -126,12 +126,11 @@ const CreateProduct = ({onSuccess = () => {},
 
   const handleRemoveImage = async (index) => {
     const imageToRemove = imagePreviews[index];
-    console.log(imageToRemove)
-    console.log(existingImages)
-    if (isEditSession && existingImages.includes(imageToRemove) ) {
+    console.log(imageToRemove);
+    console.log(existingImages);
+    if (isEditSession && existingImages.includes(imageToRemove)) {
       try {
         await dispatch(deleteImageProduct(imageToRemove));
-       
 
         // Optionally revoke URL if it was created
         URL.revokeObjectURL(imagePreviews[index]);
@@ -139,15 +138,13 @@ const CreateProduct = ({onSuccess = () => {},
           toast.success("Product Image Deleted");
           const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
           setImagePreviews(updatedPreviews);
-          console.log('Calling onSuccess to refresh DataGrid');
-          dispatch(listProducts())
-          
+          console.log("Calling onSuccess to refresh DataGrid");
+          dispatch(listProducts());
         }
         if (errorDeleteImage) {
           toast.error(errorDeleteImage);
         }
-        close()
-    
+        close();
       } catch (error) {
         toast.error("Unable to delete image from backend");
       }
@@ -176,14 +173,15 @@ const CreateProduct = ({onSuccess = () => {},
       formData.append("SubCategory", selectedSubcategory);
     }
     const existingImages = productToEdit.images || [];
-    
 
     // Collect new images
-    const newImages = watch("images").filter((file) => !existingImages.includes(file));
-  
+    const newImages = watch("images").filter(
+      (file) => !existingImages.includes(file)
+    );
+
     // Append data to formData
     for (const key in restData) {
-      if(key === 'images') continue
+      if (key === "images") continue;
       if (restData[key] !== null && restData[key] !== undefined) {
         if (Array.isArray(restData[key])) {
           restData[key].forEach((item) => formData.append(key, item));
@@ -192,7 +190,7 @@ const CreateProduct = ({onSuccess = () => {},
         }
       }
     }
-  
+
     // Append only new images
     newImages.forEach((file) => {
       formData.append("images", file); // Append new images to FormData
@@ -200,21 +198,19 @@ const CreateProduct = ({onSuccess = () => {},
     try {
       if (isEditSession) {
         await onEdit(editId, formData);
-      
       } else {
         await dispatch(createProduct(formData));
         toast.success("Product Created");
-        
       }
 
       reset(); // Reset form fields after submission
       setImagePreviews([]); // Clear image previews
-      close()
+      close();
       onSuccess(); // Call the onSuccess function to refresh the DataGrid
     } catch (err) {
       console.error("Error during form submission:", err); // Log the complete error
       toast.error(err.response?.data?.message || "Error submitting form");
-  }
+    }
   };
   const clearColors = () => {
     setValue("colors", []); // Clear the colors array
@@ -476,122 +472,40 @@ const CreateProduct = ({onSuccess = () => {},
           </Box>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <Button
-            onClick={() => setIsOpenModal((show) => !show)}
-            size="small"
-            sx={{
-              width: "100%",
-              backgroundColor: "white",
-              border: `1.9px solid rgba(0, 0, 0, 0.12)`,
-              color: theme.palette.primary.textcolor,
-              padding: ".8rem .8rem",
-              display: "flex",
-              alignItems: "center",
-              fontSize: "14px",
-              justifyContent: "start",
-              ":hover": {
-                backgroundColor: "orange",
-              },
-            }}
-          >
-            Select Color
-          </Button>
-          {isOpenModal && (
-            <CustomModal ref={modalRef} onClose={() => setIsOpenModal(false)}>
-              <div>
-                <Typography variant="h6">Select color</Typography>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexWrap: "wrap", // Allows buttons to wrap onto the next line
-                    gap: "0.2rem", // Adjusts spacing between buttons
-                    maxWidth: "20rem",
-                  }}
-                >
-                  {colorsObjectsArray.map(({ label, value }) => (
-                    <Controller
-                      key={value}
-                      name="colors"
-                      control={control}
-                      render={({ field: { onChange } }) => (
-                        <ColorButton
-                          label={label}
-                          color={value}
-                          selected={selectedColors.includes(value)}
-                          onClick={() => {
-                            const newValue = selectedColors.includes(value)
-                              ? selectedColors.filter((c) => c !== value)
-                              : [...selectedColors, value];
-                            onChange(newValue); // Update the value in React Hook Form
-                          }}
-                        />
-                      )}
-                    />
-                  ))}
-                </div>
-
-                <Typography variant="h6">Selected Colors :</Typography>
-                <Box
-                  sx={{
-                    maxWidth: "320px",
-                    display: "flex",
-                    flexWrap: "wrap",
-                    gap: ".7rem",
-                    overflow: "hidden", // Prevent overflow
-                  }}
-                >
-                  {selectedColors?.map((color, index) => (
-                    <Box
-                      key={index}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: "0.8rem 1rem",
-                        backgroundColor: color,
-                        maxWidth: "100px", // Limit the box width
-                        overflow: "hidden",
-                        position: "relative", // Prevent overflow of the inner Box
-                      }}
-                    >
-                      <Typography
-                        variant="body2" // Change to body2 for better compatibility
-                        sx={{
-                          color: "white", // Ensure text color is visible on different backgrounds
-                          whiteSpace: "nowrap", // Prevent text from wrapping
-                          overflow: "hidden", // Hide overflow
-                          textOverflow: "ellipsis", // Show ellipsis
-                          maxWidth: "100%", // Set to full width of the parent Box
-                          display: "block", // Ensure each Typography is treated as a block
-                        }}
-                      >
-                        {color}
-                      </Typography>
-                      <CloseButton
-                        onClick={() => removeColor(color)}
-                        icon={<HiXMark />}
-                      />
-                    </Box>
-                  ))}
-                </Box>
-                {selectedColors.length > 0 && (
-                  <Button
-                    sx={{
-                      backgroundColor: theme.palette.green.main,
-                      color: theme.palette.primary.main,
-                      marginTop: "1rem",
-                    }}
-                    type="button"
-                    onClick={clearColors}
-                  >
-                    Clear Colors
-                  </Button>
-                )}
-              </div>
-            </CustomModal>
-          )}
+          <CustomModal1>
+            <CustomModal1.Open opens="select-color">
+              <Button
+                size="small"
+                sx={{
+                  width: "100%",
+                  backgroundColor: "white",
+                  border: `1.9px solid rgba(0, 0, 0, 0.12)`,
+                  color: theme.palette.primary.textcolor,
+                  padding: ".8rem .8rem",
+                  display: "flex",
+                  alignItems: "center",
+                  fontSize: "14px",
+                  justifyContent: "start",
+                  ":hover": {
+                    backgroundColor: "orange",
+                  },
+                }}
+              >
+                Select Color
+              </Button>
+            </CustomModal1.Open>
+            <CustomModal1.Window name="select-color">
+              <ColorSelectionModal
+                control={control}
+                selectedColors={selectedColors}
+                clearColors={clearColors}
+                removeColor={removeColor}
+                theme={theme}
+              />
+            </CustomModal1.Window>
+          </CustomModal1>
         </Grid>
+
         <Grid item xs={6} sm={6} sx={{ marginTop: ".5rem" }}>
           <CustomFileInput
             multiple
@@ -677,20 +591,22 @@ const CreateProduct = ({onSuccess = () => {},
             >
               {isEditSession ? "Edit Product" : "Create Product"}
             </Button>
-            <Button
-              sx={{
-                backgroundColor: theme.palette.primary[800],
-                color: theme.palette.primary.main,
-                "&:hover": {
-                  backgroundColor: theme.palette.secondary.dark,
-                },
-              }}
-              variant="outlined"
-              color="secondary"
-              onClick={() => reset()}
-            >
-              Clear
-            </Button>
+            {!isEditSession && (
+              <Button
+                sx={{
+                  backgroundColor: theme.palette.primary[800],
+                  color: theme.palette.primary.main,
+                  "&:hover": {
+                    backgroundColor: theme.palette.secondary.dark,
+                  },
+                }}
+                variant="outlined"
+                color="secondary"
+                onClick={() => reset()}
+              >
+                Clear
+              </Button>
+            )}
           </Box>
         </Grid>
       </Grid>

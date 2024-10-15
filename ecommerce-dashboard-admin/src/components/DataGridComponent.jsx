@@ -3,19 +3,21 @@ import { DataGrid } from "@mui/x-data-grid";
 import {
   Box,
   useTheme,
-  Stack,
+
   Tooltip,
   Button,
   Rating,
   gridClasses,
   Typography,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import Loader from "../components/loader/Loader";
 import Message from "../components/Message";
-import { deleteProductById, listProducts, updateProduct } from "actions/productActions";
+import {
+  deleteProductById,
+  listProducts,
+  updateProduct,
+} from "actions/productActions";
 import { listUsers } from "actions/userActions";
 import CustomerActions from "./CustomerActions";
 import moment from "moment";
@@ -23,11 +25,8 @@ import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 import { grey } from "@mui/material/colors";
 import CustomModal1 from "./CustomModal1";
 import CreateProduct from "./CreateProduct";
-import { HiPencil } from "react-icons/hi2";
 import ConfirmDelete from "./ui/ConfirmDelete";
-import { maxWidth } from "@mui/system";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 import { ModalContext } from "./CustomModal1";
 import FilterComponent from "./ui/FilterComponent";
 
@@ -40,34 +39,41 @@ const getRandomBackgroundColor = () => {
   return color;
 };
 
-const DataGridComponent = ({ type,refresh }) => {
+const DataGridComponent = ({ type, refresh }) => {
   const [pageSize, setPageSize] = useState(5);
   const [rowId, setRowId] = useState(null);
-  const [value, setValue] = useState(null);
-
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+
   const theme = useTheme();
   const deleteProduct = useSelector((state) => state.deleteProduct);
-  const { loading: loadingDelete, success, error: errorDelete } = deleteProduct;
-  const editProduct = useSelector((state)=>state.editProduct)
-  const {loading:loadingEdit,error:errorEdit,success:successEdit} = editProduct
+  const { loading: loadingDelete, success:successDelete, error: errorDelete } = deleteProduct;
+  const editProduct = useSelector((state) => state.editProduct);
+  const {
+    loading: loadingEdit,
+    error: errorEdit,
+    success: successEdit,
+  } = editProduct;
   const [loadDelete, setLoadDelete] = useState(false);
-  const [loadEdit,setLoadEdit] = useState(false)
-  const items = useSelector(state => (type === "products" ? state.productList.items : state.userList.items));
-  const loading = useSelector(state => (type === "products" ? state.productList.loading : state.userList.loading));
-  const error = useSelector(state => (type === "products" ? state.productList.error : state.userList.error));
+  const [loadEdit, setLoadEdit] = useState(false);
+  const items = useSelector((state) =>
+    type === "products" ? state.productList.items : state.userList.items
+  );
+  const loading = useSelector((state) =>
+    type === "products" ? state.productList.loading : state.userList.loading
+  );
+  const error = useSelector((state) =>
+    type === "products" ? state.productList.error : state.userList.error
+  );
   useEffect(() => {
     if (type === "products") {
-      console.log('refreshed data grid')
+      console.log("refreshed data grid");
       dispatch(listProducts());
     } else {
       dispatch(listUsers());
     }
-  }, [dispatch, type,refresh]);
+  }, [dispatch, type, refresh]);
   const [filteredProducts, setFilteredProducts] = useState(items);
   const [noResults, setNoResults] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const handleFilterChange = (filteredProducts) => {
     setFilteredProducts(filteredProducts);
     setNoResults(filteredProducts.length === 0);
@@ -91,18 +97,18 @@ const DataGridComponent = ({ type,refresh }) => {
   }
 
   const { close } = useContext(ModalContext);
-  const onEdit = async (id,product) => {
+  const onEdit = async (id, product) => {
     console.log(product);
     setLoadEdit(true);
     try {
-      await dispatch(updateProduct(id,product));
-      if(successEdit){
-        toast.success("Product Edited");  
+      await dispatch(updateProduct(id, product));
+      if (successEdit) {
+        toast.success("Product Edited");
       }
-      if(errorEdit){
-        toast.error(errorEdit)
+      if (errorEdit) {
+        toast.error(errorEdit);
       }
-      
+
       close();
       if (type === "products") {
         dispatch(listProducts()); // This should refresh the product list
@@ -118,25 +124,27 @@ const DataGridComponent = ({ type,refresh }) => {
     setLoadDelete(true);
     try {
       await dispatch(deleteProductById(id));
-      toast.success("Product Deleted");
+      
       close();
+      if (successDelete) {
+        toast.success("Product Deleted");
+      }
+      if (errorDelete) {
+        toast.error(errorEdit);
+      }
       if (type === "products") {
         dispatch(listProducts()); // This should refresh the product list
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error('Unable to delete product');
     } finally {
       setLoadDelete(false);
     }
   };
 
-
-  
   useEffect(() => {
     setFilteredProducts(items); // Update filteredProducts whenever items change
   }, [items]);
-
- 
 
   const columns =
     type === "products"
@@ -311,12 +319,16 @@ const DataGridComponent = ({ type,refresh }) => {
             renderCell: (params) => (
               <CustomModal1>
                 <CustomModal1.Open opens="edit">
-                  <Button style={{ color: "green" }} >
+                  <Button style={{ color: "green" }}>
                     <AiOutlineEdit style={{ fontSize: "1rem" }} />
                   </Button>
                 </CustomModal1.Open>
                 <CustomModal1.Window name="edit">
-                  <CreateProduct productToEdit={params.row} onEdit={onEdit} isEditing={loadingEdit}  />
+                  <CreateProduct
+                    productToEdit={params.row}
+                    onEdit={onEdit}
+                    isEditing={loadingEdit}
+                  />
                 </CustomModal1.Window>
 
                 <CustomModal1.Open opens="delete">
@@ -380,7 +392,8 @@ const DataGridComponent = ({ type,refresh }) => {
         ];
   return (
     <>
-      <FilterComponent items={items} onFilterChange={handleFilterChange} />
+    {type === 'products' && ( <FilterComponent items={items} onFilterChange={handleFilterChange} />)}
+     
       <Box
         mt="20px"
         height="75vh"

@@ -21,6 +21,7 @@ export const fetchAllNotifications = () =>async(dispatch,getState)=>{
         }
     }
     const response = await axios.get('/api/notifications',config)
+    console.log('this is notification response',response)
     dispatch({type:FETCH_NOTIFICATIONS,payload:response.data.data})
 }
 

@@ -170,7 +170,7 @@ const ButtonWithPopper = forwardRef(
               </Box>
 
               <List>
-                {popperContent?.map((notification) => (
+                {popperContent.length>0 && popperContent?.map((notification) => (
                   <React.Fragment key={notification._id}>
                     <ListItem
                       style={{

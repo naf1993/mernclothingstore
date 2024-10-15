@@ -92,9 +92,14 @@ const productSchema = new mongoose.Schema(
     },
 
     countInStock: {
-      type: String,
+      type: Number,
       required: true,
+      default:0,
     },
+    sold:{
+      type:Number,
+      default:0
+    }
   },
   {
     toJSON: { virtuals: true },

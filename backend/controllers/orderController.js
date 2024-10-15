@@ -289,6 +289,33 @@ const getOrderSummary = catchAsync(async (req, res, next) => {
   });
 });
 
+export const getSalesData = catchAsync(async (req, res, next) => {
+
+  const {startDate,endDate} = req.query
+  console.log(startDate,endDate)
+  if(!startDate || !endDate){
+    return next(new AppError("Please specify start and end dates", 404));
+
+  }
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  const salesData = await Order.aggregate([
+    {$match:{
+      saleDate:{$gte:start,$lte:end}
+    }},
+    {
+      $group:{
+        _id:{$dateToString:{format: '%Y-%m-%d', date: '$saleDate'}},
+        totalSales:{$sum:'$finalPrice'},
+        totalOrders:{$sum:1}
+      }
+    },
+    {$sort:{_id:-1}}
+  ])
+  res.status(200).json(salesData)
+
+})
+
 export {
   updateOrderStatusByAdmin,
   getOrderByUserId,

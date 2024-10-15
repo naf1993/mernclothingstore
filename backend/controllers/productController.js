@@ -1,6 +1,7 @@
 import path from "path";
 import Product from "../models/productModel.js";
 import User from "../models/userModel.js";
+import Order from '../models/orderModel.js'
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import APIFeatures from "../utils/apiFeatures.js";
@@ -409,6 +410,32 @@ const productSearch = catchAsync(async (req, res, next) => {
       products,
     },
   });
+});
+
+export const topSellingProducts = catchAsync(async (req, res, next) => {
+  const topProducts = await Order.aggregate([
+    { $unwind: "$products" },
+    {
+        $lookup: {
+            from: "products", // Assuming the collection name for products is "products"
+            localField: "products.product",
+            foreignField: "_id",
+            as: "productDetails"
+        }
+    },
+    { $unwind: "$productDetails" }, // Unwind the product details array
+    {
+        $group: {
+            _id: "$productDetails.name", // Use product name as the key
+            totalSales: { $sum: "$products.price" },
+            totalOrders: { $sum: 1 }
+        }
+    },
+    { $sort: { totalSales: -1 }},
+    { $limit: 10 } // Limit to top 10 products
+]);
+
+  res.status(200).json(topProducts);
 });
 
 export {
