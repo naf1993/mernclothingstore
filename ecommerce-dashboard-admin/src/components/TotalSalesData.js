@@ -10,7 +10,7 @@ const TotalSalesData = ({ data }) => {
   return (
     <div style={{ position: 'relative', width: '100%', height: '300px' ,backgroundColor: 'white', padding: '10px', borderRadius: '8px'}}>
       <h3 style={{ position: 'absolute', top: '30px', right: '30px', margin: 0,color:theme.palette.primary.textcolor, }}>Sales per Month</h3>
-    <ResponsiveContainer width='100%' height={300}>
+    <ResponsiveContainer width='100%' height={270}>
       <LineChart data={data}>
         <CartesianGrid strokeDasharray='3 3' />
         <XAxis dataKey='_id' tickFormatter={(date) => new Date(date).toLocaleString('default', { month: 'long', year: 'numeric' })} tick={{

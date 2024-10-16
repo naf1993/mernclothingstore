@@ -3,7 +3,6 @@ import { DataGrid } from "@mui/x-data-grid";
 import {
   Box,
   useTheme,
-
   Tooltip,
   Button,
   Rating,
@@ -29,6 +28,7 @@ import ConfirmDelete from "./ui/ConfirmDelete";
 import toast from "react-hot-toast";
 import { ModalContext } from "./CustomModal1";
 import FilterComponent from "./ui/FilterComponent";
+import { getAllOrders } from "actions/orderActions";
 
 const getRandomBackgroundColor = () => {
   let letters = "0123456789ABCDEF";
@@ -46,7 +46,11 @@ const DataGridComponent = ({ type, refresh }) => {
 
   const theme = useTheme();
   const deleteProduct = useSelector((state) => state.deleteProduct);
-  const { loading: loadingDelete, success:successDelete, error: errorDelete } = deleteProduct;
+  const {
+    loading: loadingDelete,
+    success: successDelete,
+    error: errorDelete,
+  } = deleteProduct;
   const editProduct = useSelector((state) => state.editProduct);
   const {
     loading: loadingEdit,
@@ -55,21 +59,52 @@ const DataGridComponent = ({ type, refresh }) => {
   } = editProduct;
   const [loadDelete, setLoadDelete] = useState(false);
   const [loadEdit, setLoadEdit] = useState(false);
-  const items = useSelector((state) =>
-    type === "products" ? state.productList.items : state.userList.items
-  );
-  const loading = useSelector((state) =>
-    type === "products" ? state.productList.loading : state.userList.loading
-  );
-  const error = useSelector((state) =>
-    type === "products" ? state.productList.error : state.userList.error
-  );
+
+  const items = useSelector((state) => {
+    switch (type) {
+      case "products":
+        return state.productList.items;
+      case "users":
+        return state.userList.items;
+      case "orders":
+        return state.order.items;
+      default:
+        return [];
+    }
+  });
+  const loading = useSelector((state) => {
+    switch (type) {
+      case "products":
+        return state.productList.loading;
+      case "users":
+        return state.userList.loading;
+      case "orders":
+        return state.order.loading; // Assuming you have loading state for orders
+      default:
+        return false; // Default loading state
+    }
+  });
+  const error = useSelector((state) => {
+    switch (type) {
+      case "products":
+        return state.productList.error;
+      case "users":
+        return state.userList.error;
+      case "orders":
+        return state.order.error; // Assuming you have error state for orders
+      default:
+        return null; // Default error state
+    }
+  });
+
   useEffect(() => {
     if (type === "products") {
       console.log("refreshed data grid");
       dispatch(listProducts());
-    } else {
+    } else if (type === "users") {
       dispatch(listUsers());
+    } else {
+      dispatch(getAllOrders());
     }
   }, [dispatch, type, refresh]);
   const [filteredProducts, setFilteredProducts] = useState(items);
@@ -124,7 +159,7 @@ const DataGridComponent = ({ type, refresh }) => {
     setLoadDelete(true);
     try {
       await dispatch(deleteProductById(id));
-      
+
       close();
       if (successDelete) {
         toast.success("Product Deleted");
@@ -136,7 +171,7 @@ const DataGridComponent = ({ type, refresh }) => {
         dispatch(listProducts()); // This should refresh the product list
       }
     } catch (error) {
-      toast.error('Unable to delete product');
+      toast.error("Unable to delete product");
     } finally {
       setLoadDelete(false);
     }
@@ -348,7 +383,8 @@ const DataGridComponent = ({ type, refresh }) => {
             ),
           },
         ]
-      : [
+      : type === "users"
+      ? [
           {
             field: "name",
             headerName: "Name",
@@ -389,11 +425,78 @@ const DataGridComponent = ({ type, refresh }) => {
               <CustomerActions {...{ params, rowId, setRowId }} />
             ),
           },
+        ]
+      : [
+          /* Order ID
+          Customer Name
+          Email/Contact
+          Order Date
+          Total Amount
+          Payment Status (e.g., Paid, Pending, Failed)
+          Order Status (e.g., Processing, Dispatched, Delivered, Cancelled)
+          Actions (View, Edit, Delete) */
+          {
+            field: "name",
+            headerName: "Customer Name",
+            width: 120,
+            headerAlign: "center",
+            renderCell: (params) => {
+              const name = params.row.user?.name || "Unknown";
+
+              return <Box>{name}</Box>;
+            },
+            filterable: true,
+          },
+          {
+            field: "email",
+            headerName: "Email/Contact",
+            width: 200,
+            renderCell: (params) => {
+              const email = params.row.user?.email || "Unknown";
+
+              return <Box>{email}</Box>;
+            },
+            filterable: true,
+          },
+
+          {
+            field: "totalPrice",
+            headerName: "Total Amount",
+            width: 100,
+            headerAlign: "center",
+          },
+          {
+            field: "paymentMethod",
+            headerName: "Payment By",
+            width: 150,
+            
+          },
+          {
+            field: "paymentStatus",
+            headerName: "Status of Payment",
+            width: 150,
+            
+          },
+          {
+            field: "orderStatus",
+            headerName: "Status of Order",
+            width: 100,
+          
+          },
+          {
+            field: "saleDate",
+            headerName: "Order Date",
+            width: 150,
+            renderCell: (params) =>
+              moment(params.row.saleDate).format("YYYY-MM-DD"),
+          },
         ];
   return (
     <>
-    {type === 'products' && ( <FilterComponent items={items} onFilterChange={handleFilterChange} />)}
-     
+      {type === "products" && (
+        <FilterComponent items={items} onFilterChange={handleFilterChange} />
+      )}
+
       <Box
         mt="20px"
         height="75vh"

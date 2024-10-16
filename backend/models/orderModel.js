@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import validator from 'validator';
+import mongoose from "mongoose";
+import validator from "validator";
 
 const orderSchema = mongoose.Schema(
   {
@@ -70,6 +70,22 @@ const orderSchema = mongoose.Schema(
         "Cancelled",
         "Delivered",
       ],
+      validate: {
+        validator: function (v) {
+          if (this.paymentStatus === "Failed") {
+            return v === "Cancelled";
+          }
+          if (this.paymentStatus === "Pending") {
+            return v === "Not Processed" || "Cancelled";
+          }
+          if (this.paymentStatus === "Paid") {
+            return v === "Processing" || "Cancelled";
+          }
+          return false;
+        },
+        message: (props) =>
+          `Invalid order status for payment status '${props.instance.paymentStatus}'. Current value: ${props.value}`,
+      },
     },
     totalPrice: {
       type: Number,
@@ -82,7 +98,7 @@ const orderSchema = mongoose.Schema(
     finalPrice: {
       type: Number,
       required: true,
-      default: function() {
+      default: function () {
         return this.totalPrice - this.discount;
       },
     },

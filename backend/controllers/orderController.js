@@ -74,7 +74,7 @@ const getOrdersByUser = catchAsync(async (req, res, next) => {
 });
 
 const getAllOrdersByAdmin = catchAsync(async (req, res, next) => {
-  const orders = await Order.find();
+  const orders = await Order.find().populate('user');
 
   res.status(200).json({
     status: "success",

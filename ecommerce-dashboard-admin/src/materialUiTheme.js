@@ -226,6 +226,11 @@ export const themeSettings = (mode)=>{
           medium:tokensDark.grey[700],
           textcolor:tokensDark.darkBlack[100]
         },
+        green:{
+          ...tokensLight.green,
+          main:tokensLight.green[500],
+          light:tokensLight.green[400]
+        },
         background:{
 
           default:tokensDark.darkBlue[100],

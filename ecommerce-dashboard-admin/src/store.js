@@ -8,6 +8,7 @@ import { adminLoginReducer,userListReducer, userUpdateByAdminReducer } from "./r
 import { productCreateReducer,productDeleteReducer,productDetailReducer,productImageDeleteReducer,productListReducer,productUpdateReducer } from "./reducers/productReduceer";
 import { dashboardStatsReducer } from "./reducers/dashboardStatsReducer";
 import notificationReducer from "reducers/notificationReducer";
+import { orderReducer } from "reducers/orderReducer";
 const reducer = combineReducers({
     theme:themeReducer,
     customization:customizationReducer,
@@ -21,7 +22,8 @@ const reducer = combineReducers({
     userList:userListReducer,
     userUpdateAdmin:userUpdateByAdminReducer,
     dashboardStats:dashboardStatsReducer,
-    allnotifications:notificationReducer
+    allnotifications:notificationReducer,
+    order:orderReducer
    
 })
 const persistConfig = {
