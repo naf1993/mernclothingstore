@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 const statusColorMapping = {
     paymentStatus: {
         Pending: '#FFCC00',  // Yellow
-        Completed: '#4CAF50', // Green
+        Paid: '#4CAF50', // Green
         Failed: '#F44336',    // Red
     }, orderStatus: {
         'Not Processed': '#FFC107', // Amber

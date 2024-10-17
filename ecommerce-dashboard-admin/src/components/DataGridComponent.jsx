@@ -8,6 +8,7 @@ import {
   Rating,
   gridClasses,
   Typography,
+  Badge,
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import Loader from "../components/loader/Loader";
@@ -29,6 +30,7 @@ import toast from "react-hot-toast";
 import { ModalContext } from "./CustomModal1";
 import FilterComponent from "./ui/FilterComponent";
 import { getAllOrders } from "actions/orderActions";
+import FilterOrders from "./ui/FilterOrders";
 
 const getRandomBackgroundColor = () => {
   let letters = "0123456789ABCDEF";
@@ -37,6 +39,19 @@ const getRandomBackgroundColor = () => {
     color += letters[Math.floor(Math.random() * 16)];
   }
   return color;
+};
+const statusColorMapping = {
+  paymentStatus: {
+    Pending: "black", // Yellow
+    Paid: "#4CAF50", // Green
+    Failed: "#F44336", // Red
+  },
+  orderStatus: {
+    "Not Processed": "#FFC107", // Amber
+    Processing: "#2196F3", // Blue
+    Shipped: "#FF9800", // Orange
+    Delivered: "#8BC34A", // Light Green
+  },
 };
 
 const DataGridComponent = ({ type, refresh }) => {
@@ -436,14 +451,28 @@ const DataGridComponent = ({ type, refresh }) => {
           Order Status (e.g., Processing, Dispatched, Delivered, Cancelled)
           Actions (View, Edit, Delete) */
           {
+            field: "orderId",
+            headerName: "Order ID",
+            width: 80,
+            renderCell: (params) => (
+              <Typography sx={{ fontSize: "0.7rem" }} variant="p">
+                {params.value}
+              </Typography>
+            ),
+          },
+          {
             field: "name",
             headerName: "Customer Name",
             width: 120,
-            headerAlign: "center",
+            
             renderCell: (params) => {
               const name = params.row.user?.name || "Unknown";
 
-              return <Box>{name}</Box>;
+              return (
+                <Typography sx={{ fontSize: "0.7rem" }} variant="p">
+                  {name}
+                </Typography>
+              );
             },
             filterable: true,
           },
@@ -454,41 +483,111 @@ const DataGridComponent = ({ type, refresh }) => {
             renderCell: (params) => {
               const email = params.row.user?.email || "Unknown";
 
-              return <Box>{email}</Box>;
+              return (
+                <Typography sx={{ fontSize: "0.7rem" }} variant="p">
+                  {email}
+                </Typography>
+              );
             },
             filterable: true,
           },
 
           {
             field: "totalPrice",
-            headerName: "Total Amount",
-            width: 100,
-            headerAlign: "center",
+            headerName: "Amount",
+            width: 80,
+            
+            filterable: true,
+            renderCell: (params) => (
+              <Typography sx={{ fontSize: "0.7rem" }} variant="p">
+                {params.value}
+              </Typography>
+            ),
           },
           {
             field: "paymentMethod",
             headerName: "Payment By",
             width: 150,
-            
+            renderCell: (params) => (
+              <Typography sx={{ fontSize: "0.7rem" }} variant="p">
+                {params.value}
+              </Typography>
+            ),
           },
           {
             field: "paymentStatus",
-            headerName: "Status of Payment",
-            width: 150,
-            
+            headerName: "Status",
+            width: 80,
+            renderCell: (params) => (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center", // Centers vertically
+                  justifyContent: "center", // Centers horizontally
+                  height: "100%", // Ensure full height of the cell
+                  padding: "0", // Remove default padding
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor:
+                      statusColorMapping.paymentStatus[params.value] ||
+                      "transparent",
+                    color: "white",
+                    padding: "5px 8px",
+                    borderRadius: "8px",
+                    textAlign: "center",
+                    fontSize: "0.7rem",
+                    whiteSpace: "nowrap", // Prevent wrapping
+                  }}
+                >
+                  {params.value}
+                </div>
+              </div>
+            ),
           },
           {
             field: "orderStatus",
-            headerName: "Status of Order",
-            width: 100,
-          
+            headerName: "Order Status",
+            width: 130,
+            renderCell: (params) => (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center", // Centers vertically
+                  justifyContent: "center", // Centers horizontally
+                  height: "100%", // Ensure full height of the cell
+                  padding: "0", // Remove default padding
+                }}
+              >
+                <div
+                  style={{
+                    backgroundColor:
+                      statusColorMapping.orderStatus[params.value] ||
+                      "transparent",
+                    color: "white",
+                    padding: "5px 10px",
+                    borderRadius: "8px",
+                    textAlign: "center",
+                    fontSize: "0.7rem",
+                    whiteSpace: "nowrap", // Prevent wrapping
+                  }}
+                >
+                  {params.value}
+                </div>
+              </div>
+            ),
           },
           {
             field: "saleDate",
             headerName: "Order Date",
+            
             width: 150,
-            renderCell: (params) =>
-              moment(params.row.saleDate).format("YYYY-MM-DD"),
+            renderCell: (params) => (
+              <Typography sx={{ fontSize: "0.7rem" }} variant="p">
+                {moment(params.row.saleDate).format("YYYY-MM-DD")}
+              </Typography>
+            ),
           },
         ];
   return (
@@ -496,6 +595,7 @@ const DataGridComponent = ({ type, refresh }) => {
       {type === "products" && (
         <FilterComponent items={items} onFilterChange={handleFilterChange} />
       )}
+      {type === 'orders' && (<FilterOrders items={items} onFilterChange={handleFilterChange}/>)}
 
       <Box
         mt="20px"
