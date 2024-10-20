@@ -17,10 +17,16 @@ import {
     SALES_DATA_REQUEST,
     SALES_DATA_SUCCESS,
     SALES_DATA_FAIL,
+    ORDER_SINGLE_REQUEST,
+    ORDER_SINGLE_SUCCESS,
+    ORDER_SINGLE_FAIL,
+    ORDER_DELETE_REQUEST,
+    ORDER_DELETE_FAIL,
 } from '../constants/orderConstants';
 
 const initialState = {
     items:[],
+    singleOrder:{},
     userOrders:[],
     dailyOrders:[],
     orderSummary:{},
@@ -36,9 +42,13 @@ export const orderReducer = (state=initialState,action)=>{
             case ORDER_DAILY_REQUEST:
             case ORDER_SUMMARY_REQUEST:
             case SALES_DATA_REQUEST:
+            case ORDER_SINGLE_REQUEST:
+            case ORDER_DELETE_REQUEST:
                 return {...state,loading:true,error:null}
                 case ORDER_LIST_SUCCESS:
                     return { ...state, loading: false, items: action.payload };
+                case ORDER_SINGLE_SUCCESS:
+                    return {...state,loading:false,singleOrder:action.payload}
         
                 case ORDER_USER_SUCCESS:
                     return { ...state, loading: false, userOrders: action.payload };
@@ -54,6 +64,8 @@ export const orderReducer = (state=initialState,action)=>{
         
                 case SALES_DATA_SUCCESS:
                     return { ...state, loading: false, salesData: action.payload };
+                case ORDER_DELETE_FAIL:
+                    return {...state,loading:false,success:true}
         
                 case ORDER_LIST_FAIL:
                 case ORDER_USER_FAIL:
@@ -61,6 +73,8 @@ export const orderReducer = (state=initialState,action)=>{
                 case ORDER_DAILY_FAIL:
                 case ORDER_SUMMARY_FAIL:
                 case SALES_DATA_FAIL:
+                case ORDER_SINGLE_FAIL:
+                case ORDER_DELETE_FAIL:
                     return { ...state, loading: false, error: action.payload };
         
                 default:

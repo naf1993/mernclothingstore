@@ -72,7 +72,12 @@ function CustomModal1({ children }) {
 function Open({ children, opens: opensWindowName }) {
   const { open } = useContext(ModalContext);
 
-  return cloneElement(children, { onClick: () => open(opensWindowName) });
+  return cloneElement(children, {
+    onClick: (event) => {
+      event.stopPropagation(); // Prevent row click
+      open(opensWindowName);
+    }
+  });
 }
 
 function Window({ children, name }) {

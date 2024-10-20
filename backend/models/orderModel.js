@@ -77,14 +77,15 @@ const orderSchema = mongoose.Schema(
       ],
       validate: {
         validator: function (v) {
-          if (this.paymentStatus === "Failed") {
+          const paymentStatus = this.paymentStatus; // Store paymentStatus in a variable
+          if (paymentStatus === "Failed") {
             return v === "Cancelled";
           }
-          if (this.paymentStatus === "Pending") {
-            return v === "Not Processed" || "Cancelled";
+          if (paymentStatus === "Pending") {
+            return v === "Not Processed" || v === "Cancelled";
           }
-          if (this.paymentStatus === "Paid") {
-            return v === "Processing" || "Cancelled";
+          if (paymentStatus === "Paid") {
+            return v === "Processing" || v === "Cancelled";
           }
           return false;
         },

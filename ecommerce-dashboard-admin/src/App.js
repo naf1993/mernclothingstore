@@ -9,6 +9,8 @@ import Protected from "./components/Protected";
 import { Toaster } from "react-hot-toast";
 import CustomModal1 from "components/CustomModal1";
 import Loading from './scenes/Loading'; // Import your loading component
+import OrderDetail from "scenes/OrderDetail";
+import ProductDetail from "scenes/ProductDetail";
 
 // Lazy loading components
 const Layout = lazy(() => import("./scenes/Layout"));
@@ -58,11 +60,12 @@ function App() {
                     <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
                     <Route path="/products/grid" element={<Protected><ProductsCards /></Protected>} />
                     <Route path="/products/table" element={<Protected><Products /></Protected>} />
-                    <Route path="/products/:id" element={<Protected><SingleProduct /></Protected>} />
+                    <Route path="/products/:id" element={<Protected><ProductDetail/></Protected>} />
                     <Route path="/customers/table" element={<Protected><Customers /></Protected>} />
                     <Route path="/transactions" element={<Protected><Transactions /></Protected>} />
                     <Route path="/admin" element={<Protected><Admin /></Protected>} />
                     <Route path="/orders" element={<Protected><Orders /></Protected>} />
+                    <Route path="/orders/:id" element={<Protected><OrderDetail /></Protected>} />
                   </Route>
                 </Routes>
               </Suspense>

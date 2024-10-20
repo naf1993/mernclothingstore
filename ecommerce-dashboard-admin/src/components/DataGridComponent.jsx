@@ -21,7 +21,7 @@ import {
 import { listUsers } from "actions/userActions";
 import CustomerActions from "./CustomerActions";
 import moment from "moment";
-import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
+import { AiOutlineEdit, AiOutlineDelete, AiOutlineEye } from "react-icons/ai";
 import { grey } from "@mui/material/colors";
 import CustomModal1 from "./CustomModal1";
 import CreateProduct from "./CreateProduct";
@@ -29,8 +29,10 @@ import ConfirmDelete from "./ui/ConfirmDelete";
 import toast from "react-hot-toast";
 import { ModalContext } from "./CustomModal1";
 import FilterComponent from "./ui/FilterComponent";
-import { getAllOrders } from "actions/orderActions";
+import { getAllOrders, updateOrderStatus } from "actions/orderActions";
 import FilterOrders from "./ui/FilterOrders";
+import EditOrder from "./ui/EditOrder";
+import { useNavigate } from "react-router-dom";
 
 const getRandomBackgroundColor = () => {
   let letters = "0123456789ABCDEF";
@@ -42,7 +44,7 @@ const getRandomBackgroundColor = () => {
 };
 const statusColorMapping = {
   paymentStatus: {
-    Pending: "black", // Yellow
+    Pending: '#FFCC00',  /// Yellow
     Paid: "#4CAF50", // Green
     Failed: "#F44336", // Red
   },
@@ -51,6 +53,7 @@ const statusColorMapping = {
     Processing: "#2196F3", // Blue
     Shipped: "#FF9800", // Orange
     Delivered: "#8BC34A", // Light Green
+    Cancelled:'#F44336'
   },
 };
 
@@ -58,6 +61,7 @@ const DataGridComponent = ({ type, refresh }) => {
   const [pageSize, setPageSize] = useState(5);
   const [rowId, setRowId] = useState(null);
   const dispatch = useDispatch();
+  const navigate = useNavigate()
 
   const theme = useTheme();
   const deleteProduct = useSelector((state) => state.deleteProduct);
@@ -72,6 +76,8 @@ const DataGridComponent = ({ type, refresh }) => {
     error: errorEdit,
     success: successEdit,
   } = editProduct;
+  const orderUpdate = useSelector((state)=>state.order)
+  const {loading:loadingOrderUpdate,success:successOrderupdate,error:errorOrderUpdate} = orderUpdate
   const [loadDelete, setLoadDelete] = useState(false);
   const [loadEdit, setLoadEdit] = useState(false);
 
@@ -147,6 +153,26 @@ const DataGridComponent = ({ type, refresh }) => {
   }
 
   const { close } = useContext(ModalContext);
+  const onEditOrder = async(id,status)=>{
+    console.log(id)
+    try{
+      await dispatch(updateOrderStatus(id,status))
+      if(successOrderupdate){
+        toast.success('Order Updated')
+      }
+      if(errorOrderUpdate){
+        toast.error(errorOrderUpdate)
+      }
+      close()
+      if(type === 'orders'){
+        dispatch(getAllOrders())
+      }
+
+
+    }catch(error){
+      toast.error(error.message)
+    }
+  }
   const onEdit = async (id, product) => {
     console.log(product);
     setLoadEdit(true);
@@ -369,7 +395,7 @@ const DataGridComponent = ({ type, refresh }) => {
             renderCell: (params) => (
               <CustomModal1>
                 <CustomModal1.Open opens="edit">
-                  <Button style={{ color: "green" }}>
+                  <Button style={{ color: "green" }}  onClick={(event) => event.stopPropagation()} >
                     <AiOutlineEdit style={{ fontSize: "1rem" }} />
                   </Button>
                 </CustomModal1.Open>
@@ -382,7 +408,7 @@ const DataGridComponent = ({ type, refresh }) => {
                 </CustomModal1.Window>
 
                 <CustomModal1.Open opens="delete">
-                  <Button style={{ color: "red" }}>
+                  <Button style={{ color: "red" }}  onClick={(event) => event.stopPropagation()} >
                     <AiOutlineDelete style={{ fontSize: "1rem" }} />
                   </Button>
                 </CustomModal1.Open>
@@ -453,7 +479,7 @@ const DataGridComponent = ({ type, refresh }) => {
           {
             field: "orderId",
             headerName: "Order ID",
-            width: 80,
+            width: 100,
             renderCell: (params) => (
               <Typography sx={{ fontSize: "0.7rem" }} variant="p">
                 {params.value}
@@ -582,11 +608,44 @@ const DataGridComponent = ({ type, refresh }) => {
             field: "saleDate",
             headerName: "Order Date",
             
-            width: 150,
+            width: 100,
             renderCell: (params) => (
               <Typography sx={{ fontSize: "0.7rem" }} variant="p">
                 {moment(params.row.saleDate).format("YYYY-MM-DD")}
               </Typography>
+            ),
+          },
+          {
+            field: "action",
+            headerName: "Action",
+            width: 150,
+            sortable: false,
+            disableClickEventBubbling: true,
+            renderCell: (params) => (
+              <>
+            
+              <CustomModal1>
+                <CustomModal1.Open opens="edit-order">
+                  <Button style={{ color: "green" }} onClick={(event) => event.stopPropagation()}>
+                    <AiOutlineEdit style={{ fontSize: "1rem" }} />
+                  </Button>
+                </CustomModal1.Open>
+                <CustomModal1.Window name="edit-order">
+                  <EditOrder orderStatus={params.row.orderStatus} orderId={params.row._id} onEdit={onEditOrder} isUpdatingOrder={loadingOrderUpdate}/>
+                 
+                </CustomModal1.Window>
+
+                <CustomModal1.Open opens="delete">
+                  <Button style={{ color: "red" }} onClick={(event) => event.stopPropagation()}>
+                    <AiOutlineDelete style={{ fontSize: "1rem" }} />
+                  </Button>
+                </CustomModal1.Open>
+                <CustomModal1.Window name="delete">
+                 <p>you want to delete</p>
+                </CustomModal1.Window>
+              </CustomModal1> 
+              </>
+             
             ),
           },
         ];
@@ -662,7 +721,16 @@ const DataGridComponent = ({ type, refresh }) => {
                   theme.palette.mode === "light" ? grey[800] : grey[900],
               },
             }}
-            onCellEditCommit={(params) => setRowId(params.id)}
+            onCellEditCommit={(params) => setRowId(params.id)} 
+            onRowClick={(params) => {
+              const id = params.row._id;
+              if (type === "products") {
+                navigate(`/products/${id}`);
+              } else if (type === "orders") {
+                navigate(`/orders/${id}`);
+              }
+              // Add additional cases for other types if needed
+            }}
           />
         ) : (
           noResults && (

@@ -3,6 +3,7 @@ import { faker } from "@faker-js/faker";
 import User from "./models/userModel.js";
 import Order from "./models/orderModel.js";
 import Product from "./models/productModel.js";
+import { v4 as uuidv4 } from "uuid";
 
 const deleteOrdersMany = async () => {
   try {
@@ -273,4 +274,30 @@ const updateOrdersCashondelivery = async () => {
     await mongoose.disconnect();
   }
 };
-updateOrdersCashondelivery()
+//updateOrdersCashondelivery()
+const updateOrderIds = async () => {
+  try {
+    await mongoose.connect(
+      "mongodb+srv://nafitha1993:fptc4Ede6kjJFDNc@eshop.uqdktjs.mongodb.net/?retryWrites=true&w=majority&appName=eshop",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }
+    );
+    
+    const orders = await Order.find();
+    for (const order of orders) {
+      const newOrderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
+      await Order.updateOne({ _id: order._id }, { orderId: newOrderId });
+      console.log(`Updated order ID ${order._id} to ${newOrderId}`);
+    }
+
+    console.log("All order IDs updated successfully.");
+    console.log("All order IDs updated successfully.");
+  } catch (error) {
+    console.error("Error updating order IDs:", error.message);
+  } finally {
+    mongoose.connection.close();
+  }
+};
+updateOrderIds()

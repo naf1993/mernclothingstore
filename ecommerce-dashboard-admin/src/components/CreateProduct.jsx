@@ -25,7 +25,7 @@ import useOutsideClick from "hooks/useOutsideClick";
 import CustomCheckbox from "./ui/CustomCheckbox";
 import CustomFileInput from "./ui/CustomFileInput";
 import CloseButton from "./ui/CloseButton";
-import {  sizesOptions } from "./data";
+import { sizesOptions } from "./data";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createProduct,
@@ -102,7 +102,6 @@ const CreateProduct = ({
   });
 
   const selectedColors = watch("colors") || [];
-
 
   useEffect(() => {
     if (isEditSession && productToEdit.images) {
@@ -340,8 +339,6 @@ const CreateProduct = ({
           />
         </Grid>
         <Grid item xs={12} sm={12}>
-          <Typography variant="h6">Feedback Form</Typography>
-
           <Controller
             name="description"
             control={control}
@@ -359,7 +356,10 @@ const CreateProduct = ({
                   errors.description ? errors.description.message : ""
                 }
                 fullWidth
-                sx={{ marginBottom: 2 }}
+                sx={{
+                  marginBottom: 2,
+                  backgroundColor: "white", // Set background color to white
+                }}
               />
             )}
           />
@@ -563,7 +563,7 @@ const CreateProduct = ({
         </Grid>
         <Grid item xs={6} sm={6}>
           <FormControlLabel
-            control={<Switch {...register("isFeatured")} color="primary" />}
+            control={<Switch {...register("isFeatured")}  color="primary" />}
             label="Is this product a featured product?"
           />
         </Grid>

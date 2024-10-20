@@ -13,7 +13,12 @@ const CustomSelect = forwardRef(({ label, options, error, value, onChange }, ref
   return (
     <FormControl fullWidth variant="outlined" sx={{ marginBottom: '0.7rem' }} error={Boolean(error)}>
       <InputLabel>{label}</InputLabel>
-      <Select
+      <Select  sx={{
+          backgroundColor: "white", // Set background color to white
+          "& .MuiSelect-select": {
+            padding: "10px", // Optional: add padding for better appearance
+          },
+        }}
         ref={ref}
         value={value || ''}
         onChange={(e) => {

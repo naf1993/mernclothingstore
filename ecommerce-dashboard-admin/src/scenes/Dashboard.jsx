@@ -183,11 +183,16 @@ const Dashboard = () => {
               {loadingSales && <Loader />}
               {errorSales && <Message error={errorSales} />}
               {salesData.length > 0 && <TotalSalesData data={salesData} />}
-              <DateRangePicker
-                onDateChange={(start, end) => {
-                  setDateRange({ startDate: start, endDate: end });
-                }}
-              />
+             <Box sx={{width:'20rem',margin:'0 auto',marginTop:'0.8rem'}}>
+             <DateRangePicker
+            startDate={dateRange.startDate}
+            endDate={dateRange.endDate}
+            onDateChange={(start, end) => {
+              setDateRange({ startDate: start, endDate: end });
+            }}
+          />
+             </Box>
+            
             </Box>
           </Grid>
           <Grid item xs={12} md={6}>
