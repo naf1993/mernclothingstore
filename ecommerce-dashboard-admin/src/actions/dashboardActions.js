@@ -16,6 +16,7 @@ export const getDashboardStats = () => async(dispatch,getState)=>{
       
         const {data} = await axios.get('/api/orders/getordersummary',config)
           const overall = data.data
+          console.log(overall)
          
                dispatch({
             type:DASHBOARD_STATS_SUCCESS,

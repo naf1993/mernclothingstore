@@ -1,8 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import NavBar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Announcement from "./components/Announcement";
-
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Home from "./screens/Home";
@@ -79,7 +77,7 @@ const App = () => {
           <Route path="/favourites" element={<Favourites />} />
           <Route path="/cart" element={<Cart />} />
         </Routes>
-        {/* <Footer/> */}
+        <Footer/>
       </div>
     </Router>
   );

@@ -1,12 +1,13 @@
 .main-slider-wrapper {
   grid-column: center-start / center-end;
   background-color: white;
-  
-
   margin: 5rem 0;
-  padding:0 3rem;
+  padding-right: 3rem;
   font-family: "Lato", sans-serif;
+  overflow: hidden;
   position: relative;
+  border-radius: 10px;
+  
 
   span {
     display: flex;
@@ -14,44 +15,76 @@
     justify-content: center;
     gap: 0.5rem;
     position: absolute;
-    bottom: 0;
-    left: 48%;
+    bottom: 20px; // Adjust as needed
+    left: 50%;
+    transform: translateX(-50%); // Center the buttons
+    z-index: 999;
+
     .buttonSlide {
       width: 1.5rem;
       height: 1.5rem;
       border-radius: 50%;
-      background-color: var(--color-grey-dark-1);
+      background-color: var(--color-grey-light-1);
       border: none;
-      z-index: 999;
+      cursor: pointer; // Make buttons look clickable
+      transition: background-color 0.3s; // Smooth transition for hover
+
+      &:hover {
+        background-color: var(--color-grey-light-2); // Change on hover
+      }
     }
   }
 
   .slide {
-    display: flex;
-    img{
-        object-fit: cover;
-    }
-    // opacity: 0;
-    // transition-duration: 1s ease;
-    
-    .text-container{
-        margin:2rem auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap:1.5rem;
-        justify-content: center;
-        .cpn-btn{
-            width:50%;
-            margin:0 auto;
-            
-            border:none;
-            border-style:dotted;
-            background-color: white;
-            padding:1rem .5rem;
-            border-width: 2px;
+    display: none; // Hide all slides by default
+    flex: 1; // Ensure the slide takes equal space in flex container
 
+    &.active {
+      display: flex; // Show active slide
+      opacity: 1;
+      transition: opacity 1s ease; // Smooth transition for opacity
+    }
+
+      .image-container {
+      flex: 1; // Take up equal space
+      overflow: hidden; // Prevent overflow
+
+      img {
+        width: 100%; // Make the image responsive
+        height: auto; // Maintain aspect ratio
+        object-fit: cover; // Cover the container
+        aspect-ratio: 20/14;
+      }
+    }
+
+    .text-container {
+      flex: 1; // Take up equal space
+      display: flex; // Flexbox for text alignment
+      flex-direction: column; // Stack text vertically
+      align-items: center; // Center text
+      gap: 1rem;
+      justify-content: center; // Center text vertically
+      margin: 2rem auto; // Optional margin
+
+      .slider-heading {
+        text-align: center; // Center text
+      }
+
+      .cpn-btn {
+        width: 50%; // Adjust button width as needed
+        margin: 0 auto;
+        border: none;
+        border-style: dotted;
+        background-color: white;
+        padding: 1rem 0.5rem;
+        border-width: 2px;
+        cursor: pointer; // Make button look clickable
+        transition: background-color 0.3s; // Smooth transition for hover
+
+        &:hover {
+          background-color: var(--color-grey-light-1); // Change on hover
         }
+      }
     }
   }
 }

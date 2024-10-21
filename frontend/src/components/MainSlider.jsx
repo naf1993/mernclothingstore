@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { sliderData } from "../data";
+
+export const sliderData = [
+  {src:'/assets/images/abaya1.png',text:'Explore Latest Abayas'},
+ 
+  {src:'/assets/images/skirt.png',text:'Modest Wear Collection'},
+
+]
 
 const MainSlider = () => {
   const [current, setCurrent] = useState(0);
@@ -18,32 +24,18 @@ const MainSlider = () => {
         <button className="buttonSlide" onClick={nextSlide} />
       </span>
 
-      {sliderData.map((item, index) => {
-        return (
-          <div
-            key={index}
-            className={index === current ? "slide active" : "slide"}
-          >
-           <>
-          
-           <img className="slider-img" src={item.src} alt={item.text}/>
-           <div className="text-container">
-           <h1 className="slider-heading">{item.text}</h1>
-           <h3>Get 20% off on your first order</h3>
-           <button className="cpn-btn">SUM256</button>
-           
-           </div>
-          
-           </>
-            {/* <img
-              src={item.src}
-              style={{ width: "20", height: "29" }}
-              alt={item.text}
-            />
-            <p>{item.text}</p> */}
+      {sliderData.map((item, index) => (
+        <div key={index} className={index === current ? "slide active" : "slide"}>
+          <div className="image-container">
+            <img className="slider-img" src={item.src} alt={item.text} />
           </div>
-        );
-      })}
+          <div className="text-container">
+            <h1 className="slider-heading">{item.text}</h1>
+            <h3>Get 20% off on your first order</h3>
+            <button className="cpn-btn">SUM256</button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

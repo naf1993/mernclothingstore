@@ -51,29 +51,25 @@ const Dashboard = () => {
     ?.filter((item) => item.createdAt)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5); //getting latest 10 products
-  console.log(newProducts);
+  
 
   const newOrders = items
     ?.filter((order) => order.createdAt)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 7);
-  console.log("these are new orders", newOrders);
-
+  
   const orderTableData = newOrders?.map((order) => ({
     name: order.address.fullName,
     totalPrice: order.totalPrice,
     paymentStatus: order.paymentStatus,
     orderStatus: order.orderStatus,
   }));
-  console.log("Items from Redux:", items); // Log all orders
-  console.log("New Orders:", newOrders);
+ 
   useEffect(() => {
     dispatch(getDashboardStats());
   }, [dispatch]);
 
-  //   useEffect(()=>{
-  // dispatch(getAllOrders())
-  //   },[dispatch])
+  
 
   const config = {
     headers: {
@@ -89,7 +85,7 @@ const Dashboard = () => {
           "http://localhost:5000/api/products/top-selling",
           config
         );
-        console.log(data);
+        
         setTopProducts(data);
       } catch (error) {
         setErrorTopProducts(error);
@@ -111,7 +107,7 @@ const Dashboard = () => {
           `http://localhost:5000/api/orders/sales?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`,
           config
         );
-        console.log(data);
+      
         setSalesData(data);
       } catch (err) {
         setErrorSales(err);
@@ -181,7 +177,7 @@ const Dashboard = () => {
           <Grid item xs={12} md={6}>
             <Box>
               {loadingSales && <Loader />}
-              {errorSales && <Message error={errorSales} />}
+              {/* {errorSales && <Message error={errorSales} />} */}
               {salesData.length > 0 && <TotalSalesData data={salesData} />}
              <Box sx={{width:'20rem',margin:'0 auto',marginTop:'0.8rem'}}>
              <DateRangePicker
@@ -197,7 +193,7 @@ const Dashboard = () => {
           </Grid>
           <Grid item xs={12} md={6}>
             {loadingTopProducts && <Loader />}
-            {errorTopProducts && <Message error={errorTopProducts} />}
+            {/* {errorTopProducts && <Message error={errorTopProducts} />} */}
             {topProducts.length > 0 && <TopProductsChart data={topProducts} />}
           </Grid>
         </Grid>
@@ -206,7 +202,7 @@ const Dashboard = () => {
       <Grid container sx={{ marginTop: "1rem" }} spacing={3}>
         <Grid item xs={12} md={6}>
           {loadingTopProducts && <Loader />}
-          {errorTopProducts && <Message error={errorTopProducts} />}
+          {/* {errorTopProducts && <Message error={errorTopProducts} />} */}
           {newProducts && newProducts.length > 0 && (
             <CustomTable
               data={newProducts}
@@ -235,7 +231,7 @@ const Dashboard = () => {
         </Grid>
         <Grid item xs={12} md={6}>
           {loadingOrders && <Loader />}
-          {errorOrders && <Message error={errorOrders} />}
+          {/* {errorOrders && <Message error={errorOrders} />} */}
           {orderTableData && orderTableData.length > 0 && (
             <CustomTable
               data={orderTableData}

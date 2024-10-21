@@ -50,7 +50,7 @@ const sendOrderConfirmationEmail = async(order,email)=>{
 // });
 
 export const createOrder = catchAsync(async (req, res, next) => {
-  const { userId, products, address, paymentMethod } = req.body;
+  const { userId, products, address, paymentMethod,discountCode } = req.body;
  const userordered = await User.findById(userId)
 
   const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
@@ -65,7 +65,7 @@ export const createOrder = catchAsync(async (req, res, next) => {
     address,
     paymentMethod,
     totalPrice,
-    discountCode,
+    discountCode:discountCode || null,
   });
   for (const item of products) {
     const product = await Product.findById(item.product);
@@ -265,6 +265,7 @@ const getDailyOrders = catchAsync(async (req, res, next) => {
     },
     { $sort: { _id: 1 } },
   ]);
+  console.log(dailyOrders)
   res.status(200).json({
     status: "success",
 

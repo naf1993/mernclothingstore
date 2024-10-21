@@ -7,18 +7,21 @@ import ProductsSlider from "../components/ProductsSlider";
 import NewProducts from "../components/NewProducts";
 import HomeCategories from "../components/HomeCategories";
 import MainSlider from "../components/MainSlider";
+import Review from "../components/Review";
 
 
 const Home = () => {
   return (
     <div className="home">
       <MainSlider/>
-      {/* <Categories /> */}
       <Policy />
-
+      <HomeCategories/>
       <ProductsSlider />
-     <HomeCategories/>
+      
+    
       <NewProducts />
+      <Review/>
+     
     </div>
   );
 };

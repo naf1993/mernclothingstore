@@ -8,6 +8,7 @@ import Message from "./Message";
 import Product from "./Product";
 
 import axios from "axios";
+import { listProducts } from "../actions/productActions";
 
 export const responsive = {
   superLargeDesktop: {
@@ -30,30 +31,31 @@ export const responsive = {
   },
 };
 
+
 const ProductsSlider = () => {
-  let [featuredProducts, setFeaturedProducts] = useState([]);
-
+  const dispatch = useDispatch();
+  const { loading, error, products } = useSelector((state) => state.product);
+  console.log(products);
+  const featuredProducts = products?.filter((product) => product.isFeatured);
+  console.log(featuredProducts);
   useEffect(() => {
-    async function fetchFeaturedProducts() {
-      const { data } = await axios.get(
-        "http://localhost:5000/api/products?isFeatured=true"
-      );
-
-      setFeaturedProducts(data.data.products);
-    }
-    fetchFeaturedProducts();
-  }, [setFeaturedProducts]);
+    dispatch(listProducts());
+  }, [dispatch]);
   return (
     <div className="products-slider">
-      <div className='heading'>
-     <Headings>Top Sellers</Headings>
+      <div className="heading">
+        <Headings>Top Sellers</Headings>
       </div>
       <div className="slider">
-        <Carousel responsive={responsive} containerClass="carousel-container">
-          {featuredProducts.map((product) => (
-            <Product key={product.id} product={product} />
-          ))}
-        </Carousel>
+        {loading && <Loader />}
+        {error && <Message error={error} />}
+        {featuredProducts && featuredProducts.length > 0 && (
+          <Carousel responsive={responsive} containerClass="carousel-container">
+            {featuredProducts.map((product) => (
+              <Product key={product.id} product={product} />
+            ))}
+          </Carousel>
+        )}
       </div>
     </div>
   );

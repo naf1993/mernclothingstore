@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import validator from "validator";
+import Coupon from "./couponModel.js";
 
 const orderSchema = mongoose.Schema(
   {
@@ -102,14 +103,8 @@ const orderSchema = mongoose.Schema(
       default: 0, // Default no discount
     },
     discountCode: {
-      type: String,
-      validate: {
-        validator: function (v) {
-          // Add logic to check if the discount code is valid
-          return v === undefined || v === null || v.length > 0; // Example validation
-        },
-        message: "Invalid discount code.",
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Coupon", // Reference to the Coupon model
     },
     finalPrice: {
       type: Number,
@@ -131,7 +126,7 @@ const orderSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-orderSchema.pre('save',function(next){
+orderSchema.pre('save',async function(next){
   if(this.isModified('paymentStatus')){
     if(this.paymentStatus === 'Paid'){
       this.orderStatus = 'Processing'
@@ -139,20 +134,17 @@ orderSchema.pre('save',function(next){
     }
   }
   if(this.discountCode){
-    const discountDetails = getDiscountDetails(this.discountCode)
-    if(discountDetails){
-      this.discountCode = discountDetails.amount
-    }
+   const coupon = await Coupon.findById(this.discountCode)
+   if(coupon && coupon.isActive){
+    this.discount = (this.totalPrice*coupon.discount)/100
+   }
+   else{
+    this.discountCode = null
+   }
   }
   next()
 })
-const getDiscountDetails = (code) => {
-  const discounts = {
-    "SUMMER21": { amount: 10 },
-    "FREESHIP": { amount: 5 },
-  };
-  return discounts[code] || null; // Return null if the code is not valid
-};
+
 
 const Order = mongoose.model("Order", orderSchema);
 

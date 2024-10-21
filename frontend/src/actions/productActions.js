@@ -1,55 +1,63 @@
-import { PRODUCT_LIST_SUCCESS } from "../constants/productConstants";
+import {
+  PRODUCT_CATEGORY_REQUEST,
+  PRODUCT_CATEGORY_SUCCESS,
+  PRODUCT_LIST_SUCCESS,
+  PRODUCT_CATEGORY_FAIL,
+} from "../constants/productConstants";
 import { PRODUCT_LIST_FAIL } from "../constants/productConstants";
 import { PRODUCT_LIST_REQUEST } from "../constants/productConstants";
-import { PRODUCT_DETAIL_REQUEST } from "../constants/productConstants"
-import { PRODUCT_DETAIL_SUCCESS } from "../constants/productConstants"
-import { PRODUCT_DETAIL_FAIL } from "../constants/productConstants"
+import { PRODUCT_DETAIL_REQUEST } from "../constants/productConstants";
+import { PRODUCT_DETAIL_SUCCESS } from "../constants/productConstants";
+import { PRODUCT_DETAIL_FAIL } from "../constants/productConstants";
 
+import axios from "axios";
 
-import axios from 'axios';
+export const getCategories = () => async (dispatch) => {
+  try {
+    dispatch({ type: PRODUCT_CATEGORY_REQUEST });
+    const { data } = await axios.get("/api/categories");
+    dispatch({ type: PRODUCT_CATEGORY_SUCCESS, payload: data.data.categories });
+  } catch (error) {
+    dispatch({
+      type: PRODUCT_CATEGORY_FAIL,
+      payload: error.response.data.message,
+    });
+  }
+};
 
-export const listProducts = ()=>  async(dispatch)=>{
-    try{
-        dispatch({type:PRODUCT_LIST_REQUEST})
-        const {data} = await axios.get('/api/products')
-      
-        const allProducts = data.data.products
-               dispatch({
-            type:PRODUCT_LIST_SUCCESS,
-            payload:allProducts//action object containing type and payload
-        })
+export const listProducts = () => async (dispatch) => {
+  try {
+    dispatch({ type: PRODUCT_LIST_REQUEST });
+    const { data } = await axios.get("/api/products");
 
-    }catch(error){
-        dispatch({
-            type:PRODUCT_LIST_FAIL,
-            payload:error.response.data.message
-        })
+    const allProducts = data.data.products;
+    dispatch({
+      type: PRODUCT_LIST_SUCCESS,
+      payload: allProducts, //action object containing type and payload
+    });
+  } catch (error) {
+    dispatch({
+      type: PRODUCT_LIST_FAIL,
+      payload: error.response.data.message,
+    });
+  }
+};
 
-    }
+export const listProductDetails = (id) => async (dispatch) => {
+  try {
+    dispatch({ type: PRODUCT_DETAIL_REQUEST });
+    const { data } = await axios.get(`/api/products/${id}`);
+    console.log("these is detailed product ", data);
 
-}
-
-export const listProductDetails = (id)=>  async(dispatch)=>{
-    try{
-        dispatch({type:PRODUCT_DETAIL_REQUEST})
-        const {data} = await axios.get(`/api/products/${id}`)
-        console.log('these is detailed product ',data)
-       
-       
-
-        dispatch({
-            type:PRODUCT_DETAIL_SUCCESS,
-            payload:data.data.product
-        })
-        
-    }catch(error){
-        console.log(error)
-        dispatch({
-            type:PRODUCT_DETAIL_FAIL,
-            payload:error.response.statusText
-        })
-
-    }
-
-}
-
+    dispatch({
+      type: PRODUCT_DETAIL_SUCCESS,
+      payload: data.data.product,
+    });
+  } catch (error) {
+    console.log(error);
+    dispatch({
+      type: PRODUCT_DETAIL_FAIL,
+      payload: error.response.statusText,
+    });
+  }
+};

@@ -1,21 +1,42 @@
 import mongoose from "mongoose";
 
 const couponSchema = new mongoose.Schema({
-  name: {
+  code: {
     type: String,
     required: true,
     unique: true,
     uppercase: true,
   },
-  expiry: {
-    type: Date,
-    required: true,
+  discount:{
+    type:Number,
+    required:true
   },
-  discount: {
-    type: Number,
-    required: true,
+  isActive:{
+    type:Boolean,
+    default:true
+  },createdAt:{
+    type:Date,
+    default:Date.now
   },
+  expiresAt:{
+    type:Date,
+    required:true
+  }
+  
 });
+couponSchema.pre('save',function(next){
+  if(!this.expiresAt){
+    this.expiresAt = new Date(this.createdAt)
+    this.expiresAt.setDate(this.expiresAt.getDate()+15)
+  }
+  next()
+})
+couponSchema.methods.checkExpiration = function(){
+  const now = new Date()
+  if(now > this.expiresAt){
+    this.isActive = false
+  }
+}
 
 const Coupon = mongoose.model("Coupon", couponSchema);
 
