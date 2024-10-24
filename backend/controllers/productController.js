@@ -1,7 +1,7 @@
 import path from "path";
 import Product from "../models/productModel.js";
 import User from "../models/userModel.js";
-import Order from '../models/orderModel.js'
+import Order from "../models/orderModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import APIFeatures from "../utils/apiFeatures.js";
@@ -35,7 +35,7 @@ export const upload = multer({
 
 export const resizeImages = async (req, res, next) => {
   // Check if files are present
- 
+
   if (!req.files || !req.files.images) {
     // If no files, proceed to the next middleware
     return next();
@@ -65,8 +65,8 @@ export const resizeImages = async (req, res, next) => {
 
     // Add the image URLs to the request body
     req.body.newImages = imagegallery;
-    console.log('image uploaded and resized')
-    console.log(req.body.newImages)
+    console.log("image uploaded and resized");
+    console.log(req.body.newImages);
 
     // Proceed to the next middleware
     next();
@@ -86,12 +86,12 @@ const createProduct = catchAsync(async (req, res, next) => {
     SubCategory,
     isFeatured,
     countInStock,
-    
+
     colors,
     sizes,
   } = req.body;
 
-const images = req.body.newImages
+  const images = req.body.newImages;
   const product = new Product({
     name,
     description,
@@ -157,17 +157,17 @@ const getProductById = catchAsync(async (req, res, next) => {
 });
 
 const updateProduct = catchAsync(async (req, res, next) => {
-  const {id} = req.params
-  console.log('this is req.body',req.body)
-  const product = await Product.findById(id)
-  if(!product){
-    return next(new AppError('No product found with ID',404))
+  const { id } = req.params;
+  console.log("this is req.body", req.body);
+  const product = await Product.findById(id);
+  if (!product) {
+    return next(new AppError("No product found with ID", 404));
   }
-  if(req.body.newImages){
-    product.images.push(...req.body.newImages)
+  if (req.body.newImages) {
+    product.images.push(...req.body.newImages);
   }
-  Object.assign(product,req.body)
-  await product.save()
+  Object.assign(product, req.body);
+  await product.save();
   res.status(200).json({
     status: "success",
     data: {
@@ -201,7 +201,7 @@ export const deleteImageFromProduct = catchAsync(async (req, res, next) => {
     console.warn(`No product found with image URL: ${imageUrl}`);
     return next(new AppError("No Product found", 404));
   }
-console.log(updateProduct)
+  console.log(updateProduct);
   // Respond with the updated product or a success message
   res.status(200).json({
     status: "success",
@@ -210,7 +210,6 @@ console.log(updateProduct)
     },
   });
 });
-
 
 const deleteProduct = catchAsync(async (req, res, next) => {
   const product = await Product.findByIdAndDelete(req.params.id);
@@ -229,6 +228,42 @@ const deleteProduct = catchAsync(async (req, res, next) => {
   });
 });
 
+export const bulkDeleteProducts = catchAsync(async (req, res, next) => {
+  const { productIds, action } = req.body;
+  switch (action) {
+    case "deleteProducts":
+      await Product.deleteMany({ _id: { $in: productIds } });
+      return res.status(200).json({ message: "Products Deleted" });
+
+    default:
+      return res.status(400).json({ message: "Invalid action" });
+  }
+});
+
+export const bulkUpdateProductStock = catchAsync(async (req, res, next) => {
+  const { productIds } = req.body;
+  const incrementBy = parseInt(req.query.incrementBy, 10); // Get incrementBy from query string
+
+  if (!productIds || !productIds.length) {
+    return res.status(400).json({ message: "No product IDs provided" });
+  }
+
+  if (isNaN(incrementBy)) {
+    return res.status(400).json({ message: "Invalid increment value" });
+  }
+
+  try {
+    await Product.updateMany(
+      { _id: { $in: productIds } },
+      { $inc: { countInStock: incrementBy } } // Increment countInStock by the query value
+    );
+    return res.status(200).json({ message: "Products stock updated" });
+  } catch (error) {
+    console.error('Error performing bulk update:', error);
+    return res.status(500).json({ error: 'Bulk update failed', details: error.message });
+  }
+
+})
 const addToWishList = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
   const { prodId } = req.body;
@@ -416,24 +451,24 @@ export const topSellingProducts = catchAsync(async (req, res, next) => {
   const topProducts = await Order.aggregate([
     { $unwind: "$products" },
     {
-        $lookup: {
-            from: "products", // Assuming the collection name for products is "products"
-            localField: "products.product",
-            foreignField: "_id",
-            as: "productDetails"
-        }
+      $lookup: {
+        from: "products", // Assuming the collection name for products is "products"
+        localField: "products.product",
+        foreignField: "_id",
+        as: "productDetails",
+      },
     },
     { $unwind: "$productDetails" }, // Unwind the product details array
     {
-        $group: {
-            _id: "$productDetails.name", // Use product name as the key
-            totalSales: { $sum: "$products.price" },
-            totalOrders: { $sum: 1 }
-        }
+      $group: {
+        _id: "$productDetails.name", // Use product name as the key
+        totalSales: { $sum: "$products.price" },
+        totalOrders: { $sum: 1 },
+      },
     },
-    { $sort: { totalSales: -1 }},
-    { $limit: 10 } // Limit to top 10 products
-]);
+    { $sort: { totalSales: -1 } },
+    { $limit: 10 }, // Limit to top 10 products
+  ]);
 
   res.status(200).json(topProducts);
 });

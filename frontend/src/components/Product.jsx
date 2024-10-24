@@ -11,6 +11,7 @@ import { BsFillStarFill } from "react-icons/bs";
 import ProductModel from "./ProductModel";
 
 const Product = ({product,selectedProduct}) => {
+  console.log('this is product',product)
  
   const dispatch = useDispatch();
   const modal = useSelector((state)=>state.productModal.modal)

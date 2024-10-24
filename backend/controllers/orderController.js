@@ -1,5 +1,8 @@
 import * as dotenv from "dotenv";
 import Stripe from "stripe";
+import puppeteer from "puppeteer";
+import fs from "fs";
+import path from "path";
 import Order from "../models/orderModel.js";
 import User from "../models/userModel.js";
 import Product from "../models/productModel.js";
@@ -7,28 +10,33 @@ import Cart from "../models/cartModels.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { v4 as uuidv4 } from "uuid";
-import nodemailer from 'nodemailer'
+import nodemailer from "nodemailer";
 dotenv.config();
+import { fileURLToPath } from "url";
+
+// Get the current filename and directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize Stripe
 const stripe = new Stripe(process.env.STRIPE_API_KEY);
-const sendOrderConfirmationEmail = async(order,email)=>{
+const sendOrderConfirmationEmail = async (order, email) => {
   const transporter = nodemailer.createTransport({
-    service:'Gmail',
-    auth:{
-      user:process.env.EMAIL_USER,
-      pass:process.env.EMAIL_PASSWORD
-    }
-  })
+    service: "Gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
   const mailOptions = {
-    from:process.env.EMAIL_USER,
-    to:email,
-    subject:'Order Confirmation',
-    text:`Your order ${order.orderId} has been placed succesfully`,
-    html:`<h1>Order Confirmation</h1><p>Your order ${order.orderId} has been placed successfully!</p>`
-  }
-  await transporter.sendMail(mailOptions)
-}
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Order Confirmation",
+    text: `Your order ${order.orderId} has been placed succesfully`,
+    html: `<h1>Order Confirmation</h1><p>Your order ${order.orderId} has been placed successfully!</p>`,
+  };
+  await transporter.sendMail(mailOptions);
+};
 
 // const makePayment = catchAsync(async (req, res) => {
 //   const { amount, currency } = req.body; // Assuming you're sending these in the request body
@@ -50,8 +58,8 @@ const sendOrderConfirmationEmail = async(order,email)=>{
 // });
 
 export const createOrder = catchAsync(async (req, res, next) => {
-  const { userId, products, address, paymentMethod,discountCode } = req.body;
- const userordered = await User.findById(userId)
+  const { userId, products, address, paymentMethod, discountCode } = req.body;
+  const userordered = await User.findById(userId);
 
   const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
   const totalPrice = products.reduce(
@@ -65,7 +73,7 @@ export const createOrder = catchAsync(async (req, res, next) => {
     address,
     paymentMethod,
     totalPrice,
-    discountCode:discountCode || null,
+    discountCode: discountCode || null,
   });
   for (const item of products) {
     const product = await Product.findById(item.product);
@@ -93,8 +101,8 @@ export const createOrder = catchAsync(async (req, res, next) => {
     currency: "usd",
     payment_method_types: ["card"],
   });
-  const userMail = userordered.email
-  await sendOrderConfirmationEmail(order,userMail)
+  const userMail = userordered.email;
+  await sendOrderConfirmationEmail(order, userMail);
   const notification = {
     user: req.user._id,
     message: `New Order places : ${user.name}`,
@@ -159,10 +167,43 @@ const createCashOrder = catchAsync(async (req, res, next) => {
   });
 });
 
-export const getSingleOrder = catchAsync(async(req,res,next)=>{
-  console.log(req.params.id)
-  const order = await Order.findById(req.params.id).populate('user').populate('products')
-  if(!order){
+export const bulkUpdateOrders = catchAsync(async (req, res, next) => {
+  const { orderIds, action } = req.body;
+  switch (action) {
+    case "markAsShipped":
+      await Order.updateMany(
+        { _id: { $in: orderIds } },
+        { $set: { orderStatus: "Dispatched" } }
+      );
+      return res.status(200).json({ message: "Orders marked as shipped" });
+
+    case "markAsDelivered":
+      await Order.updateMany(
+        { _id: { $in: orderIds } },
+        { $set: { orderStatus: "Delivered" } }
+      );
+      return res.status(200).json({ message: "Orders marked as delivered" });
+
+    case "cancelOrders":
+      await Order.updateMany(
+        { _id: { $in: orderIds } },
+        { $set: { orderStatus: "Cancelled" } }
+      );
+      return res.status(200).json({ message: "Orders cancelled" });
+    case "deleteOrders":
+      await Order.deleteMany({ _id: { $in: orderIds } });
+      return res.status(200).json({ message: "Orders Deleted" });
+
+    default:
+      return res.status(400).json({ message: "Invalid action" });
+  }
+});
+export const getSingleOrder = catchAsync(async (req, res, next) => {
+  console.log(req.params.id);
+  const order = await Order.findById(req.params.id)
+    .populate("user")
+    .populate("products");
+  if (!order) {
     return next(new AppError("No order found", 400));
   }
   res.status(200).json({
@@ -171,23 +212,139 @@ export const getSingleOrder = catchAsync(async(req,res,next)=>{
       order,
     },
   });
+});
 
-})
-export const deleteOrder = catchAsync(async(req,res,next)=>{
-  const order = await Order.findByIdAndDelete(req.params.id)
-  if(!order){
+
+
+const generateOrdersHtml = (orders) => {
+  return orders.map(order => {
+    const itemsHtml = order.products && order.products.length > 0
+      ? order.products.map(item => `
+        <tr>
+          <td>${item.product}</td>
+          <td>$${item.price}</td>
+          <td>${item.count}</td>
+        </tr>`).join("")
+      : '<tr><td colspan="3">No items found</td></tr>';
+
+    return `
+      <div class="order">
+        <div class="order-details">
+          <p>Order ID: ${order._id}</p>
+          <p>Customer: ${order.address.fullName || "N/A"}</p>
+          <p>Total Amount: $${order.totalPrice || "0.00"}</p>
+        </div>
+        <table class="items">
+          <thead>
+            <tr>
+              <th>Item ID</th>
+              <th>Price</th>
+              <th>Quantity</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsHtml}
+          </tbody>
+        </table>
+      </div>`;
+  }).join("");
+};
+
+export const generateInvoiceSingle = catchAsync(async (req, res, next) => {
+  const { orderId } = req.params;
+  const { orderIds } = req.query;
+
+  let orderIdList;
+  if (orderId) {
+    orderIdList = [orderId];
+  } else if (orderIds) {
+    orderIdList = orderIds.split(',');
+  } else {
+    return next(new AppError("No order ID(s) provided", 400));
+  }
+
+  const orders = await Order.find({ _id: { $in: orderIdList } });
+  if (!orders.length) {
+    return next(new AppError("No orders found", 404));
+  }
+
+  const templatePath = path.join(__dirname, "../views/invoiceTemplate.html");
+
+  if (!fs.existsSync(templatePath)) {
+    return next(new AppError("Invoice template not found", 500));
+  }
+
+  let template;
+  try {
+    template = fs.readFileSync(templatePath, "utf8");
+  } catch (err) {
+    console.error("Error reading template:", err);
+    return next(new AppError("Error reading invoice template", 500));
+  }
+
+  const ordersHtml = generateOrdersHtml(orders);
+  const orderTitle = orders.length > 1 ? 's' : '';
+
+  template = template
+    .replace("{{orders}}", ordersHtml)
+    .replace("{{orderTitle}}", orderTitle);
+
+  try {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1200, height: 800 });
+    await page.setContent(template, { waitUntil: "networkidle0" });
+    await page.emulateMediaType("screen");
+
+    const pdfBuffer = Buffer.from(
+      await page.pdf({
+        format: "A4",
+        printBackground: true,
+        margin: {
+          top: "20px",
+          right: "20px",
+          bottom: "20px",
+          left: "20px",
+        },
+      })
+    );
+    console.log("PDF buffer size:", pdfBuffer.length);
+    const isPdfFile = pdfBuffer.toString("utf8", 0, 4) === "%PDF";
+
+    console.log("Is valid PDF:", isPdfFile);
+
+    await browser.close();
+
+    const filename = orders.length > 1 ? 'invoices.pdf' : `invoice-${orderIdList[0]}.pdf`;
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(pdfBuffer);
+    console.log("PDF sent successfully");
+  } catch (error) {
+    console.error("Error generating PDF:", error.message);
+    console.error(error.stack);
+    return next(new AppError("Could not generate invoice", 500));
+  }
+});
+
+export const deleteOrder = catchAsync(async (req, res, next) => {
+  const order = await Order.findByIdAndDelete(req.params.id);
+  if (!order) {
     return next(new AppError("No order found", 400));
   }
   res.status(204).json({
     status: "success",
     data: null,
   });
-})
-
+});
 
 const getOrdersByUser = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-  const orders = await Order.find({ user: _id }).populate('products')
+  const orders = await Order.find({ user: _id })
+    .populate("products")
     .populate("user products.product")
     .exec();
 
@@ -265,7 +422,7 @@ const getDailyOrders = catchAsync(async (req, res, next) => {
     },
     { $sort: { _id: 1 } },
   ]);
-  console.log(dailyOrders)
+  console.log(dailyOrders);
   res.status(200).json({
     status: "success",
 

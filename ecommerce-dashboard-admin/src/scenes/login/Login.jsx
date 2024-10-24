@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { authenticateAdmin } from "../../actions/userActions";
 import Loader from "../../components/loader/Loader";
 import Message from "../../components/Message";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-
 import image1 from "../../loginimage.jpg";
-
 import "./login.css";
 
 const Login = () => {
@@ -16,33 +13,27 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
   const userLogin = useSelector((state) => state.userLogin);
-  const { loading, error,userInfo } = userLogin;
- 
+  const { loading, error, userInfo } = userLogin;
+
   useEffect(() => {
-    if (userInfo) {
-      if(userInfo.data.user.isAdmin){
-      
-      return navigate("/");
+    if (userInfo && userInfo.data && userInfo.data.user) {
+      if (userInfo.data.user.isAdmin) {
+        return navigate("/");
       }
-     
     }
   }, [userInfo, navigate]);
 
-  // const isAdmin = useSelector((state) => state.userLogin.isAdmin);
-  // console.log(isAdmin)
-
   const submitHandler = (e) => {
     e.preventDefault();
-   
     dispatch(authenticateAdmin(email, password));
-    
   };
+
   return (
     <div className="login-container">
       <div className="wrapper">
         <div className="image-container">
           <figure className="image-figure">
-            <img src={image1} className="login-img" alt="hijab" />{" "}
+            <img src={image1} className="login-img" alt="hijab" />
           </figure>
         </div>
 

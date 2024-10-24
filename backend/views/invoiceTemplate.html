@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Invoices</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+        }
+        .order {
+            margin: 20px 0;
+            page-break-after: always; /* Ensure each order starts on a new page */
+        }
+        .order-details {
+            margin: 10px 0;
+        }
+        .items {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .items th, .items td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .items th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Invoice{{orderTitle}}</h1>
+    {{orders}}
+</body>
+</html>

@@ -1,6 +1,6 @@
 import express from 'express';
 import {  login, protect,  restrictToAdmin } from '../controllers/authController.js';
-import { addToWishList, createProduct, deleteProduct ,getAllProducts, getProductById, getProductStatistics, getProductsByCategory, getProductsBySubCategory, getSimilarProducts, productSearch, updateProduct, upload, resizeImages, deleteImageFromProduct, topSellingProducts } from '../controllers/productController.js';
+import { addToWishList, createProduct, deleteProduct ,getAllProducts, getProductById, getProductStatistics, getProductsByCategory, getProductsBySubCategory, getSimilarProducts, productSearch, updateProduct, upload, resizeImages, deleteImageFromProduct, topSellingProducts, bulkUpdateProductStock } from '../controllers/productController.js';
 import { getSoldProductCount,getAllColorsOfAllProducts } from '../controllers/productController.js';
 import reviewRoutes from './reviewRoutes.js'
 
@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.use('/:productId/reviews',reviewRoutes)
 router.get('/getProductByCategory',getProductsByCategory)
+router.route('/bulk-update-stock').post(protect,restrictToAdmin,bulkUpdateProductStock)
 router.get('/getProductBySubCategory',getProductsBySubCategory)
 router.get("/relatedproducts/:productId/:categoryId", getSimilarProducts);
 router.route('/getproductstats').get(getProductStatistics)

@@ -1,77 +1,127 @@
-.container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  text-align: center;
-  background: #f7f4f4;
-}
-.container:before {
-  content: "";
-  height: 100%;
-  display: inline-block;
-  vertical-align: middle;
-}
-  .loader {
-  animation: rotate 1s infinite;
-  display: inline-block;
-  vertical-align: middle;
-  width: 50px;
-  height: 50px;
-  z-index: 500;
-}
-.loader:before,
-.loader:after {
-  content: "";
-  display: block;
-  height: 20px;
-  width: 20px;
-}
-.loader:before {
-  animation: box1 1s infinite;
-  background-color: #81075d;
-  box-shadow: 30px 0 0 white;
-  margin-bottom: 10px;
-}
-.loader:after {
-  animation: box2 1s infinite;
-  background-color: #ee73dd;
-  box-shadow: 30px 0 0  #81075d;
-}
 
+.spinner{
+  margin:4.8rem auto;
+  width:6.4rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(farthest-side, var( --color-pink-dark) 94%, #0000)
+      top/10px 10px no-repeat,
+    conic-gradient(#0000 30%, var( --color-pink-dark));
+  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - 10px), #000 0);
+animation: rotate 1.5s infinite linear;
+}
 @keyframes rotate {
-  0% { transform: rotate(0deg) scale(0.8) }
-  50% { transform: rotate(360deg) scale(1.2) }
-  100% { transform: rotate(720deg) scale(0.8) }
-}
-
-@keyframes box1 {
-  0% {
-    box-shadow: 30px 0 0  #ee73dd;
-  }
-  50% {
-    box-shadow: 0 0 0  #ee73dd;
-    margin-bottom: 0;
-    transform: translate(15px, 15px);
-  }
-  100% {
-    box-shadow: 30px 0 0  #ee73dd;
-    margin-bottom: 10px;
+  to {
+    transform: rotate(1turn)
   }
 }
 
-@keyframes box2 {
-  0% {
-    box-shadow: 30px 0 0  #81075d;
-  }
-  50% {
-    box-shadow: 0 0 0  #81075d;
-    margin-top: -10px;
-    transform: translate(15px, 15px);
-  }
-  100% {
-    box-shadow: 30px 0 0 #81075d;
-    margin-top: 0;
-  }
-}
+// .spinner-container {
+//   position: relative; /* Position relative for any absolute children */
+//   background-color: rgba(255, 255, 255, 0.8); /* Light background for contrast */
+//   border-radius: 10px; /* Rounded corners for the container */
+//   padding: 2rem; /* Padding around the spinner */
+//   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+// }
+
+// .spinner {
+//   width: 3rem; /* Diameter of the spinner */
+//   height: 3rem; /* Diameter of the spinner */
+//   border: 0.4rem solid transparent; /* Make the border transparent to show the gradient */
+//   border-radius: 50%; /* Make it a circle */
+//   background-image: conic-gradient(
+//       rgba(171, 8, 78, 0.99) 0%, 
+//       rgba(171, 8, 78, 0.6) 50%, 
+//       rgba(171, 8, 78, 0.99) 100%
+//   ); /* Gradient border effect */
+//   animation: spin 1s linear infinite; /* Animation for spinning */
+// }
+
+// @keyframes spin {
+//   0% {
+//       transform: rotate(0deg); /* Start rotation */
+//   }
+//   100% {
+//       transform: rotate(360deg); /* End rotation */
+//   }
+// }
+
+
+
+// // .container {
+// //   position: fixed;
+// //   top: 0;
+// //   left: 0;
+// //   right: 0;
+// //   bottom: 0;
+// //   text-align: center;
+// //   background: #f7f4f4;
+// // }
+// // .container:before {
+// //   content: "";
+// //   height: 100%;
+// //   display: inline-block;
+// //   vertical-align: middle;
+// // }
+// //   .loader {
+// //   animation: rotate 1s infinite;
+// //   display: inline-block;
+// //   vertical-align: middle;
+// //   width: 50px;
+// //   height: 50px;
+// //   z-index: 500;
+// // }
+// // .loader:before,
+// // .loader:after {
+// //   content: "";
+// //   display: block;
+// //   height: 20px;
+// //   width: 20px;
+// // }
+// // .loader:before {
+// //   animation: box1 1s infinite;
+// //   background-color: #81075d;
+// //   box-shadow: 30px 0 0 white;
+// //   margin-bottom: 10px;
+// // }
+// // .loader:after {
+// //   animation: box2 1s infinite;
+// //   background-color: #ee73dd;
+// //   box-shadow: 30px 0 0  #81075d;
+// // }
+
+// // @keyframes rotate {
+// //   0% { transform: rotate(0deg) scale(0.8) }
+// //   50% { transform: rotate(360deg) scale(1.2) }
+// //   100% { transform: rotate(720deg) scale(0.8) }
+// // }
+
+// // @keyframes box1 {
+// //   0% {
+// //     box-shadow: 30px 0 0  #ee73dd;
+// //   }
+// //   50% {
+// //     box-shadow: 0 0 0  #ee73dd;
+// //     margin-bottom: 0;
+// //     transform: translate(15px, 15px);
+// //   }
+// //   100% {
+// //     box-shadow: 30px 0 0  #ee73dd;
+// //     margin-bottom: 10px;
+// //   }
+// // }
+
+// // @keyframes box2 {
+// //   0% {
+// //     box-shadow: 30px 0 0  #81075d;
+// //   }
+// //   50% {
+// //     box-shadow: 0 0 0  #81075d;
+// //     margin-top: -10px;
+// //     transform: translate(15px, 15px);
+// //   }
+// //   100% {
+// //     box-shadow: 30px 0 0 #81075d;
+// //     margin-top: 0;
+// //   }
+// // }

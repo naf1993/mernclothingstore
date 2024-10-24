@@ -5,6 +5,7 @@
 @import './base/utilities.scss';
 @import '../../../node_modules/bootstrap/scss/bootstrap.scss';
 @import '../scss/components/loader.scss';
+@import '../scss/components/LoadingScreen.scss';
 @import '../scss/components/navbar.scss';
 @import '../scss/components/footer.scss';
 
@@ -15,6 +16,8 @@
 @import '../scss/components/policy.scss';
 @import '../scss/components/slider.scss';
 @import '../scss/components/reviews.scss';
+@import '../scss/components/newsletter.scss';
+@import '../scss/components/multicarousel.scss';
 @import '../scss/pages/productspage.scss';
 @import '../scss/components/product.scss';
 @import '../scss/components/list.scss';

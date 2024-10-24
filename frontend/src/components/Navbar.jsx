@@ -17,6 +17,7 @@ const Navbar = ({ navItems }) => {
   const depthLevel = 0;
   const { pathname } = useLocation();
   const auth = useSelector((state) => state.auth);
+  const {loading,error,categories} = useSelector((state)=>state.product)
   const { user } = auth;
 
   const handleSubmit = (e) => {

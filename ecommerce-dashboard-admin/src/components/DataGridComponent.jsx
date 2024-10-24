@@ -33,6 +33,8 @@ import { getAllOrders, updateOrderStatus } from "actions/orderActions";
 import FilterOrders from "./ui/FilterOrders";
 import EditOrder from "./ui/EditOrder";
 import { useNavigate } from "react-router-dom";
+import { bulkAction } from "actions/bulkActions";
+import BulkActions from "./BulkActions";
 
 const getRandomBackgroundColor = () => {
   let letters = "0123456789ABCDEF";
@@ -44,7 +46,7 @@ const getRandomBackgroundColor = () => {
 };
 const statusColorMapping = {
   paymentStatus: {
-    Pending: '#FFCC00',  /// Yellow
+    Pending: "#FFCC00", /// Yellow
     Paid: "#4CAF50", // Green
     Failed: "#F44336", // Red
   },
@@ -53,15 +55,16 @@ const statusColorMapping = {
     Processing: "#2196F3", // Blue
     Shipped: "#FF9800", // Orange
     Delivered: "#8BC34A", // Light Green
-    Cancelled:'#F44336'
+    Cancelled: "#F44336",
   },
 };
 
 const DataGridComponent = ({ type, refresh }) => {
+  const [selectionModel, setSelectionModel] = useState([]);
   const [pageSize, setPageSize] = useState(5);
   const [rowId, setRowId] = useState(null);
   const dispatch = useDispatch();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const theme = useTheme();
   const deleteProduct = useSelector((state) => state.deleteProduct);
@@ -76,11 +79,19 @@ const DataGridComponent = ({ type, refresh }) => {
     error: errorEdit,
     success: successEdit,
   } = editProduct;
-  const orderUpdate = useSelector((state)=>state.order)
-  const {loading:loadingOrderUpdate,success:successOrderupdate,error:errorOrderUpdate} = orderUpdate
+  const orderUpdate = useSelector((state) => state.order);
+  const {
+    loading: loadingOrderUpdate,
+    success: successOrderupdate,
+    error: errorOrderUpdate,
+  } = orderUpdate;
   const [loadDelete, setLoadDelete] = useState(false);
   const [loadEdit, setLoadEdit] = useState(false);
-
+  const {
+    loading: bulkorderloading,
+    error: bulkordererror,
+    success: bulkordersuccess,
+  } = useSelector((state) => state.bulkAction);
   const items = useSelector((state) => {
     switch (type) {
       case "products":
@@ -153,26 +164,24 @@ const DataGridComponent = ({ type, refresh }) => {
   }
 
   const { close } = useContext(ModalContext);
-  const onEditOrder = async(id,status)=>{
-    console.log(id)
-    try{
-      await dispatch(updateOrderStatus(id,status))
-      if(successOrderupdate){
-        toast.success('Order Updated')
+  const onEditOrder = async (id, status) => {
+    console.log(id);
+    try {
+      await dispatch(updateOrderStatus(id, status));
+      if (successOrderupdate) {
+        toast.success("Order Updated");
       }
-      if(errorOrderUpdate){
-        toast.error(errorOrderUpdate)
+      if (errorOrderUpdate) {
+        toast.error(errorOrderUpdate);
       }
-      close()
-      if(type === 'orders'){
-        dispatch(getAllOrders())
+      close();
+      if (type === "orders") {
+        dispatch(getAllOrders());
       }
-
-
-    }catch(error){
-      toast.error(error.message)
+    } catch (error) {
+      toast.error(error.message);
     }
-  }
+  };
   const onEdit = async (id, product) => {
     console.log(product);
     setLoadEdit(true);
@@ -221,6 +230,21 @@ const DataGridComponent = ({ type, refresh }) => {
   useEffect(() => {
     setFilteredProducts(items); // Update filteredProducts whenever items change
   }, [items]);
+
+  const handleBulkAction = async (action) => {
+    await dispatch(bulkAction(type, action, selectionModel));
+  };
+  useEffect(() => {
+    if (bulkordersuccess) {
+      if (type === "products") {
+        dispatch(listUsers());
+      } else if (type === "orders") {
+        dispatch(getAllOrders());
+      } else {
+        dispatch(listUsers());
+      }
+    }
+  }, [bulkordersuccess, type, dispatch]);
 
   const columns =
     type === "products"
@@ -395,7 +419,10 @@ const DataGridComponent = ({ type, refresh }) => {
             renderCell: (params) => (
               <CustomModal1>
                 <CustomModal1.Open opens="edit">
-                  <Button style={{ color: "green" }}  onClick={(event) => event.stopPropagation()} >
+                  <Button
+                    style={{ color: "green" }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
                     <AiOutlineEdit style={{ fontSize: "1rem" }} />
                   </Button>
                 </CustomModal1.Open>
@@ -408,7 +435,10 @@ const DataGridComponent = ({ type, refresh }) => {
                 </CustomModal1.Window>
 
                 <CustomModal1.Open opens="delete">
-                  <Button style={{ color: "red" }}  onClick={(event) => event.stopPropagation()} >
+                  <Button
+                    style={{ color: "red" }}
+                    onClick={(event) => event.stopPropagation()}
+                  >
                     <AiOutlineDelete style={{ fontSize: "1rem" }} />
                   </Button>
                 </CustomModal1.Open>
@@ -490,7 +520,7 @@ const DataGridComponent = ({ type, refresh }) => {
             field: "name",
             headerName: "Customer Name",
             width: 120,
-            
+
             renderCell: (params) => {
               const name = params.row.user?.name || "Unknown";
 
@@ -522,7 +552,7 @@ const DataGridComponent = ({ type, refresh }) => {
             field: "totalPrice",
             headerName: "Amount",
             width: 80,
-            
+
             filterable: true,
             renderCell: (params) => (
               <Typography sx={{ fontSize: "0.7rem" }} variant="p">
@@ -607,7 +637,7 @@ const DataGridComponent = ({ type, refresh }) => {
           {
             field: "saleDate",
             headerName: "Order Date",
-            
+
             width: 100,
             renderCell: (params) => (
               <Typography sx={{ fontSize: "0.7rem" }} variant="p">
@@ -623,29 +653,37 @@ const DataGridComponent = ({ type, refresh }) => {
             disableClickEventBubbling: true,
             renderCell: (params) => (
               <>
-            
-              <CustomModal1>
-                <CustomModal1.Open opens="edit-order">
-                  <Button style={{ color: "green" }} onClick={(event) => event.stopPropagation()}>
-                    <AiOutlineEdit style={{ fontSize: "1rem" }} />
-                  </Button>
-                </CustomModal1.Open>
-                <CustomModal1.Window name="edit-order">
-                  <EditOrder orderStatus={params.row.orderStatus} orderId={params.row._id} onEdit={onEditOrder} isUpdatingOrder={loadingOrderUpdate}/>
-                 
-                </CustomModal1.Window>
+                <CustomModal1>
+                  <CustomModal1.Open opens="edit-order">
+                    <Button
+                      style={{ color: "green" }}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <AiOutlineEdit style={{ fontSize: "1rem" }} />
+                    </Button>
+                  </CustomModal1.Open>
+                  <CustomModal1.Window name="edit-order">
+                    <EditOrder
+                      orderStatus={params.row.orderStatus}
+                      orderId={params.row._id}
+                      onEdit={onEditOrder}
+                      isUpdatingOrder={loadingOrderUpdate}
+                    />
+                  </CustomModal1.Window>
 
-                <CustomModal1.Open opens="delete">
-                  <Button style={{ color: "red" }} onClick={(event) => event.stopPropagation()}>
-                    <AiOutlineDelete style={{ fontSize: "1rem" }} />
-                  </Button>
-                </CustomModal1.Open>
-                <CustomModal1.Window name="delete">
-                 <p>you want to delete</p>
-                </CustomModal1.Window>
-              </CustomModal1> 
+                  <CustomModal1.Open opens="delete">
+                    <Button
+                      style={{ color: "red" }}
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <AiOutlineDelete style={{ fontSize: "1rem" }} />
+                    </Button>
+                  </CustomModal1.Open>
+                  <CustomModal1.Window name="delete">
+                    <p>you want to delete</p>
+                  </CustomModal1.Window>
+                </CustomModal1>
               </>
-             
             ),
           },
         ];
@@ -654,11 +692,13 @@ const DataGridComponent = ({ type, refresh }) => {
       {type === "products" && (
         <FilterComponent items={items} onFilterChange={handleFilterChange} />
       )}
-      {type === 'orders' && (<FilterOrders items={items} onFilterChange={handleFilterChange}/>)}
+      {type === "orders" && (
+        <FilterOrders items={items} onFilterChange={handleFilterChange} />
+      )}
 
       <Box
         mt="20px"
-        height="75vh"
+        height="64vh"
         width="100%"
         overflow="auto"
         sx={{
@@ -705,7 +745,11 @@ const DataGridComponent = ({ type, refresh }) => {
             autoHeight
             rowHeight={50}
             onPageSizeChange={(newPageSize) => setPageSize(newPageSize)}
-            checkboxSelection={false} // Disable checkbox selection
+            checkboxSelection
+            onSelectionModelChange={(newSelection) => {
+              console.log(newSelection);
+              setSelectionModel(newSelection);
+            }} // Disable checkbox selection
             disableSelectionOnClick // Disable selection on cell click
             sx={{
               "& .MuiDataGrid-cell": {
@@ -721,7 +765,7 @@ const DataGridComponent = ({ type, refresh }) => {
                   theme.palette.mode === "light" ? grey[800] : grey[900],
               },
             }}
-            onCellEditCommit={(params) => setRowId(params.id)} 
+            onCellEditCommit={(params) => setRowId(params.id)}
             onRowClick={(params) => {
               const id = params.row._id;
               if (type === "products") {
@@ -746,7 +790,15 @@ const DataGridComponent = ({ type, refresh }) => {
             </Box>
           )
         )}
+        
       </Box>
+      {selectionModel.length > 0 && (
+          <BulkActions
+            type={type}
+            selectionModel={selectionModel}
+            onAction={handleBulkAction}
+          />
+        )}
     </>
   );
 };

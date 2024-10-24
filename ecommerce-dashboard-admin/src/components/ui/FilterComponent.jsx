@@ -73,6 +73,10 @@ const FilterComponent = ({ items, onFilterChange }) => {
             return a.price - b.price;
           case "priceHighToLow":
             return b.price - a.price;
+          case 'stocklowtohigh':
+            return a.countInStock - b.countInStock
+          case 'stockhightolow':
+            return b.countInStock - a.countInStock
           default:
             return 0;
         }
@@ -251,6 +255,9 @@ const FilterComponent = ({ items, onFilterChange }) => {
               <MenuItem value="isFeatured">Featured</MenuItem>
               <MenuItem value="priceLowToHigh">Price: Low to High</MenuItem>
               <MenuItem value="priceHighToLow">Price: High to Low</MenuItem>
+              <MenuItem value="stocklowtohigh">Increasing Stock</MenuItem>
+              <MenuItem value="stockhightolow">Decreasing Stock</MenuItem>
+
             </Select>
           </FormControl>
         </Grid>

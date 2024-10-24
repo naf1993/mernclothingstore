@@ -1,7 +1,7 @@
 import { applyMiddleware, combineReducers, createStore } from "redux";
 import { composeWithDevTools} from 'redux-devtools-extension';
 import thunk from 'redux-thunk';
-import {persistStore,persistReducer,FLUSH,REHYDRATE,PAUSE,PERSIST,PURGE,REGISTER} from 'redux-persist'
+import {persistStore,persistReducer} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import { customizationReducer, themeReducer } from "./reducers/themeReducer";
 import { adminLoginReducer,userListReducer, userUpdateByAdminReducer } from "./reducers/userReducer";
@@ -9,6 +9,7 @@ import { productCreateReducer,productDeleteReducer,productDetailReducer,productI
 import { dashboardStatsReducer } from "./reducers/dashboardStatsReducer";
 import notificationReducer from "reducers/notificationReducer";
 import { orderReducer } from "reducers/orderReducer";
+import { bulkActionReducer } from "reducers/bulkActionReducer";
 const reducer = combineReducers({
     theme:themeReducer,
     customization:customizationReducer,
@@ -23,7 +24,8 @@ const reducer = combineReducers({
     userUpdateAdmin:userUpdateByAdminReducer,
     dashboardStats:dashboardStatsReducer,
     allnotifications:notificationReducer,
-    order:orderReducer
+    order:orderReducer,
+    bulkAction:bulkActionReducer
    
 })
 const persistConfig = {

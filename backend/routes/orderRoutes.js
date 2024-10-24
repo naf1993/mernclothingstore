@@ -1,11 +1,12 @@
 import express from 'express';
 import { protect, restrictToAdmin,restrictToUser } from '../controllers/authController.js';
 
-import { createCashOrder, createOrder, deleteOrder, getAllOrdersByAdmin, getDailyOrders, getOrderByUserId, getOrderSummary, getOrdersByUser, getSalesData, getSingleOrder, updateOrderStatusByAdmin } from '../controllers/orderController.js';
+import { bulkUpdateOrders, createCashOrder, createOrder, deleteOrder, generateInvoiceSingle, getAllOrdersByAdmin, getDailyOrders, getOrderByUserId, getOrderSummary, getOrdersByUser, getSalesData, getSingleOrder, updateOrderStatusByAdmin } from '../controllers/orderController.js';
 
 const router = express.Router();
 router.route('/getordersummary').get(protect,restrictToAdmin,getOrderSummary)
-
+router.route('/bulk-action').post(protect,restrictToAdmin,bulkUpdateOrders)
+router.route('/generate-invoice/:orderId?').get(protect,restrictToAdmin,generateInvoiceSingle)
 router.route('/getdailyorders').get(protect,restrictToAdmin,getDailyOrders)
 router.route('/sales').get(protect,restrictToAdmin,getSalesData)
 router.route('/').post(protect,restrictToUser,createOrder).get(protect,restrictToAdmin,getAllOrdersByAdmin)

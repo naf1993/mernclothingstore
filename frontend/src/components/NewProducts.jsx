@@ -4,9 +4,8 @@ import { useSelector, useDispatch } from "react-redux";
 import Loader from "./Loader";
 import Message from "./Message";
 import Headings from "./Headings";
-
-import Product from "./Product";
 import { listProducts } from "../actions/productActions";
+import MultiCarousel from "./MultiCarousel";
 
 export const responsive = {
   superLargeDesktop: {
@@ -33,13 +32,17 @@ const NewProducts = () => {
   const dispatch = useDispatch();
   const { loading, error, products } = useSelector((state) => state.product);
   console.log(products);
-  const newProducts = products.sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-  );
-  console.log(newProducts);
+  const newProducts =
+    Array.isArray(products) && products.length > 0
+      ? products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      : [];
+  console.log("this is new products", newProducts);
   useEffect(() => {
     dispatch(listProducts());
-  }, [dispatch]);
+  }, []);
+
+  console.log('Fetched products:', products);
+  console.log('This is new products:', newProducts);
 
   return (
     <div className="products-slider">
@@ -51,6 +54,13 @@ const NewProducts = () => {
         {loading && <Loader />}
         {error && <Message error={error} />}
         {newProducts && newProducts.length > 0 && (
+          <MultiCarousel
+            items={newProducts}
+            itemsToShow={4}
+            autoScroll={true}
+          ></MultiCarousel>
+        )}
+        {/* {newProducts && newProducts.length > 0 && (
           <Carousel responsive={responsive} containerClass="carousel-container">
             {newProducts.map((product) => (
               <Product
@@ -60,7 +70,7 @@ const NewProducts = () => {
               />
             ))}
           </Carousel>
-        )}
+        )} */}
       </div>
     </div>
   );

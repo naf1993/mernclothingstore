@@ -75,14 +75,18 @@
         margin: 0 auto;
         border: none;
         border-style: dotted;
+        border-color: var(--dark-gold);
         background-color: white;
+    
         padding: 1rem 0.5rem;
         border-width: 2px;
         cursor: pointer; // Make button look clickable
         transition: background-color 0.3s; // Smooth transition for hover
 
         &:hover {
-          background-color: var(--color-grey-light-1); // Change on hover
+          background-color: var(--dark-gold);
+          border-color: white;
+          color:white; // Change on hover
         }
       }
     }
