@@ -9,7 +9,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
   grid-gap:2rem;
-  @media only screen and (max-width:$bp-small) {//30em
+  @media only screen and (max-width:$bp-medium) {//30em
     grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
      overflow-x: hidden;
  }

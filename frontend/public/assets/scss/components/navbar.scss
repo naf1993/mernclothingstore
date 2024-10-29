@@ -188,7 +188,7 @@
 
     .mega-menu {
       grid-column: 1/-1;
-      @media only screen and (max-width: $bp-smallest) {
+      @media only screen and (max-width: $bp-small) {
         display: none;
       }
       .mega-menu__nav {

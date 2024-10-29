@@ -7,11 +7,14 @@ const LargeScreenDetails = ({
   colors,
   onHandleColor,
   ifSize,
-  setColorErr,setSizeErr,colorErr,sizeErr
+  setColorErr,
+  setSizeErr,
+  colorErr,
+  sizeErr,
 }) => {
   useEffect(() => {
     console.log("large  view rendered");
-    console.log(colors)
+    console.log(colors);
   }, []);
   return (
     <>
@@ -35,7 +38,6 @@ const LargeScreenDetails = ({
 
       {colorErr ? <p className="text-danger">{colorErr}</p> : null}
 
-     
       {ifSize && <h4 className="product-size size-name">SIZE</h4>}
       {ifSize && (
         <Select
@@ -45,9 +47,9 @@ const LargeScreenDetails = ({
           onChange={onSizeChange}
         />
       )}
-      {sizeErr ? <p className="text-danger">{sizeErr}</p>:null}
+      {sizeErr ? <p className="text-danger">{sizeErr}</p> : null}
 
-<h4 className="product-details detail-name">Product Details</h4>
+      <h4 className="product-details detail-name">Product Details</h4>
       <p>Product Details: 8834941</p>
       <p>Return within "30 days". For detailed information, Click.</p>
       <p>Fabric Info: 100% BARKCLOTH</p>

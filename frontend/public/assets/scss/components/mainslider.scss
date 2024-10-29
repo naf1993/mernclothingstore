@@ -3,49 +3,25 @@
   background-color: white;
   margin: 5rem 0;
   padding-right: 3rem;
+ 
   font-family: "Lato", sans-serif;
   overflow: hidden;
   position: relative;
   border-radius: 10px;
+
   
-
-  span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    position: absolute;
-    bottom: 20px; // Adjust as needed
-    left: 50%;
-    transform: translateX(-50%); // Center the buttons
-    z-index: 999;
-
-    .buttonSlide {
-      width: 1.5rem;
-      height: 1.5rem;
-      border-radius: 50%;
-      background-color: var(--color-grey-light-1);
-      border: none;
-      cursor: pointer; // Make buttons look clickable
-      transition: background-color 0.3s; // Smooth transition for hover
-
-      &:hover {
-        background-color: var(--color-grey-light-2); // Change on hover
-      }
-    }
-  }
-
   .slide {
     display: none; // Hide all slides by default
     flex: 1; // Ensure the slide takes equal space in flex container
-
+    opacity: 0;
+    transition: opacity 1s ease-in;
     &.active {
       display: flex; // Show active slide
       opacity: 1;
-      transition: opacity 1s ease; // Smooth transition for opacity
+       // Smooth transition for opacity
     }
 
-      .image-container {
+    .image-container {
       flex: 1; // Take up equal space
       overflow: hidden; // Prevent overflow
 
@@ -77,7 +53,7 @@
         border-style: dotted;
         border-color: var(--dark-gold);
         background-color: white;
-    
+
         padding: 1rem 0.5rem;
         border-width: 2px;
         cursor: pointer; // Make button look clickable
@@ -86,7 +62,7 @@
         &:hover {
           background-color: var(--dark-gold);
           border-color: white;
-          color:white; // Change on hover
+          color: white; // Change on hover
         }
       }
     }

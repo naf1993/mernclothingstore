@@ -180,7 +180,7 @@ const SingleProduct = () => {
           <div className="product-detail-wrapper">
             <div className="detail-wrapper">
               <div className="productdisplay-left">
-                <ProductImage images={images} imageUrl={imageUrl} />
+                <ProductImage images={images}  />
               </div>
 
               <div className="productdisplay-right">

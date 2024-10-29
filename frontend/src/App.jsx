@@ -1,91 +1,81 @@
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Layout from "./components/Layout";
-import Home from "./screens/Home";
-import Login from "./screens/Login";
-import Register from "./screens/Register";
-import Favourites from "./screens/Favourites";
-import Cart from "./screens/Cart";
-import ProductList from "./screens/ProductList";
-import Cookies from "js-cookie";
-import "react-multi-carousel/lib/styles.css";
-import { useEffect } from "react";
-import axios from "axios";
-import SingleProduct from "./screens/SingleProduct";
-import { loginUserWithOauth, loadUser } from "./actions/authActions";
-import SearchScreen from "./screens/SearchScreen";
-import ProductDetail from "./screens/ProductDetail";
 import LoadingFullScreen from "./components/LoadingFullScreen";
 import ScrollToTop from "./components/ScrollToTop";
+import Cookies from "js-cookie";
+import { loginUserWithOauth, loadUser } from "./actions/authActions";
+import axios from "axios";
+import ProductDetail2 from "./screens/ProductDetail2";
+
+// Lazy load screens
+const Home = lazy(() => import("./screens/Home"));
+const Login = lazy(() => import("./screens/Login"));
+const Register = lazy(() => import("./screens/Register"));
+const Favourites = lazy(() => import("./screens/Favourites"));
+const Cart = lazy(() => import("./screens/Cart"));
+const ProductList = lazy(() => import("./screens/ProductList"));
+const SingleProduct = lazy(() => import("./screens/SingleProduct"));
+const SearchScreen = lazy(() => import("./screens/SearchScreen"));
 
 const App = () => {
-  const [loading,setLoading] = useState(true)
+  const [loading, setLoading] = useState(true);
   const [navItems, setNavItems] = useState([]);
   const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
-  const { token, appLoaded, isLoading, isAuthenticated, user, error } = auth;
-useEffect(()=>{
-  const timer = setTimeout(()=>{
-    setLoading(false)
-  },2000)
-  return()=>clearTimeout(timer)
-},[])
+  const { token, appLoaded, isLoading, isAuthenticated } = auth;
 
   useEffect(() => {
-    if (window.location.hash === "#_=_") window.location.hash = "";
+    const fetchCategoriesAndUser = async () => {
+      try {
+        // Fetch categories
+        const { data } = await axios.get("http://localhost:5000/api/categories");
+        setNavItems(data.data.categories);
 
-    const cookieJwt = Cookies.get("x-auth-cookie");
+        // Check for JWT cookie and log in user
+        const cookieJwt = Cookies.get("x-auth-cookie");
+        if (cookieJwt) {
+          dispatch(loginUserWithOauth(cookieJwt));
+        }
 
-    if (cookieJwt) {
-      dispatch(loginUserWithOauth(cookieJwt));
-      //Cookies.remove('x-auth-cookie');
-    }
-  }, []);
+        // Load user if needed
+        if (!appLoaded && !isLoading && token && !isAuthenticated) {
+          await dispatch(loadUser());
+        }
+      } catch (error) {
+        console.error("Error fetching categories or user:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  useEffect(() => {
-    async function fetchCategories() {
-      const { data } = await axios.get("http://localhost:5000/api/categories");
-      const categories = data.data.categories;
-      setNavItems(categories);
-    }
-    fetchCategories();
-  }, []);
+    fetchCategoriesAndUser();
+  }, [dispatch, appLoaded, isLoading, token, isAuthenticated]);
 
-  useEffect(() => {
-    if (!appLoaded && !isLoading && token && !isAuthenticated) {
-      loadUser();
-    }
-  }, [
-    auth.isAuthenticated,
-    auth.token,
-    loadUser,
-    auth.isLoading,
-    auth.appLoaded,
-  ]);
-  if(loading){
-    return <LoadingFullScreen/>
+  if (loading) {
+    return <LoadingFullScreen />;
   }
 
   return (
     <Router>
-      <ScrollToTop/>
-  
+      <ScrollToTop />
+      <Suspense fallback={<LoadingFullScreen />}>
         <Routes>
-        <Route path="/" element={<Layout navItems={navItems} />}>
-          <Route index element={<Home />} />
-          <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
-          <Route path="products/:category/:id" element={<ProductList />} />
-          <Route path="products/:id" element={<SingleProduct />} />
-          <Route path="search" element={<SearchScreen />} />
-          <Route path="favourites" element={<Favourites />} />
-          <Route path="cart" element={<Cart />} />
-        </Route>
+          <Route path="/" element={<Layout navItems={navItems} />}>
+            <Route index element={<Home />} />
+            <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="products/:category/:id" element={<ProductList />} />
+            <Route path="products/:id" element={<ProductDetail2 />} />
+            <Route path="search" element={<SearchScreen />} />
+            <Route path="favourites" element={<Favourites />} />
+            <Route path="cart" element={<Cart />} />
+          </Route>
         </Routes>
-       
-     
+      </Suspense>
     </Router>
   );
 };
+
 export default App;

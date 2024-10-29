@@ -31,9 +31,10 @@ export const listProducts = () => async (dispatch) => {
     const { data } = await axios.get("/api/products");
 
     const allProducts = data.data.products;
+    console.log(allProducts)
     dispatch({
       type: PRODUCT_LIST_SUCCESS,
-      payload: allProducts, //action object containing type and payload
+      payload: allProducts,
     });
   } catch (error) {
     dispatch({

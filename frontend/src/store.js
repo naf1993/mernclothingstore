@@ -1,46 +1,36 @@
-import { applyMiddleware, combineReducers, createStore, compose } from "redux";
-import { composeWithDevTools } from "redux-devtools-extension";
-import thunk from "redux-thunk";
-import {
-  persistStore,
-  persistReducer,
-} from "redux-persist";
-import storage from "redux-persist/lib/storage";
-import { modalReducer } from "./reducers/productModalReducer.js";
-import { addToCartReducer } from "./reducers/cartReducer.js";
-import { authReducer } from "./reducers/authReducer.js";
-import { productReducer } from "./reducers/productReducer.js";
+import { createStore, applyMiddleware, combineReducers } from 'redux';
+import thunk from 'redux-thunk';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+import { composeWithDevTools } from 'redux-devtools-extension';
+import { productReducer } from './reducers/productReducer';
+import { authReducer } from './reducers/authReducer';
+import { addToCartReducer } from './reducers/cartReducer';
+import { modalReducer } from './reducers/productModalReducer';
 
-const reducer = combineReducers({
-  auth: authReducer,
-  productModal: modalReducer,
-  cart: addToCartReducer,
-  product: productReducer,
+const rootReducer = combineReducers({
+    product: productReducer,
+    auth: authReducer,
+    cart: addToCartReducer,
+    productModal: modalReducer,
 });
 
 const persistConfig = {
-  key: "root",
-  whitelist: ["auth", "cart"], // Persist both auth and cart
-  version: 1,
-  storage,
+    key: 'root',
+    storage,
+    whitelist: ['auth', 'cart'], // Persisting only auth and cart
 };
 
-const persistedReducer = persistReducer(persistConfig, reducer);
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-const cartItemsFromStorage = localStorage.getItem('cartItems') 
-  ? JSON.parse(localStorage.getItem('cartItems')) 
-  : [];
-const shippingAddressFromStorage = localStorage.getItem('shippingAddress') 
-  ? JSON.parse(localStorage.getItem('shippingAddress')) 
-  : {};
+const middleware = [thunk];
 
-const initialState = {
-  cart: { cartItems: cartItemsFromStorage, shippingAddress: shippingAddressFromStorage },
-};
+const store = createStore(
+    persistedReducer,
+    composeWithDevTools(applyMiddleware(...middleware))
+);
 
-const middleware = composeWithDevTools(applyMiddleware(thunk));
-const store = createStore(persistedReducer, initialState, middleware);
-const persistor = persistStore(store);
+ const persistor = persistStore(store);
 
-export default store;
-export { persistor };
+export default store
+export {persistor}

@@ -2,7 +2,7 @@ import { cloneElement, createContext, useContext, useState } from "react";
 import { createPortal } from "react-dom";
 import { HiXMark } from "react-icons/hi2";
 import styled from "styled-components";
-import {Box} from '@mui/material'
+import { Box } from "@mui/material";
 import useOutsideClick from "../hooks/useOutsideClick";
 
 const StyledModal = styled(Box)`
@@ -19,8 +19,8 @@ const StyledModal = styled(Box)`
   max-height: 80vh;
   overflow-y: auto;
   z-index: 1000;
-   display: flex;
-  flex-direction: column; 
+  display: flex;
+  flex-direction: column;
 `;
 
 const Overlay = styled(Box)`
@@ -42,7 +42,7 @@ const Button = styled.button`
   position: absolute;
   top: 0.4rem;
   right: 1rem;
-  z-index:1100;
+  z-index: 1100;
 
   &:hover {
     background-color: #f3f4f6;
@@ -59,7 +59,9 @@ export const ModalContext = createContext();
 function CustomModal1({ children }) {
   const [openName, setOpenName] = useState("");
 
-  const close = () => setOpenName("");
+  const close = () => {
+    setOpenName("");
+  };
   const open = setOpenName;
 
   return (
@@ -76,7 +78,7 @@ function Open({ children, opens: opensWindowName }) {
     onClick: (event) => {
       event.stopPropagation(); // Prevent row click
       open(opensWindowName);
-    }
+    },
   });
 }
 
@@ -88,19 +90,19 @@ function Window({ children, name }) {
 
   return createPortal(
     <Overlay>
-    <StyledModal ref={ref}>
-      <Button onClick={close}>
-        <HiXMark />
-      </Button>
-     
-      <Box sx={{ marginTop: "2rem" }}> {/* Add margin to push the form below the close button */}
-      {cloneElement(children, { onCloseModal: close })}
-      </Box>
-      
-     
-    </StyledModal>
-  </Overlay>,
-  document.body
+      <StyledModal ref={ref}>
+        <Button onClick={close}>
+          <HiXMark />
+        </Button>
+
+        <Box sx={{ marginTop: "2rem" }}>
+          {" "}
+          {/* Add margin to push the form below the close button */}
+          {cloneElement(children, { onCloseModal: close })}
+        </Box>
+      </StyledModal>
+    </Overlay>,
+    document.body
   );
 }
 
@@ -108,4 +110,3 @@ CustomModal1.Open = Open;
 CustomModal1.Window = Window;
 
 export default CustomModal1;
-

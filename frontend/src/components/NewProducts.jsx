@@ -6,6 +6,7 @@ import Message from "./Message";
 import Headings from "./Headings";
 import { listProducts } from "../actions/productActions";
 import MultiCarousel from "./MultiCarousel";
+import Product from "./Product";
 
 export const responsive = {
   superLargeDesktop: {
@@ -29,17 +30,23 @@ export const responsive = {
 };
 
 const NewProducts = () => {
+  console.log('NEW PRODUCTS COMPONENT')
   const dispatch = useDispatch();
+  console.log("Dispatch function:", dispatch);
+ 
   const { loading, error, products } = useSelector((state) => state.product);
-  console.log(products);
+
+  useEffect(() => {
+    console.log("Dispatching listProducts");
+    dispatch(listProducts());
+  }, [dispatch]);
+  
   const newProducts =
     Array.isArray(products) && products.length > 0
       ? products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       : [];
   console.log("this is new products", newProducts);
-  useEffect(() => {
-    dispatch(listProducts());
-  }, []);
+  
 
   console.log('Fetched products:', products);
   console.log('This is new products:', newProducts);
@@ -53,14 +60,8 @@ const NewProducts = () => {
       <div className="slider">
         {loading && <Loader />}
         {error && <Message error={error} />}
+       
         {newProducts && newProducts.length > 0 && (
-          <MultiCarousel
-            items={newProducts}
-            itemsToShow={4}
-            autoScroll={true}
-          ></MultiCarousel>
-        )}
-        {/* {newProducts && newProducts.length > 0 && (
           <Carousel responsive={responsive} containerClass="carousel-container">
             {newProducts.map((product) => (
               <Product
@@ -70,7 +71,7 @@ const NewProducts = () => {
               />
             ))}
           </Carousel>
-        )} */}
+        )}
       </div>
     </div>
   );
