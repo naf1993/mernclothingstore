@@ -10,3 +10,9 @@ This project is a comprehensive e-commerce platform for a clothing store, develo
 - **Admin Panel**: Manage products, orders, and user roles.
 - **Responsive Design**: Mobile-friendly layout for an optimal shopping experience on all devices.
 - **Automated Slideshow**: Responsive and animated product image slider on 
+
+### Installation
+1. **Clone the repository**
+   ```sh
+   git clone https://github.com/naf1993/mernclothingstore.git
+   cd mern-ecommerce-clothing-store
