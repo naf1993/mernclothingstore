@@ -1,8 +1,10 @@
+
+import * as dotenv from "dotenv";
+dotenv.config();
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import validator from "validator";
-import keys from '../config/keys.js'
 import jwt from 'jsonwebtoken'
 const userSchema = new mongoose.Schema(
   {
@@ -56,7 +58,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const secretOrKey = keys.jwt.secret
+const secretOrKey = process.env.JWT_SECRET
 
 userSchema.methods.generateJWT = function(){
   const token = jwt.sign(

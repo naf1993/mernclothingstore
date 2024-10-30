@@ -1,3 +1,5 @@
+import * as dotenv from "dotenv";
+dotenv.config();
 import User from "../models/userModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
@@ -5,10 +7,9 @@ import jwt from "jsonwebtoken";
 import { promisify } from "util";
 import sendEmail from "../utils/email.js";
 import crypto from "crypto";
-import axios from "axios";
-import keys from '../config/keys.js'
 
-const secretOrKey = keys.jwt.secret
+
+const secretOrKey = process.env.JWT_SECRET
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
