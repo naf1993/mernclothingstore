@@ -1,7 +1,9 @@
+import * as dotenv from "dotenv";
+dotenv.config();
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth2";
 import User from "../models/userModel.js";
-import keys from '../config/keys.js'
+
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -15,9 +17,9 @@ passport.deserializeUser((id, done) => {
 
 export const googleStrategy = new GoogleStrategy(
   {
-    clientID: keys.google.GOOGLE_CLIENT_ID,
-    clientSecret: keys.google.GOOGLE_CLIENT_SECRET,
-    callbackURL: keys.google.GOOGLE_CALLBACK_URL,
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    callbackURL: process.env.GOOGLE_CALLBACK_URL,
     proxy: true,
   },
   async (accessToken, refreshToken, profile, done) => {

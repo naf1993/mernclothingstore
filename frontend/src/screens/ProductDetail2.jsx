@@ -1,37 +1,57 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { listProductDetails } from "../actions/productActions";
+import { getColors, listProductDetails } from "../actions/productActions";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 import axios from "axios";
+import StarRating from "../components/StarRating";
+import ProductImage from "../components/ProductImage";
 const ProductDetail2 = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const [colors, setColors] = useState([]);
   const { loading, error, product } = useSelector((state) => state.product);
+  const { colors: allColors } = useSelector((state) => state.product);
   useEffect(() => {
     dispatch(listProductDetails(`${id}`));
   }, [id, dispatch]);
   useEffect(() => {
-    async function fetchColors() {
-      const { data } = await axios.get(
-        "http://localhost:5000/api/products/allcolors"
+    dispatch(getColors());
+  }, [product, dispatch]);
+
+  useEffect(() => {
+    if (product && product.colors && allColors && allColors.length > 0) {
+      let uniqueColors = allColors.filter((color) =>
+        product.colors.includes(color)
       );
-
-      setColors(data.data.uniqueColors);
+      setColors(uniqueColors);
     }
-    fetchColors();
-  }, []);
-  let colorsArray = product?.colors || []; // Default to empty array if product.colors is undefined
-  const productColors = colors.filter((color) => colorsArray.includes(color));
+  }, [product, product.colors, allColors, allColors.length]);
 
-  console.log(`This is product colors: ${productColors}`);
   return (
     <>
       {loading && <Loader />}
       {error && <Message error={error} />}
-      {product && <p>{product.name}</p>}
+      {product && (
+        <div className="product-detail-wrapper">
+          <div className="detail-wrapper">
+            <div className="productdisplay-left">
+              {product.images && product.images.length > 0 && (
+                <ProductImage images={product.images} />
+              )}
+            </div>
+
+            <div className="productdisplay-right">
+              <h2 className="product-category">
+                {product.SubCategory && product.SubCategory.name}
+              </h2>
+              <h1 className="product-name">{product.name}</h1>
+              <StarRating rating={product.ratingsAverage} />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

@@ -4,13 +4,14 @@ import {
     PRODUCT_LIST_FAIL,
     PRODUCT_DETAIL_REQUEST,
     PRODUCT_DETAIL_SUCCESS,
-    PRODUCT_DETAIL_FAIL,PRODUCT_CATEGORY_FAIL,PRODUCT_CATEGORY_REQUEST,PRODUCT_CATEGORY_SUCCESS
+    PRODUCT_DETAIL_FAIL,PRODUCT_CATEGORY_FAIL,PRODUCT_CATEGORY_REQUEST,PRODUCT_CATEGORY_SUCCESS,PRODUCT_COLORS_REJECT,PRODUCT_COLORS_REQUEST,PRODUCT_COLORS_SUCCESS
 } from "../constants/productConstants";
 
 
 const initialState = {
     categories:[],
     products: [],
+    colors:[],
     product: { reviews: [] },
     loading: false,
     error: null,
@@ -39,6 +40,12 @@ export const productReducer = (state = initialState, action) => {
                 return { ...state, loading: false, categories: action.payload };
         case PRODUCT_CATEGORY_FAIL:
                 return { ...state, loading: false, error: action.payload };
+        case PRODUCT_COLORS_REQUEST:
+                return {...state,loading:true}
+        case PRODUCT_COLORS_SUCCESS:
+                return {...state,loading:false,colors:action.payload}
+        case PRODUCT_COLORS_REJECT:
+                return {...state,loading:false,error:action.payload}
 
         default:
             return state;
