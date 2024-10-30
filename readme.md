@@ -57,22 +57,21 @@ This project is a comprehensive e-commerce platform for a clothing store, develo
 5. **Create a .env file in the root folder and add the following
     PORT=5000
     MONGO_URI_LOCAL=mongodb://127.0.0.1:27017/mern_ecommerce
-    MONGO_URL_HOST=
-    NODE_ENV=
-    GOOGLE_CLIENT_ID=
-    GOOGLE_CLIENT_SECRET=
-    GOOGLE_CALLBACK_URL=
-    CLOUD_NAME=
-    API_KEY=
-    API_SECRET=
-    JWT_SECRET=
-    JWT_EXPIRES_IN=
-    JWT_COOKIE_EXPIRES_IN=
-    STRIPE_PUBLIC_KEY=
-    STRIPE_API_KEY=
-    EMAIL_USER=
-    EMAIL_PASSWORD=
-    CLIENT_URL=
+    MONGO_URL_HOST=your mongodb_uri
+    NODE_ENV=development
+    GOOGLE_CLIENT_ID=your google client id
+    GOOGLE_CLIENT_SECRET=your google client secret
+    GOOGLE_CALLBACK_URL=callback url
+    CLOUD_NAME=cloudinary name
+    API_KEY=cloudinary api key
+    API_SECRET=cloudinary api secret
+    JWT_SECRET=your jwt secret
+    JWT_EXPIRES_IN=jwtexpiresin
+    JWT_COOKIE_EXPIRES_IN=jwtcookieexpiresin
+    STRIPE_PUBLIC_KEY=your stripe public key
+    STRIPE_API_KEY=your stripe private key
+    EMAIL_USER=email
+    EMAIL_PASSWORD=password
     BASE_API_URL=api
 
 
