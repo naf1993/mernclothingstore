@@ -13,8 +13,6 @@ This project is a comprehensive e-commerce platform for a clothing store, develo
 
 ### Features
 
-### Features
-
 #### Frontend
 - **User Authentication**: Sign up, log in, and log out functionality with Google OAuth for a seamless login experience.
 - **Product Listing**: Browse, search, and filter clothing items.
@@ -38,23 +36,26 @@ This project is a comprehensive e-commerce platform for a clothing store, develo
 - **Dashboard**: Overview of key metrics like total revenue, number of orders, no of customers,product sold and charts to display sales per month and top selling products.
 - **Inventory Management**: : Track stock levels and manage inventory efficiently.
 
-
 ### Installation
 1. **Clone the repository**
    ```sh
    git clone https://github.com/naf1993/mernclothingstore.git
    cd mern-ecommerce-clothing-store
 
-2. **Install server dependencies
+2. **Install server dependencies**
     cd backend
     npm install
-3. **Install client dependencies
+
+3. **Install client dependencies**
     cd frontend
     npm install
-4. **Install admin dependencies
+
+4. **Install admin dependencies**
     cd ecommerce-dashboard-admin
     npm install
-5. **Create a .env file in the root folder and add the following
+
+5. **Create a .env file in the root folder and add the following**
+
     ```sh
     PORT=5000
     MONGO_URI_LOCAL=mongodb://127.0.0.1:27017/mern_ecommerce
@@ -74,7 +75,6 @@ This project is a comprehensive e-commerce platform for a clothing store, develo
     EMAIL_USER=email
     EMAIL_PASSWORD=password
     BASE_API_URL=api
-
 
 ### Usage
 1. **Start Backend**
