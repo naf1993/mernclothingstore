@@ -27,13 +27,13 @@ This project is a comprehensive e-commerce platform for a clothing store, develo
 #### Backend
 - **User Management**: Handle user registration, authentication, and profile management. Supports Google OAuth integration.
 - **Product Management**: CRUD operations for managing products in the database.
-- **Order Management**: Process orders, handle payments, and manage order statuses.
+- **Order Management**: Process orders, handle payments, and manage order statuses,print invoices.
 - **JWT Authentication**: Secure routes and ensure secure user sessions using JSON Web Tokens.
 - **Error Handling**: Centralized error handling for consistent and clear error responses.
 
 #### Admin Panel
 - **Product Management**: Add, update, delete, and list products.
-- **Order Management**: View and manage customer orders.
+- **Order Management**: View and manage customer orders,print invoices.
 - **User Management**: Manage user roles and active status.
 - **Dashboard**: Overview of key metrics like total revenue, number of orders, no of customers,product sold and charts to display sales per month and top selling products.
 - **Inventory Management**: : Track stock levels and manage inventory efficiently.
