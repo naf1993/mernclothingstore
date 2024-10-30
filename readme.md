@@ -43,19 +43,21 @@ This project is a comprehensive e-commerce platform for a clothing store, develo
    cd mern-ecommerce-clothing-store
 
 2. **Install server dependencies**
+    ```sh
     cd backend
     npm install
 
 3. **Install client dependencies**
+    ```sh
     cd frontend
     npm install
 
 4. **Install admin dependencies**
+     ```sh
     cd ecommerce-dashboard-admin
     npm install
 
 5. **Create a .env file in the root folder and add the following**
-
     ```sh
     PORT=5000
     MONGO_URI_LOCAL=mongodb://127.0.0.1:27017/mern_ecommerce
