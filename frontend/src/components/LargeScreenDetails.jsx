@@ -10,7 +10,7 @@ const LargeScreenDetails = ({
   setColorErr,
   setSizeErr,
   colorErr,
-  sizeErr,
+  sizeErr,description
 }) => {
   useEffect(() => {
     console.log("large  view rendered");
@@ -50,9 +50,9 @@ const LargeScreenDetails = ({
       {sizeErr ? <p className="text-danger">{sizeErr}</p> : null}
 
       <h4 className="product-details detail-name">Product Details</h4>
-      <p>Product Details: 8834941</p>
+      <p>{description}</p>
       <p>Return within "30 days". For detailed information, Click.</p>
-      <p>Fabric Info: 100% BARKCLOTH</p>
+     
     </>
   );
 };

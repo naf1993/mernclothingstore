@@ -7,7 +7,9 @@ import ScrollToTop from "./components/ScrollToTop";
 import Cookies from "js-cookie";
 import { loginUserWithOauth, loadUser } from "./actions/authActions";
 import axios from "axios";
-import ProductDetail2 from "./screens/ProductDetail2";
+import Protected from "./components/Protected";
+import {Toaster} from 'react-hot-toast'
+
 
 // Lazy load screens
 const Home = lazy(() => import("./screens/Home"));
@@ -58,7 +60,8 @@ const App = () => {
   }
 
   return (
-    <Router>
+    <>
+     <Router>
       <ScrollToTop />
       <Suspense fallback={<LoadingFullScreen />}>
         <Routes>
@@ -67,14 +70,37 @@ const App = () => {
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path="products/:category/:id" element={<ProductList />} />
-            <Route path="products/:id" element={<ProductDetail2 />} />
+            <Route path="products/:id" element={<SingleProduct/>} />
             <Route path="search" element={<SearchScreen />} />
-            <Route path="favourites" element={<Favourites />} />
+            <Route path="favourites" element={<Protected><Favourites/></Protected>}/>
             <Route path="cart" element={<Cart />} />
+            
           </Route>
         </Routes>
       </Suspense>
     </Router>
+    <Toaster
+        position="bottom-right"
+        gutter={12}
+        containerStyle={{ margin: "8px" }}
+        toastOptions={{
+          success: {
+            duration: 3000,
+          },
+          error: {
+            duration: 5000,
+          },
+          style: {
+            fontSize: "16px",
+            maxWidth: "500px",
+            padding: "16px 24px",
+            backgroundColor: "#fff",
+            color: "#374151",
+          },
+        }}
+      />
+    </>
+   
   );
 };
 

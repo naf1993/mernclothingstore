@@ -7,18 +7,20 @@ import { productReducer } from './reducers/productReducer';
 import { authReducer } from './reducers/authReducer';
 import { addToCartReducer } from './reducers/cartReducer';
 import { modalReducer } from './reducers/productModalReducer';
+import { userReducer } from './reducers/userReducer';
 
 const rootReducer = combineReducers({
     product: productReducer,
     auth: authReducer,
     cart: addToCartReducer,
     productModal: modalReducer,
+    user:userReducer
 });
 
 const persistConfig = {
     key: 'root',
     storage,
-    whitelist: ['auth', 'cart'], // Persisting only auth and cart
+    whitelist: ['auth', 'cart','user'], // Persisting auth cart user
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

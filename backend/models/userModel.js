@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
-    wishList: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+    favourites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
 
     passwordChangedAt: Date,
     passwordResetToken: String,

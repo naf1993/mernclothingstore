@@ -4,7 +4,7 @@ import AppError from "../utils/appError.js";
 import multer from "multer";
 import sharp from "sharp";
 import Coupon from "../models/couponModel.js";
-import Cart from '../models/cartModels.js'
+import Cart from "../models/cartModels.js";
 
 // const multerStorage = multer.diskStorage({
 //   destination: (req, file, cb) => {
@@ -170,9 +170,53 @@ const updateUserStatusByAdmin = catchAsync(async (req, res, next) => {
   });
 });
 
+export const addToFavourites = catchAsync(async (req, res, next) => {
+  const { _id } = req.user;
+  const { productId } = req.body;
+  const user = await User.findById(_id);
+
+  if (!user) {
+    return next(new AppError("No user found with that ID", 404));
+  }
+
+  if (!user?.favourites?.includes(productId)) {
+    user.favourites.push(productId);
+    await user.save();
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      favourites: user.favourites, // Make sure to return the correct property
+    },
+  });
+});
+
+export const removeFromFavourites = catchAsync(async (req, res, next) => {
+  const { _id } = req.user;
+  const { productId } = req.bdy;
+  const user = await User.findById(_id);
+
+  if (!user) {
+    return next(new AppError("No user found with that ID", 404));
+  }
+
+  user.favourites = user.favourites.filter(
+    (item) => item.toString() !== productId
+  );
+  await user.save()
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      favourites: user.favourites, // Make sure to return the correct property
+    },
+  });
+});
+
 const getWishlist = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-  console.log(_id)
+  console.log(_id);
 
   const user = await User.findById(_id).populate("wishList");
   if (!user) {
@@ -213,19 +257,22 @@ const applyCoupon = catchAsync(async (req, res, next) => {
   if (todayDate < validCoupon.expiry) {
     return next(new AppError("Sorry coupon expired", 404));
   }
-  const user = await User.findById(req.params.id)
-  if(!user){
+  const user = await User.findById(req.params.id);
+  if (!user) {
     return next(new AppError("No User found with that ID", 404));
   }
-  let {cartTotal} = await Cart.findOne({user:user._id}).populate('products.product')
+  let { cartTotal } = await Cart.findOne({ user: user._id }).populate(
+    "products.product"
+  );
   let totalAfterDiscount = (
-    cartTotal - (cartTotal*validCoupon.discount)/100
-  ).toFixed(2)
+    cartTotal -
+    (cartTotal * validCoupon.discount) / 100
+  ).toFixed(2);
   await Cart.findOneAndUpdate(
-    {user:user._id},
-    {totalAfterDiscount},
-    {new:true}
-  )
+    { user: user._id },
+    { totalAfterDiscount },
+    { new: true }
+  );
   res.status(200).json({
     status: "success",
     data: {
@@ -235,7 +282,7 @@ const applyCoupon = catchAsync(async (req, res, next) => {
   // const user = await User.findByIdAndUpdate(req.params.id,req.body,{
   //   new:true,
   // })
-  
+
   // res.status(200).json({
   //   status: "success",
   //   data: {

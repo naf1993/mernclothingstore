@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
 
 const ProductImage = ({ images }) => {
-  console.log(images)
   const [mainImage, setMainImage] = useState(images[0]);
 
   useEffect(() => {
     setMainImage(images[0]);
   }, [images]);
-
-  useEffect(() => {
-    console.log("child rendered");
-  }, []);
 
   return (
     <>

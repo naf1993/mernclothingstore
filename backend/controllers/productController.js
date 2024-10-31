@@ -319,21 +319,32 @@ const getProductsByCategory = catchAsync(async (req, res, next) => {
 const getSimilarProducts = catchAsync(async (req, res, next) => {
   const { categoryId, productId } = req.params;
 
-  const products = await Product.find({
-    Category: categoryId,
-    _id: { $ne: productId },
-  }).limit(4);
-  if (products.length === 0) {
-    return next(new AppError("No Similar Products", 404));
+  // Validate categoryId and productId
+  if (!categoryId || !productId) {
+    return next(new AppError('Invalid categoryId or productId', 400));
   }
 
-  res.status(200).json({
-    status: "success",
-    length: products.length,
-    data: {
-      products,
-    },
-  });
+  try {
+    const products = await Product.find({
+      Category: categoryId,
+      _id: { $ne: productId },
+    }).limit(4);
+
+    if (products.length === 0) {
+      return next(new AppError("No Similar Products", 404));
+    }
+
+    console.log('this is related products length', products.length);
+    res.status(200).json({
+      status: "success",
+      length: products.length,
+      data: {
+        products,
+      },
+    });
+  } catch (error) {
+    return next(new AppError('Error fetching similar products', 500));
+  }
 });
 
 const getProductsBySubCategory = catchAsync(async (req, res, next) => {

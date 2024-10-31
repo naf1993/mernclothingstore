@@ -36,21 +36,41 @@
     justify-content: flex-end;
     gap: 0.6rem;
 
-    &-item {
+    &-item-1 {
       cursor: pointer;
       height: 3rem;
       width: 3rem;
       padding: 0.5rem;
       border-radius: 50%;
-      background-color: black;
       position: relative;
-      color: white;
-
+      background-color: black; // Use a consistent background color
+      border: 2px solid black; // Set border to match fill color
+      color: white; // Icon color
+  
       &:hover {
         background-color: white;
-
-        color: black;
+        color: black; // Change icon color on hover
+        border: 2px solid black; // Maintain border color on hover
       }
+    }
+    &-item-2 {
+      cursor: pointer;
+      height: 3rem;
+      width: 3rem;
+      padding: 0.5rem;
+      border-radius: 50%;      
+      position: relative;
+      background-color: var(--color-primary-light); // Use a consistent background color
+      border: 2px solid var(--color-primary-light); // Set border to match fill color
+      color: white; // Icon color
+  
+      &:hover {
+        background-color: var(--color-primary-dark); // Change background on hover
+        color: white; // Maintain icon color
+        border: 2px solid var(--color-primary-dark); // Change border to match hover color
+      }      
+
+     
     }
   }
 
