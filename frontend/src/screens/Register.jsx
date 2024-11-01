@@ -5,7 +5,7 @@ import Message from '../components/Message';
 import { useDispatch,useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-import { registerWithEmail } from '../actions/authActions';
+import { registerWithEmail } from '../actions/userActions';
 
 const image1 = require("../img/loginimage.jpg");
 const Register = () => {
@@ -15,8 +15,8 @@ const Register = () => {
   const [password,setPassword] = useState('')
   const [confirmPassword,setconfirmPassword] = useState('')
   const dispatch = useDispatch()
-  const auth = useSelector((state) => state.auth);
-  const { isAuthenticated,error,isLoading } = auth;
+  const user = useSelector((state) => state.user);
+  const { isAuthenticated,error,isLoading } = user;
   const [message,setMessage] = useState(null)
 
   useEffect(()=>{

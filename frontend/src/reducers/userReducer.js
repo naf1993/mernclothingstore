@@ -1,48 +1,127 @@
 import {
-  USER_ADD_FAVOURUTES_FAIL,
-  USER_ADD_FAVOURUTES_REQUEST,
-  USER_UPDATE_PROFILE_FAIL,
+  USER_LOADING,
+  LOGIN_WITH_EMAIL_LOADING,
+  LOGIN_WITH_OAUTH_LOADING,
+  REGISTER_WITH_EMAIL_LOADING,
   USER_UPDATE_PROFILE_REQUEST,
-  USER_UPDATE_PROFILE_SUCCESS,USER_REMOVE_FAVOURITE_FAIL,USER_REMOVE_FAVOURITE_SUCCESS,USER_REMOVE_FAVOURITE_REQUEST,
-  USER_ADD_FAVOURUTES_SUCCESS
+  USER_ADD_FAVOURITES_REQUEST,
+  USER_REMOVE_FAVOURITE_REQUEST,
+  LOGIN_WITH_EMAIL_SUCCESS,
+  LOGIN_WITH_OAUTH_SUCCESS,
+  REGISTER_WITH_EMAIL_SUCCESS,
+  USER_FAIL,
+  LOGIN_WITH_EMAIL_FAIL,
+  REGISTER_WITH_EMAIL_FAIL,
+  USER_UPDATE_PROFILE_FAIL,
+  USER_ADD_FAVOURITES_FAIL,
+  USER_REMOVE_FAVOURITE_FAIL,
+  USER_ADD_FAVOURITES_SUCCESS,
+  LOGOUT_SUCCESS,
+  USER_LOGOUT_SUCCESS,
+  USER_UPDATE_PROFILE_SUCCESS,
+  USER_REMOVE_FAVOURITE_SUCCESS,
+  USER_SUCCESS,
 } from "../constants/userConstant";
 
 const initialState = {
-    user:{},
-    loading:false,
-    error:null,
-    favorites:[]
-}
-export const userReducer = (state=initialState,action)=>{
-    switch(action.type){
-        case USER_UPDATE_PROFILE_REQUEST:
-            return { ...state, loading: true };
-          case USER_UPDATE_PROFILE_SUCCESS:
-            return { ...state, loading: false, userInfo: action.payload };
-          case USER_UPDATE_PROFILE_FAIL:
-            return { ...state, loading: false, error: action.payload };
-      
-          case USER_ADD_FAVOURUTES_REQUEST:
-            return { ...state, loading: true };
-          case USER_ADD_FAVOURUTES_SUCCESS:
-            return { ...state, loading: false, favorites: [...state.favorites, action.payload] };
-          case USER_ADD_FAVOURUTES_FAIL:
-            return { ...state, loading: false, error: action.payload };
-            case USER_REMOVE_FAVOURITE_REQUEST:
-                return { ...state, loading: true };
-              case USER_REMOVE_FAVOURITE_SUCCESS:
-                return { 
-                  ...state, 
-                  loading: false, 
-                  favorites: state.favorites.filter(fav => fav._id !== action.payload._id) 
-                };
-              case USER_REMOVE_FAVOURITE_FAIL:
-                return { ...state, loading: false, error: action.payload };
-          
-            
-                default:
-                  return state;
-        };
+  token: localStorage.getItem("token"),
+  isAuthenticated: false,
+  isLoading: false,
+  user: null,
+  error: null,
+  appLoaded: false,
+  favourites: [],
+};
 
-        
-    }
+export const userReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case USER_LOADING:
+      return {
+        ...state,
+        isLoading: true,
+        appLoaded: false,
+        error: null,
+      };
+    case LOGIN_WITH_EMAIL_LOADING:
+    case LOGIN_WITH_OAUTH_LOADING:
+    case REGISTER_WITH_EMAIL_LOADING:
+    case USER_ADD_FAVOURITES_REQUEST:
+    case USER_REMOVE_FAVOURITE_REQUEST:
+      return {
+        ...state,
+        isLoading: true,
+        error: null,
+      };
+    case LOGIN_WITH_EMAIL_SUCCESS:
+    case LOGIN_WITH_OAUTH_SUCCESS:
+    case REGISTER_WITH_EMAIL_SUCCESS:
+      localStorage.setItem("token", action.payload.token);
+      return {
+        ...state,
+        isAuthenticated: true,
+        isLoading: false,
+        token: action.payload.token,
+        user: action.payload.user,
+        error: null,
+        favourites: action.payload.user?.favourites || [],
+      };
+    case USER_SUCCESS:
+      return {
+        ...state,
+        isAuthenticated: true,
+        isLoading: false,
+        user: action.payload.user,
+        favourites: action.payload.user?.favourites || [],
+        error: null,
+        appLoaded: true,
+      };
+      case USER_ADD_FAVOURITES_SUCCESS:
+        return {
+          ...state,
+          isLoading: false,
+          favourites: [...new Set([...state.favourites, ...action.payload])], // Use Set to remove duplicates
+        };
+    case USER_REMOVE_FAVOURITE_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        favourites:  state.favourites.filter(favourite => favourite !== action.payload),
+      };
+    case USER_FAIL:
+      localStorage.removeItem("token");
+      return {
+        ...state,
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+        error: action.payload.error,
+        appLoaded: true,
+      };
+    case LOGIN_WITH_EMAIL_FAIL:
+    case REGISTER_WITH_EMAIL_FAIL:
+      localStorage.removeItem("token");
+      return {
+        ...state,
+        token: null,
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: action.payload.error,
+      };
+    case USER_ADD_FAVOURITES_FAIL:
+    case USER_REMOVE_FAVOURITE_FAIL:
+      return { ...state, error: action.payload};
+    case LOGOUT_SUCCESS:
+      localStorage.removeItem("token");
+      return {
+        ...state,
+        token: null,
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      };
+    default:
+      return state;
+  }
+};

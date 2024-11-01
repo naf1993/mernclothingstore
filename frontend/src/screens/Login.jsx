@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
-import { loginUserWithEmail } from "../actions/authActions";
+import { loginUserWithEmail } from "../actions/userActions";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,8 +16,8 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
-  const auth = useSelector((state) => state.auth);
-  const { isAuthenticated,error,isLoading } = auth;
+  const user = useSelector((state) => state.user);
+  const { isAuthenticated,error,isLoading } = user;
 
   useEffect(() => {
     if (isAuthenticated) {

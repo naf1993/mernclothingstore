@@ -6,12 +6,6 @@ import { createUser, updateUserStatusByAdmin,deleteUser,addToFavourites, getAllU
 const router = express.Router();
 
 
-
-
-
-
-
-
 router.route('/register').post(register)
 router.post('/login',login)
 
@@ -19,7 +13,7 @@ router.post('/forgetPassword',forgotPassword)
 router.patch('/resetPassword/:token',resetPassword)
 router.route('/updateMyPassword').patch(protect,updatePassword)
 router.route('/addtofavourites').post(protect,addToFavourites)
-router.route('/removefromfavourites').delete(protect,removeFromFavourites)
+router.route('/removefromfavourites/:productId').delete(protect,removeFromFavourites)
 
 
 router.use(protect)

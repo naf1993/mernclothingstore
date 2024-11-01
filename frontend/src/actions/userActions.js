@@ -1,119 +1,240 @@
-import axios from "axios";
+import axios from 'axios';
 import {
-  USER_ADD_FAVOURUTES_REQUEST,
-  USER_ADD_FAVOURUTES_SUCCESS,
-  USER_ADD_FAVOURUTES_FAIL,
-  USER_UPDATE_PROFILE_FAIL,
+  USER_LOADING,
+  LOGIN_WITH_EMAIL_LOADING,
+  LOGIN_WITH_OAUTH_LOADING,LOGIN_WITH_OAUTH_FAIL,
+  REGISTER_WITH_EMAIL_LOADING,
   USER_UPDATE_PROFILE_REQUEST,
-  USER_UPDATE_PROFILE_SUCCESS,
-} from "../constants/userConstant";
-import {
-  USER_REMOVE_FAVOURITE_FAIL,
-  USER_REMOVE_FAVOURITE_SUCCESS,
+  USER_ADD_FAVOURITES_REQUEST,
   USER_REMOVE_FAVOURITE_REQUEST,
+  LOGIN_WITH_EMAIL_SUCCESS,
+  LOGIN_WITH_OAUTH_SUCCESS,
+  REGISTER_WITH_EMAIL_SUCCESS,
+  USER_FAIL,
+  LOGIN_WITH_EMAIL_FAIL,
+  REGISTER_WITH_EMAIL_FAIL,
+  USER_UPDATE_PROFILE_FAIL,
+  USER_ADD_FAVOURITES_FAIL,
+  USER_REMOVE_FAVOURITE_FAIL,
+  USER_ADD_FAVOURITES_SUCCESS,
+  LOGOUT_SUCCESS,
+  USER_LOGOUT_SUCCESS,
+  USER_UPDATE_PROFILE_SUCCESS,
+  USER_REMOVE_FAVOURITE_SUCCESS,USER_SUCCESS
 } from "../constants/userConstant";
-import {toast} from 'react-hot-toast'
-// Update user action
-export const updateUser = (userData) => async (dispatch, getState) => {
+import toast from 'react-hot-toast';
+export const loadUser = () => async (dispatch, getState) => {
+  dispatch({ type: USER_LOADING });
   try {
-    dispatch({ type: USER_UPDATE_PROFILE_REQUEST });
+    const options = attachTokenToHeaders(getState);
+    const { data } = await axios.get("/api/users/me", options);
 
-    const {
-      userLogin: { userInfo },
-    } = getState();
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${userInfo.token}`,
-      },
-    };
-
-    const { data } = await axios.put("/api/users/profile", userData, config);
-
-    dispatch({ type: USER_UPDATE_PROFILE_SUCCESS, payload: data });
-  } catch (error) {
     dispatch({
-      type: USER_UPDATE_PROFILE_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
+      type: USER_SUCCESS,
+      payload: { user: data.data.user },
+    });
+    toast.success(`Welcome ${data?.data?.user?.name}`);
+  } catch (error) {
+    const errorMessage = error.response && error.response.data && error.response.data.message 
+      ? error.response.data.message 
+      : error.message;
+
+    toast.error(`Error: ${errorMessage}`); // More descriptive error message
+    dispatch({
+      type: USER_FAIL,
+      payload: { error: errorMessage }, // Consistent payload structure
     });
   }
 };
 
-// Add to favorites action
-export const addToFavourites = (productId) => async (dispatch, getState) => {
-  try {
-    console.log('reached actions')
-    const { auth: { token, isAuthenticated } } = getState();
 
-    if (!isAuthenticated || !token) {
-      throw new Error('User is not logged in'); // Handle not authenticated
-    }
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // Use the token from state
-      },
-    };
-
-    const { data } = await axios.post(
-      `/api/users/addtofavourites`,
-      { productId },
-      config
-    );
-console.log(data)
-    dispatch({ type: USER_ADD_FAVOURUTES_SUCCESS, payload: data.data.favourites });
-    console.log('action success')
-   
-  } catch (error) {
-    console.log('action failed',error.message)
-    
-    dispatch({
-      type: USER_ADD_FAVOURUTES_FAIL,
-      payload:
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message,
-    });
-   
-  }
-};
-
-export const removeFromFavourites =
-  (productId) => async (dispatch, getState) => {
+export const loginUserWithEmail =
+  (email, password) => async (dispatch, getState) => {
+    dispatch({ type: LOGIN_WITH_EMAIL_LOADING });
     try {
-      dispatch({ type: USER_REMOVE_FAVOURITE_REQUEST });
-
-      const { auth: { token, isAuthenticated } } = getState();
-
-      if (!isAuthenticated || !token) {
-        throw new Error('User is not logged in'); // Handle not authenticated
-      }
-  
       const config = {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Use the token from state
         },
       };
-      const { data } = await axios.delete(
-        `/api/users/removefromfavourites`,
-        { productId },
+      const { data } = await axios.post(
+        "/api/users/login",
+        { email, password },
         config
       );
-
-      dispatch({ type: USER_REMOVE_FAVOURITE_SUCCESS, payload: data });
-    } catch (error) {
+    dispatch({
+        type: LOGIN_WITH_EMAIL_SUCCESS,
+        payload: { token: data.token, user: data.data.user },
+      });
+      dispatch(loadUser());
+    } catch (err) {
       dispatch({
-        type: USER_REMOVE_FAVOURITE_FAIL,
-        payload:
-          error.response && error.response.data.message
-            ? error.response.data.message
-            : error.message,
+        type: LOGIN_WITH_EMAIL_FAIL,
+        payload: { error: err.response.data.message },
       });
     }
   };
+
+  export const registerWithEmail = (name,email,password) => async(dispatch) => {
+    dispatch({type:REGISTER_WITH_EMAIL_LOADING})
+    try{
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const { data } = await axios.post(
+        "/api/users/register",
+        { name,email, password },
+        config
+      );
+      dispatch({
+        type:REGISTER_WITH_EMAIL_SUCCESS,
+        payload:{token:data.token,user:data.data.user}
+      })
+      dispatch(loadUser())
+      }catch(err){
+        dispatch({
+          type:REGISTER_WITH_EMAIL_FAIL,
+          payload:{error:err.response.data.message}
+        })
+
+    }
+  }
+
+  
+
+export const loginUserWithOauth = (token) => async (dispatch, getState) => {
+  dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
+  try {
+    const config = {
+      headers: {
+        "Content-type": "application/json",
+      },
+    };
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
+    }
+   
+    const { data }  = await axios.get("/api/users/me", config);
+    dispatch({
+      type: LOGIN_WITH_OAUTH_SUCCESS,
+      payload: { token: token, user: data.data.user },
+    });
+  } catch (err) {
+    dispatch({
+      type: LOGIN_WITH_OAUTH_FAIL,
+      payload: { error: err.response.data.message },
+    });
+  }
+};
+
+export const logOutUser = () => async (dispatch, getState) => {
+  deleteAllCookies();
+  const user = getState().user.user;
+  const provider = user.provider;
+  if (provider !== "google") {
+    try {
+      await axios.get("/auth/logout/email");
+      dispatch({
+        type: LOGOUT_SUCCESS,
+      });
+    } catch (err) {
+      console.log(err.response.data.message)
+    }
+  } else {
+    try {
+      await axios.get("/auth/logout/google");
+      dispatch({
+        type: LOGOUT_SUCCESS,
+      });
+    } catch (err) { console.log(err.response.data.message)}
+  }
+};
+
+function deleteAllCookies() {
+  var cookies = document.cookie.split(";");
+
+  for (var i = 0; i < cookies.length; i++) {
+    var cookie = cookies[i];
+    var eqPos = cookie.indexOf("=");
+    var name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+    document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+  }
+}
+export const attachTokenToHeaders = (getState) => {
+  const token = getState().user.token;
+  const config = {
+    headers: {
+      "Content-type": "application/json",
+    },
+  };
+  if (token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
+  }
+  return config;
+};
+
+export const addToFavourites = (productId) => async (dispatch, getState) => {
+  try {
+    console.log('reached actions');
+    dispatch({ type: USER_ADD_FAVOURITES_REQUEST });
+
+    const { user: { token, isAuthenticated } } = getState();
+    if (!isAuthenticated || !token) {
+      throw new Error('User is not logged in');
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const { data } = await axios.post(`/api/users/addtofavourites`, { productId }, config);
+    console.log(data);
+    dispatch({ type: USER_ADD_FAVOURITES_SUCCESS, payload: data.data.favourites });
+    console.log('action success');
+  } catch (error) {
+    console.log('action failed', error.message);
+    dispatch({
+      type: USER_ADD_FAVOURITES_FAIL,
+      payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+    });
+  }
+};
+
+// Remove from favorites action
+export const removeFromFavourites = (productId) => async (dispatch, getState) => {
+  try {
+    dispatch({ type: USER_REMOVE_FAVOURITE_REQUEST });
+
+    const { user: { token, isAuthenticated } } = getState();
+    if (!isAuthenticated || !token) {
+      throw new Error('User is not logged in');
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    console.log('product to be deleted from favs', productId);
+    const { data } = await axios.delete(`/api/users/removefromfavourites/${productId}`, config);
+    console.log('Before removal:', getState().user.favourites);
+
+    // Make sure this payload has the updated list of favourites
+    dispatch({ type: USER_REMOVE_FAVOURITE_SUCCESS, payload: data.data.favourites });
+    
+    console.log('After removal (inside action):', data.data.favourites); // Log the new favorites from the API response
+  } catch (error) {
+    dispatch({
+      type: USER_REMOVE_FAVOURITE_FAIL,
+      payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+    });
+  }
+};
+

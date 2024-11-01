@@ -16,9 +16,9 @@ const Navbar = ({ navItems }) => {
   const [searchText, setSearchText] = useState("");
   const depthLevel = 0;
   const { pathname } = useLocation();
-  const auth = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.user);
   const {loading,error,categories} = useSelector((state)=>state.product)
-  const { user } = auth;
+  const { user:userPresent } = user;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -63,9 +63,9 @@ const Navbar = ({ navItems }) => {
         </form>
 
         <ul className="user-nav">
-          {user
+          {userPresent
             ? useraccounts.map((menu, index) => {
-                return <UserNav items={menu} key={index} user={user} />;
+                return <UserNav items={menu} key={index} user={userPresent} />;
               })
             : usernav.map((menu, index) => {
                 return <UserNav items={menu} key={index} />;

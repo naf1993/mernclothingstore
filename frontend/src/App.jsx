@@ -5,7 +5,7 @@ import Layout from "./components/Layout";
 import LoadingFullScreen from "./components/LoadingFullScreen";
 import ScrollToTop from "./components/ScrollToTop";
 import Cookies from "js-cookie";
-import { loginUserWithOauth, loadUser } from "./actions/authActions";
+import { loginUserWithOauth, loadUser } from "./actions/userActions";
 import axios from "axios";
 import Protected from "./components/Protected";
 import {Toaster} from 'react-hot-toast'
@@ -25,8 +25,8 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [navItems, setNavItems] = useState([]);
   const dispatch = useDispatch();
-  const auth = useSelector((state) => state.auth);
-  const { token, appLoaded, isLoading, isAuthenticated } = auth;
+  const user = useSelector((state) => state.user);
+  const { token, appLoaded, isLoading, isAuthenticated } = user;
 
   useEffect(() => {
     const fetchCategoriesAndUser = async () => {

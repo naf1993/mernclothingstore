@@ -112,7 +112,8 @@ const createUser = catchAsync(async (req, res, next) => {
 });
 
 const getUserById = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.params.id).populate("cart");
+  const user = await User.findById(req.params.id);
+  console.log('this is logged in user',user)
   if (!user) {
     return next(new AppError("No User found with that ID", 404));
   }
@@ -184,17 +185,19 @@ export const addToFavourites = catchAsync(async (req, res, next) => {
     await user.save();
   }
 
+  console.log("Updated favourites after addition:", user.favourites); // Log updated favorites
+
   res.status(200).json({
     status: "success",
     data: {
-      favourites: user.favourites, // Make sure to return the correct property
+      favourites: user.favourites,
     },
   });
 });
 
 export const removeFromFavourites = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-  const { productId } = req.bdy;
+  const { productId } = req.params;
   const user = await User.findById(_id);
 
   if (!user) {
@@ -204,15 +207,18 @@ export const removeFromFavourites = catchAsync(async (req, res, next) => {
   user.favourites = user.favourites.filter(
     (item) => item.toString() !== productId
   );
-  await user.save()
+  await user.save();
+
+  console.log("Updated favourites after removal:", user.favourites); // Log updated favorites
 
   res.status(200).json({
     status: "success",
     data: {
-      favourites: user.favourites, // Make sure to return the correct property
+      favourites: user.favourites,
     },
   });
 });
+
 
 const getWishlist = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
