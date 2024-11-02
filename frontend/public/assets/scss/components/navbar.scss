@@ -145,10 +145,23 @@
         margin-top: 0.9rem;
         text-decoration: none;
         color: black;
+        position:relative
       }
       .item-icon {
         font-size: 1.5rem;
         margin-bottom: 0.26rem;
+      }
+      .badge {
+        position: absolute;
+        top: -2px; /* Adjust based on your icon size */
+        right: -2px; /* Adjust based on your icon size */
+        background-color:var(--color-primary-dark); /* Color of the badge */
+        color: white;
+        border-radius: 50%;
+        padding: 4px 5px; /* Adjust padding as necessary */
+        font-size: 0.8em; /* Adjust font size as necessary */
+        min-width: 20px; /* Minimum width for better appearance */
+        text-align: center; /* Center the text */
       }
       .item-title {
         font-size: 1.1rem;

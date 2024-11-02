@@ -21,6 +21,9 @@ import {
   USER_UPDATE_PROFILE_SUCCESS,
   USER_REMOVE_FAVOURITE_SUCCESS,
   USER_SUCCESS,
+  USER_GET_FAVOURITES_REQUEST,
+  USER_GET_FAVOURITES_SUCCESS,
+  USER_GET_FAVOURITES_FAIL,
 } from "../constants/userConstant";
 
 const initialState = {
@@ -47,6 +50,7 @@ export const userReducer = (state = initialState, action) => {
     case REGISTER_WITH_EMAIL_LOADING:
     case USER_ADD_FAVOURITES_REQUEST:
     case USER_REMOVE_FAVOURITE_REQUEST:
+    case USER_GET_FAVOURITES_REQUEST:
       return {
         ...state,
         isLoading: true,
@@ -79,13 +83,22 @@ export const userReducer = (state = initialState, action) => {
         return {
           ...state,
           isLoading: false,
-          favourites: [...new Set([...state.favourites, ...action.payload])], // Use Set to remove duplicates
+          favourites: [
+            ...state.favourites.filter(fav => !action.payload.some(item => item._id === fav._id)), // Filter out existing favourites
+            ...action.payload // Add new products
+          ],
         };
+      case USER_GET_FAVOURITES_SUCCESS:
+        return {
+          ...state,
+          isLoading:false,
+          favourites:action.payload
+        }
     case USER_REMOVE_FAVOURITE_SUCCESS:
       return {
         ...state,
         isLoading: false,
-        favourites:  state.favourites.filter(favourite => favourite !== action.payload),
+        favourites:  action.payload,
       };
     case USER_FAIL:
       localStorage.removeItem("token");
@@ -110,6 +123,7 @@ export const userReducer = (state = initialState, action) => {
       };
     case USER_ADD_FAVOURITES_FAIL:
     case USER_REMOVE_FAVOURITE_FAIL:
+    case USER_GET_FAVOURITES_FAIL:
       return { ...state, error: action.payload};
     case LOGOUT_SUCCESS:
       localStorage.removeItem("token");

@@ -180,17 +180,20 @@ export const addToFavourites = catchAsync(async (req, res, next) => {
     return next(new AppError("No user found with that ID", 404));
   }
 
-  if (!user?.favourites?.includes(productId)) {
+  // Only add if productId is not already in favourites
+  if (!user.favourites.includes(productId)) {
     user.favourites.push(productId);
     await user.save();
   }
 
-  console.log("Updated favourites after addition:", user.favourites); // Log updated favorites
+  const updatedUser = await User.findById(_id).populate('favourites');
+
+  console.log("Updated favourites after addition:", updatedUser.favourites); // Log updated favorites
 
   res.status(200).json({
     status: "success",
     data: {
-      favourites: user.favourites,
+      favourites: updatedUser.favourites, // Now this contains the full product objects
     },
   });
 });
@@ -209,29 +212,31 @@ export const removeFromFavourites = catchAsync(async (req, res, next) => {
   );
   await user.save();
 
-  console.log("Updated favourites after removal:", user.favourites); // Log updated favorites
+  const updatedUser = await User.findById(_id).populate('favourites');
+
+  console.log("Updated favourites after removal:", updatedUser.favourites); // Log updated favorites
 
   res.status(200).json({
     status: "success",
     data: {
-      favourites: user.favourites,
+      favourites: updatedUser.favourites, // Now this contains the full product objects
     },
   });
 });
 
 
-const getWishlist = catchAsync(async (req, res, next) => {
+export const getFavourites = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
   console.log(_id);
 
-  const user = await User.findById(_id).populate("wishList");
+  const user = await User.findById(_id).populate('favourites');
   if (!user) {
     return next(new AppError("No User found with that ID", 404));
   }
   res.status(200).json({
     status: "success",
     data: {
-      user,
+      favourites: user.favourites,
     },
   });
 });
@@ -308,7 +313,6 @@ export {
   uploadUserPhoto,
   resizeUserPhoto,
   updateUserStatusByAdmin,
-  getWishlist,
   saveAddress,
   applyCoupon,
 };

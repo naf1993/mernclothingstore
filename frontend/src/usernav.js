@@ -29,35 +29,3 @@ export const usernav = [
   },
 ];
 
-export const useraccounts = [
-  {
-    title: "Favourites",
-    url: "/favourites",
-    icon: <BsHeart />,
-  },
-  {
-    title: "Cart",
-    url: "/cart",
-    icon: <BsCart />,
-  },
-  {
-    title: "",
-    icon: <CiUser />,
-    submenu: [
-      {
-        title: "Orders",
-        url: "/orders",
-      },
-      {
-        title: "My Account",
-        url: "/myaccount",
-      },
-     {
-      title:'Log out',
-      action:'logout'
-      
-     }
-    ],
-  },
-];
-

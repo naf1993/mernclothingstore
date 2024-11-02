@@ -43,7 +43,7 @@ const UserNav = ({items,user}) => {
     <span className='dropdown-link'>
     <span className='item-icon'>{items.icon}</span>
      {user ? ( <button type='button' aria-haspopup='menu' className='dropdown-menu-item' aria-expanded={dropdown ? "true" : "false"} onClick={()=>setDropdown((prev)=>!prev)}>
-        {user.name}{' '} </button>):
+        {user.name}{' '}  </button>):
         (
            <button type='button' aria-haspopup='menu' className='dropdown-menu-item' aria-expanded={dropdown ? "true" : "false"} onClick={()=>setDropdown((prev)=>!prev)}>
            {items.title}{' '}
@@ -58,7 +58,9 @@ const UserNav = ({items,user}) => {
     </span>
    ):(
     <Link className='menu-item' to={items.url}>
+
         <span className='item-icon'>{items.icon}</span>
+        {items.count > 0 && <span className="badge">{items.count}</span>}
         <span className='item-title'>
         {items.title}</span></Link>
     )}

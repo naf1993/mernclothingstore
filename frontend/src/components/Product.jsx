@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import StarRating from "./StarRating";
@@ -11,14 +11,8 @@ const Product = ({ product }) => {
   const dispatch = useDispatch();
   const { isAuthenticated, favourites } = useSelector((state) => state.user);
   
-  // Determine if the product is a favorite based on Redux state
-  const isProductFav = favourites?.includes(product.id) || false;
-  const [isFav, setIsFav] = useState(isProductFav);
-
-  useEffect(() => {
-    // Sync local state with Redux state when component mounts
-    setIsFav(isProductFav);
-  }, [isProductFav]);
+ 
+  const isProductFav = favourites?.some(fav => fav._id === product.id) || false;
 
   const handleClick = async (e, id) => {
     e.preventDefault();
@@ -30,13 +24,11 @@ const Product = ({ product }) => {
     }
 
     try {
-      if (isFav) {
+      if (isProductFav) {
         await dispatch(removeFromFavourites(id));
-        setIsFav(false); // Update local state
         toast.success("Removed from favourites");
       } else {
         await dispatch(addToFavourites(id));
-        setIsFav(true); // Update local state
         toast.success("Added to favourites");
       }
     } catch (err) {
@@ -65,7 +57,7 @@ const Product = ({ product }) => {
             className="icon-button"
             type="button"
           >
-            {isFav ? (
+            {isProductFav ? (
               <AiFillHeart className="product-card__icons-item-2" />
             ) : (
               <AiOutlineHeart className="product-card__icons-item-1" />

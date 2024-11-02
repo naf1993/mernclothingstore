@@ -6,7 +6,9 @@ import { menuItems } from "../menuItems";
 import MenuItems from "./MenuItems";
 import { useLocation } from "react-router-dom";
 import { usernav } from "../usernav";
-import { useraccounts } from "../usernav";
+import { BsHeart } from "react-icons/bs";
+import { CiUser } from "react-icons/ci";
+import { BsCart } from "react-icons/bs";
 import UserNav from "./UserNav";
 import { useDispatch, useSelector } from "react-redux";
 import { useState, useEffect } from "react";
@@ -18,7 +20,39 @@ const Navbar = ({ navItems }) => {
   const { pathname } = useLocation();
   const user = useSelector((state) => state.user);
   const {loading,error,categories} = useSelector((state)=>state.product)
-  const { user:userPresent } = user;
+  const { user:userPresent,favourites } = user;
+  const useraccounts = [
+    {
+      title: "Favourites",
+      url: "/favourites",
+      icon: <BsHeart />,
+      count:favourites?.length
+    },
+    {
+      title: "Cart",
+      url: "/cart",
+      icon: <BsCart />,
+    },
+    {
+      title: "",
+      icon: <CiUser />,
+      submenu: [
+        {
+          title: "Orders",
+          url: "/orders",
+        },
+        {
+          title: "My Account",
+          url: "/myaccount",
+        },
+       {
+        title:'Log out',
+        action:'logout'
+        
+       }
+      ],
+    },
+  ];
 
   const handleSubmit = (e) => {
     e.preventDefault();

@@ -20,7 +20,7 @@ import {
   LOGOUT_SUCCESS,
   USER_LOGOUT_SUCCESS,
   USER_UPDATE_PROFILE_SUCCESS,
-  USER_REMOVE_FAVOURITE_SUCCESS,USER_SUCCESS
+  USER_REMOVE_FAVOURITE_SUCCESS,USER_SUCCESS,USER_GET_FAVOURITES_FAIL,USER_GET_FAVOURITES_REQUEST,USER_GET_FAVOURITES_SUCCESS
 } from "../constants/userConstant";
 import toast from 'react-hot-toast';
 export const loadUser = () => async (dispatch, getState) => {
@@ -173,6 +173,36 @@ export const attachTokenToHeaders = (getState) => {
     config.headers["Authorization"] = `Bearer ${token}`;
   }
   return config;
+};
+
+export const getFavourites = () => async (dispatch, getState) => {
+  try {
+    console.log('reached actions');
+    dispatch({ type: USER_GET_FAVOURITES_REQUEST });
+
+    const { user: { token, isAuthenticated } } = getState();
+    if (!isAuthenticated || !token) {
+      throw new Error('User is not logged in');
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const { data } = await axios.get(`/api/users/getFavourites`, config);
+    
+    dispatch({ type: USER_GET_FAVOURITES_SUCCESS, payload: data.data.favourites });
+    
+  } catch (error) {
+  
+    dispatch({
+      type: USER_GET_FAVOURITES_FAIL,
+      payload: error.response && error.response.data.message ? error.response.data.message : error.message,
+    });
+  }
 };
 
 export const addToFavourites = (productId) => async (dispatch, getState) => {
