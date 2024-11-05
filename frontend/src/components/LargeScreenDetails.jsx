@@ -10,25 +10,24 @@ const LargeScreenDetails = ({
   setColorErr,
   setSizeErr,
   colorErr,
-  sizeErr,description
+  sizeErr,
+  description,
 }) => {
-  useEffect(() => {
-    console.log("large  view rendered");
-    console.log(colors);
-  }, []);
+
+
   return (
     <>
       {colors && <h4 className="product-color color-name">COLORS</h4>}
       {colors && (
         <div className="buttons-wrapper">
-          {colors?.map((color, index) => (
-            <span key={index} className="filter-color-btn">
+          {colors.map((color) => (
+            <span key={color} className="filter-color-btn">
               <button
                 value={color}
-                type="submit"
+                type="button" // Change to button to avoid form submission
                 onClick={() => onHandleColor(color)}
                 style={{
-                  backgroundColor: `${color}`,
+                  backgroundColor: color,
                 }}
               />
             </span>
@@ -36,23 +35,21 @@ const LargeScreenDetails = ({
         </div>
       )}
 
-      {colorErr ? <p className="text-danger">{colorErr}</p> : null}
-
+      {colorErr && <p className="text-danger">{colorErr}</p>}
+      
       {ifSize && <h4 className="product-size size-name">SIZE</h4>}
       {ifSize && (
         <Select
           isClearable={true}
           options={sizeOptions}
-          defaultValue={{ label: "Select Size", value: 0 }}
           onChange={onSizeChange}
         />
       )}
-      {sizeErr ? <p className="text-danger">{sizeErr}</p> : null}
+      {sizeErr && <p className="text-danger">{sizeErr}</p>}
 
       <h4 className="product-details detail-name">Product Details</h4>
       <p>{description}</p>
       <p>Return within "30 days". For detailed information, Click.</p>
-     
     </>
   );
 };

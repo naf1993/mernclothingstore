@@ -14,28 +14,32 @@ const addToCart = catchAsync(async (req, res, next) => {
   const count = Number.parseInt(req.body.count);
   const { _id } = req.user;
 
-  //get user cart
-  let cart = await Cart.findOne({ user: req.user._id });
+  // Get user cart
+  let cart = await Cart.findOne({ user: _id }).populate("products.productId"); // Populate product details
   const productDetails = await Product.findById(productId);
 
-  if (cart) {
-    //check product exist in cart
-    let itemIndex = cart.products.findIndex((p) => p.productId == productId);
-    console.log("hello");
-    if (itemIndex > -1) {
-      //if product exists
+  if (!productDetails) {
+    return next(new AppError("Product not found", 404));
+  }
 
-      let productItem = cart.products[itemIndex];
-      productItem.count = cart.products[itemIndex].count + count;
-      productItem.price = productDetails.price;
-      productItem.total = cart.products[itemIndex].count * productDetails.price;
+  if (cart) {
+    // Check if product exists in cart with same color and size
+    const itemIndex = cart.products.findIndex(
+      (p) =>
+        p.productId.toString() === productId &&
+        p.color === color &&
+        p.size === size
+    );
+
+    if (itemIndex > -1) {
+      // If product exists, update count and total
+      const productItem = cart.products[itemIndex];
+      productItem.count += count;
+      productItem.total = productItem.count * productDetails.price;
       cart.products[itemIndex] = productItem;
-      cart.subTotal = cart.products
-        .map((item) => item.total)
-        .reduce((acc, curr) => acc + curr);
     } else {
-      let total = parseInt(productDetails.price * count);
-      console.log("new product");
+      // If new product, push it to the products array
+      const total = productDetails.price * count;
       cart.products.push({
         productId,
         count,
@@ -44,132 +48,118 @@ const addToCart = catchAsync(async (req, res, next) => {
         price: productDetails.price,
         total: total,
       });
-      cart.subTotal = cart.products
-        .map((item) => item.total)
-        .reduce((acc, curr) => acc + curr);
     }
-    await updateStock(productId, count);
-    cart = await cart.save();
 
-    res.status(201).json({
+    // Recalculate subtotal
+    cart.subTotal = cart.products.reduce((acc, item) => acc + item.total, 0);
+    await cart.save();
+
+    // Re-populate the cart to include the updated product details
+    cart = await cart.populate("products.productId");
+
+    return res.status(200).json({
       status: "success",
       data: {
         cart,
       },
     });
   } else {
-    let total = parseInt(productDetails.price * count);
-    let subTotal = parseInt(productDetails.price * count);
-
+    // Create new cart if none exists
+    const total = productDetails.price * count;
     const newCart = await Cart.create({
       user: _id,
       products: [
         {
           productId,
-          count: count,
-          color: color,
-          size: size,
-          total: total,
+          count,
+          color,
+          size,
           price: productDetails.price,
+          total,
         },
       ],
-      subTotal: subTotal,
+      subTotal: total,
     });
-    await updateStock(productId, count);
-    res.status(201).json({
+    await newCart.populate("products.productId"); // Populate product details
+
+    return res.status(201).json({
       status: "success",
       data: {
-        newCart,
+        cart: newCart,
       },
     });
   }
+});
+
+export const updateCartQuantity = catchAsync(async (req, res, next) => {
+  const { productId, color, size, action } = req.body;
+  console.log(productId, action, color, size);
+  let cart = await Cart.findOne({ user: req.user._id }).populate(
+    "products.productId"
+  );
+  if (!cart) {
+    return next(new AppError("No Product found in cart", 404));
+  }
+  let cartItem = cart.products.find(
+    (item) =>
+      item.productId._id.toString() === productId.toString() &&
+      item.color === color &&
+      item.size === size
+  );
+
+  if (action === "subtract" && cartItem.count > 1) {
+    cartItem.count -= 1;
+    cartItem.total = cartItem.count*cartItem.price
+  } else if (action === "add") {
+    cartItem.count += 1;
+    cartItem.total = cartItem.count*cartItem.price
+  } else {
+    return next(new AppError("Unknown action", 404));
+  }
+  await cart.save();
+  console.log('this is cart after updating qty',cart)
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      cart: cart,
+    },
+  });
 });
 
 export const removeItemFromCart = catchAsync(async (req, res, next) => {
-  const productId = req.body.productId;
+  const { productId, color, size } = req.body;
   let cart = await Cart.findOne({ user: req.user._id });
   if (!cart) {
-    return next(new AppError("No Cart found with that user", 404));
+    return next(new AppError("No Cart found with user", 404));
   }
-  let itemIndex = cart.products.findIndex((p) => p.productId == productId);
-  
-
+  let itemIndex = cart.products.findIndex(
+    (p) =>
+      p.productId.toString() === productId &&
+      p.color === color &&
+      p.size === size
+  );
   if (itemIndex > -1) {
-    let total = cart.products[itemIndex].total
-    console.log(total)
-    cart.summary -= total
+    let total = cart.products[itemIndex].total;
+    cart.subTotal -= total;
     cart.products.splice(itemIndex, 1);
     cart = await cart.save();
+
     res.status(200).json({
       status: "success",
       data: {
-        updatedCart: cart,
+        cart: cart,
       },
     });
+  } else {
+    return next(new AppError("Item not found in cart", 404));
   }
 });
-// const addToCart = catchAsync(async (req, res, next) => {
-//   const { productId, color, size, count } = req.body;
-//   const { _id } = req.user;
-//   const user = await User.findById(_id);
-//   const product = await Product.findById(productId);
-//   const getPrice = await Product.findById(productId).select("price");
-//   const price = getPrice.price * count;
-//   console.log(price);
-
-//   await updateStock(productId, count);
-
-//   const cart = await new Cart({
-//     color: color,
-//     user: user,
-//     product: product,
-//     count: count,
-//     size: size,
-//     price: price,
-//   }).save();
-//   res.status(201).json({
-//     status: "success",
-//     data: {
-//       cart,
-//     },
-//   });
-// });
-
-// let products = [];
-
-// const alreadyAddedproduct = await Cart.findOne({ user: user._id });
-// if (alreadyAddedproduct) {
-//   alreadyAddedproduct.remove();
-// }
-// for (let i = 0; i < cart.length; i++) {
-//   let object = {};
-//   object.product = cart[i].productId;
-//   let totalCount = await Product.findById(cart[i].productId).select('countInStock').exec()
-
-//   object.count = cart[i].count;
-//   if(totalCount < object.count){
-//     return next(new AppError("Sorry no enough stock", 404));
-//   }
-
-//   object.color = cart[i].color;
-//   if(cart[i].hasOwnProperty('size'))
-//   {
-//     object.size = cart[i].size
-//   }
-
-//   let getPrice = await Product.findById(cart[i].productId).select("price").exec();
-
-//   object.price = getPrice.price;
-//   products.push(object);
-// }
-
-// let cartTotal = 0;
-// for (let i = 0; i < products.length; i++) {
-//   cartTotal = cartTotal + products[i].price * products[i].count;
-// }
 
 const getUserCart = catchAsync(async (req, res, next) => {
-  const cart = await Cart.find({ user: req.user._id });
+  const cart = await Cart.find({ user: req.user._id }).populate(
+    "products.productId"
+  );
 
   if (!cart) {
     return next(new AppError("No Cart found with that user", 404));

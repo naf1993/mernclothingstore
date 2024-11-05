@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import MobileScreenDetails from "../components/MobileScreenDetails";
 import LargeScreenDetails from "../components/LargeScreenDetails";
 import Loader from "../components/Loader";
@@ -15,92 +14,67 @@ import {
   getColors,
   getRelatedProducts,
 } from "../actions/productActions";
+import { addToCart, getMyCart } from "../actions/cartActions";
 
 const SingleProduct = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { loading, error, product } = useSelector((state) => state.product);
   const {
     loading: loadingRelated,
     error: errorRelated,
     relatedProducts,
   } = useSelector((state) => state.product);
-  useEffect(() => {
-    if (id) {
-      console.log("dispatching");
-      dispatch(listProductDetails(id));
-    } else {
-      console.log("no id provided");
-    }
-  }, [id, dispatch]);
-
-  const navigate = useNavigate();
 
   const [colors, setColors] = useState([]);
   const [sizeOptions, setSizeOptions] = useState([]);
-  const [isSize, setiSize] = useState(false);
+  const [isSize, setIsSize] = useState(false);
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const [valid, setIsValid] = useState(false);
-
   const [colorErr, setColorErr] = useState(null);
   const [sizeErr, setSizeErr] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 400);
+  const user = useSelector((state) => state.user);
+  const { products } = useSelector((state) => state.cart);
+  const { products: cartItems } = products;
+  const { isAuthenticated } = user;
 
-  const { colors: allColors } = useSelector((state) => state.product);
-
-  const [isMobile, setIsMobile] = useState(false);
-  let categoryId, productId;
+  useEffect(() => {
+    if (id) {
+      dispatch(listProductDetails(id));
+    }
+  }, [id, dispatch]);
 
   useEffect(() => {
     if (product) {
-      console.log("dispatching getColors");
       dispatch(getColors());
-    }
-  }, [product, dispatch]);
-
-  useEffect(() => {
-    if (product && product.Category) {
       const productId = product._id;
-      const categoryId = product.Category._id;
-      console.log("this is product id", productId);
-      console.log("this is category id", categoryId);
-      dispatch(getRelatedProducts(productId, categoryId));
+      const categoryId = product.Category?._id;
+      if (categoryId) {
+        dispatch(getRelatedProducts(productId, categoryId));
+      }
     }
   }, [product, dispatch]);
 
-
-
   useEffect(() => {
-    let options = [];
-    if (product) {
-      if (product?.sizes?.length === 0) {
-        setiSize(false);
-      }
-      if (product.sizes && product.sizes.length > 0) {
-        setiSize(true);
-        product.sizes.forEach((size) => {
-          options.push({
-            value: size,
-            label: size,
-          });
-        });
-        setSizeOptions([...options]);
-      }
+    if (product?.sizes?.length > 0) {
+      setIsSize(true);
+      setSizeOptions(
+        product.sizes.map((size) => ({ value: size, label: size }))
+      );
+    } else {
+      setIsSize(false);
     }
   }, [product]);
 
   useEffect(() => {
-    if (product && product.colors && allColors && allColors.length > 0) {
-      let uniqueColors = allColors.filter((color) =>
-        product.colors.includes(color)
-      );
+    if (product?.colors) {
+      const uniqueColors = product.colors.filter((color) => color);
       setColors(uniqueColors);
     }
-  }, [product, product.colors, allColors, allColors.length]);
-
-  const { cartItems } = useSelector((state) => state.cart);
-
-  const options = [];
+  }, [product]);
 
   const handleChange = (selectedOption) => {
     setSelectedSize(selectedOption.value);
@@ -108,56 +82,112 @@ const SingleProduct = () => {
 
   const handleColor = (color) => {
     setSelectedColor(color);
-    console.log(color);
-    setIsValid(true);
   };
 
-  const goToCart = () => {
-    navigate("/cart");
+  const validateSelection = () => {
+    let isValid = true;
+
+    // Validate color
+    if (!selectedColor) {
+      if (colorErr !== "Please select a color") {
+        setColorErr("Please select a color");
+      }
+      isValid = false;
+    } else {
+      if (colorErr !== null) {
+        setColorErr(null);
+      }
+    }
+
+    // Validate size
+    if (isSize && !selectedSize) {
+      if (sizeErr !== "Please select a size") {
+        setSizeErr("Please select a size");
+      }
+      isValid = false;
+    } else {
+      if (sizeErr !== null) {
+        setSizeErr(null);
+      }
+    }
+
+    return isValid;
+  };
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(getMyCart());
+    }
+  }, [isAuthenticated]);
+  useEffect(() => {
+    if (cartItems) {
+      console.log(cartItems);
+    } else {
+      console.log("no cart items");
+    }
+  }, [cartItems]);
+
+  const isInCart = cartItems?.some((item) => {
+    console.log("item.productId._id:", item.productId._id); // Log the product ID in the cart
+    console.log("product.id (from params):", id); // Log the current product ID
+    console.log("item.color:", item.color); // Log the item color in the cart
+    console.log("selectedColor:", selectedColor); // Log the selected color
+    console.log("item.size:", item.size); // Log the item size in the cart
+    console.log("selectedSize:", selectedSize); // Log the selected size
+
+    // Check and ensure the values are defined and match as expected
+    const productIdMatch = item.productId._id === id;
+    const colorMatch =
+      selectedColor !== undefined && selectedColor !== null
+        ? item.color === selectedColor
+        : true;
+    const sizeMatch =
+      selectedSize !== undefined && selectedSize !== null
+        ? item.size === selectedSize
+        : true;
+
+    console.log("productIdMatch:", productIdMatch);
+    console.log("colorMatch:", colorMatch);
+    console.log("sizeMatch:", sizeMatch);
+
+    return productIdMatch && colorMatch && sizeMatch; // Ensure it returns true/false
+  });
+
+  console.log("isInCart:", isInCart); // Log the final result
+
+  const handleAddToCart = async (id) => {
+    if (!validateSelection()) {
+      return; // Stop if validation fails
+    }
+
+    const color = selectedColor;
+    const size = isSize ? selectedSize : ""; // Size is optional if `isSize` is false
+    console.log("this is product to cart details", id, color, size);
+    try {
+      await dispatch(addToCart(id, 1, color, size)); // Adjust according to your action
+      navigate("/cart"); // Navigate to cart
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+    }
+  };
+  const handleGoToCart = () => {
+    navigate('/cart');  // Navigates to the cart page
   };
 
-  // const addToCart = (id) => {
-  //   let color = "";
-  //   let size = "";
-  //   if (selectedColor && !selectedSize) {
-  //     color = selectedColor;
-  //     size = "";
-  //   }
-  //   if (selectedColor && selectedSize) {
-  //     color = selectedColor;
-  //     size = selectedSize;
-  //   } else {
-  //     if (!selectedColor) {
-  //       setColorErr("Please Select Color");
-  //     } else {
-  //       setColorErr("");
-  //     }
-  //     if (isSize && !selectedSize) {
-  //       setSizeErr("Please Select Size");
-  //     } else {
-  //       setSizeErr("");
-  //     }
-  //   }
-
-  //   dispatch(createCart(id, color, size));
-  //   navigate("/cart");
-  // };
-  // const buyNow = () => {
-  //   addToCart(id);
-  //   navigate("/shipping");
-  // };
+  const buyNow = () => {
+    if (validateSelection()) {
+      addToCart(id);
+      navigate("/shipping");
+    }
+  };
 
   const handleScreenSize = () => {
-    if (window.innerWidth < 400) {
-      setIsMobile(true);
-    } else {
-      setIsMobile(false);
-    }
+    setIsMobile(window.innerWidth < 400);
   };
 
   useEffect(() => {
     window.addEventListener("resize", handleScreenSize);
-  });
+    return () => window.removeEventListener("resize", handleScreenSize);
+  }, []);
 
   return (
     <>
@@ -170,15 +200,14 @@ const SingleProduct = () => {
           <div className="product-detail-wrapper">
             <div className="detail-wrapper">
               <div className="productdisplay-left">
-                {Array.isArray(product.images) &&
-                  product?.images?.length > 0 && (
-                    <ProductImage images={product.images} />
-                  )}
+                {product.images?.length > 0 && (
+                  <ProductImage images={product.images} />
+                )}
               </div>
 
               <div className="productdisplay-right">
                 <h2 className="product-category">
-                  {product.SubCategory && product.SubCategory.name}
+                  {product.SubCategory?.name}
                 </h2>
                 <h1 className="product-name">{product.name}</h1>
                 <Rating value={product.ratingsAverage} text={""} />
@@ -189,7 +218,7 @@ const SingleProduct = () => {
                     sizeOptions={sizeOptions}
                     colors={colors}
                     onHandleColor={handleColor}
-                    ifSize={isSize && isSize}
+                    ifSize={isSize}
                     setColorErr={setColorErr}
                     colorErr={colorErr}
                     setSizeErr={setSizeErr}
@@ -199,7 +228,7 @@ const SingleProduct = () => {
                   <LargeScreenDetails
                     onSizeChange={handleChange}
                     sizeOptions={sizeOptions}
-                    colors={product.colors}
+                    colors={colors}
                     onHandleColor={handleColor}
                     ifSize={isSize}
                     setColorErr={setColorErr}
@@ -210,25 +239,28 @@ const SingleProduct = () => {
                 )}
 
                 <div className="btn-container">
-                  {/* {product.countInStock > 1 && (
+                  {product.countInStock < 5 && (
+                    <button type="button" disabled className="submit-btn">
+                      <span className="btn-title">Out Of Stock</span>
+                    </button>
+                  )}
+                  {product.countInStock > 5 && (
                     <button
-                      type="submit"
+                      type="button"
                       className="submit-btn"
-                      onClick={() =>
-                        cartItems &&
-                        cartItems.some((item) => item.product === product.id)
-                          ? goToCart
-                          : addToCart(product.id)
-                      }
+                      onClick={() => {
+                        if (isInCart) {
+                          handleGoToCart();  // If product is already in cart, navigate to the cart page
+                        } else {
+                          handleAddToCart(product.id);  // If not in cart, add to cart
+                        }
+                      }}
                     >
                       <span className="btn-title">
-                        {cartItems &&
-                        cartItems.some((item) => item.product === product.id)
-                          ? "Go to cart"
-                          : "add to cart"}
+                        {isInCart ? "Go to cart" : "Add to cart"}
                       </span>
                     </button>
-                  )} */}
+                  )}
                 </div>
 
                 <p>
@@ -241,17 +273,18 @@ const SingleProduct = () => {
             </div>
             <div className="related-products">
               {loadingRelated && <Loader />}
-              {errorRelated && <Message error={error} />}
+              {errorRelated && <Message error={errorRelated} />}
               {relatedProducts && relatedProducts.length > 0 && (
-                <RelatedProducts products={relatedProducts} categoryName={product && product.Category && product.Category.name} />
+                <RelatedProducts
+                  products={relatedProducts}
+                  categoryName={product.Category?.name}
+                />
               )}
-              {relatedProducts && relatedProducts.length === 0 && (
-                <p>No Related Products</p>
-              )}
+              {relatedProducts?.length === 0 && <p>No Related Products</p>}
             </div>
 
             <div className="reviews-container">
-              {product && <ReviewsList product={product} />}
+              <ReviewsList product={product} />
             </div>
           </div>
         )

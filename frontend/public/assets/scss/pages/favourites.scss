@@ -9,6 +9,7 @@
     )
     [center-end] minmax(13rem, 1fr) [full-end];
     .favourites-products {
+      margin-top: 2rem;
         grid-column: center-start / center-end;
         display: flex; // Use flexbox for layout
         flex-wrap: wrap; // Allow wrapping

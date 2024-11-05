@@ -4,21 +4,21 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { composeWithDevTools } from "redux-devtools-extension";
 import { productReducer } from "./reducers/productReducer";
-import { addToCartReducer } from "./reducers/cartReducer";
 import { modalReducer } from "./reducers/productModalReducer";
 import { userReducer } from "./reducers/userReducer";
+import { cartReducer } from "./reducers/cartReducer";
 
 const rootReducer = combineReducers({
   product: productReducer,
   user: userReducer,
-  cart: addToCartReducer,
+  cart:cartReducer,
   productModal: modalReducer,
 });
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["cart", "user"], // Persisting auth cart user
+  whitelist: ["user"], // Persisting auth cart user
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -21,6 +21,32 @@ const Navbar = ({ navItems }) => {
   const user = useSelector((state) => state.user);
   const {loading,error,categories} = useSelector((state)=>state.product)
   const { user:userPresent,favourites } = user;
+  const usernav = [
+    {
+      title: "Favourites",
+      url: "/favourites",
+      icon: <BsHeart />,
+    },
+    {
+      title: "Cart",
+      url: "/cart",
+      icon: <BsCart />,
+    },
+    {
+      title: "Login/Register",
+      icon: <CiUser />,
+      submenu: [
+        {
+          title: "Login",
+          url: "/login",
+        },
+        {
+          title: "Register",
+          url: "/register",
+        },
+      ],
+    },
+  ];
   const useraccounts = [
     {
       title: "Favourites",

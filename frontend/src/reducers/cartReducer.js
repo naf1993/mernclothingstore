@@ -1,54 +1,47 @@
-import { CART_ADD_ITEM, CART_REMOVE_ITEM } from "../constants/cartConstants";
+import {
+  ADD_TO_CART_ERROR,
+  ADD_TO_CART_REQUEST,
+  ADD_TO_CART_SUCCESS,
+  REMOVE_FROM_CART_ERROR,
+  REMOVE_FROM_CART_REQUEST,
+  REMOVE_FROM_CART_SUCCESS,GET_MY_CART_ERROR,GET_MY_CART_REQUEST,GET_MY_CART_SUCCESS,
+  UPDATE_CART_QTY_REQUEST,
+  UPDATE_CART_QTY_SUCCESS,
+  UPDATE_CART_QTY_FAIL
+} from '../constants/cartConstants';
 
 const initialState = {
-  cartItems: [],
-  
+  products: [],
+  subTotal: 0,
+  loading: false,
+  error: null,
 };
 
-const saveToLocalStorage = (cartItems) => {
-  localStorage.setItem('cartItems', JSON.stringify(cartItems));
- 
-};
-
-export const addToCartReducer = (state = initialState, action) => {
+export const cartReducer = (state = initialState, action) => {
   switch (action.type) {
-    case CART_ADD_ITEM:
-      const item = action.payload;
-      const existItem = state.cartItems.find(
-        (x) => x.product === item.product && x.color === item.color && x.size === item.size
-      );
-
-      let updatedCartItems;
-      if (existItem) {
-        updatedCartItems = state.cartItems.map((x) =>
-          x.product === existItem.product && x.color === existItem.color && x.size === existItem.size
-            ? item
-            : x
-        );
-      } else {
-        updatedCartItems = [...state.cartItems, item];
-      }
-
-      // Save to local storage
-      saveToLocalStorage(updatedCartItems);
-
+    case ADD_TO_CART_REQUEST:
+    case GET_MY_CART_REQUEST:
+    case REMOVE_FROM_CART_REQUEST:
+    case UPDATE_CART_QTY_REQUEST:
+      return { ...state, loading: true, error: null };
+    case ADD_TO_CART_SUCCESS:
+    case REMOVE_FROM_CART_SUCCESS:
+    case GET_MY_CART_SUCCESS:
+    case UPDATE_CART_QTY_SUCCESS:
       return {
         ...state,
-        cartItems: updatedCartItems,
+        loading: false,
+        products: action.payload.products || [],  // Store flattened product list
+        subTotal: action.payload.subTotal || 0,   // Store the global subTotal
       };
-
-    case CART_REMOVE_ITEM:
-      const filteredCartItems = state.cartItems.filter((el) => el.product !== action.payload);
-
-      // Save to local storage
-      saveToLocalStorage(filteredCartItems);
-
-      return {
-        ...state,
-        cartItems: filteredCartItems,
-      };
-
-    default:
+    
+    case ADD_TO_CART_ERROR:
+    case REMOVE_FROM_CART_ERROR:
+    case GET_MY_CART_ERROR:
+    case UPDATE_CART_QTY_FAIL:
+      return {...state,loading:true,error:action.payload}
+    
+      default:
       return state;
   }
 };

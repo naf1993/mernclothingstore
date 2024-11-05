@@ -1,7 +1,6 @@
-import React,{useState,useRef,useEffect} from "react";
-import {gsap} from 'gsap'
+import React, { useState, useRef, useEffect } from "react";
+import { gsap } from "gsap";
 import { FaAngleRight } from "react-icons/fa";
-
 import Select from "react-select";
 
 const customStyles = {
@@ -10,67 +9,65 @@ const customStyles = {
     color: state.isSelected ? "#212529" : "black",
     border: "0.01px solid #cac2c2",
     boxShadow: "none",
-    fontSize:'13px',
-    fontWeight:'400',
-    letterSpacing:'0.1rem',
+    fontSize: "13px",
+    fontWeight: "400",
+    letterSpacing: "0.1rem",
     backgroundColor: state.isSelected ? "#cac2c2" : "white",
-    fontFamily:'lato'
-    
+    fontFamily: "lato",
   }),
-  dropdownIndicator: styles => ({ 
-    ...styles, 
-    color: 'rgb(95, 89, 89)', 
+  dropdownIndicator: (styles) => ({
+    ...styles,
+    color: "rgb(95, 89, 89)",
   }),
-
   control: (defaultStyles) => ({
     ...defaultStyles,
     backgroundColor: "#fff",
-    color:'rgb(95, 89, 89)',
-    marginTop:'1rem',
-   
+    color: "rgb(95, 89, 89)",
+    marginTop: "1rem",
     border: "0.2px solid #cac2c2",
     boxShadow: "none",
-    fontSize:'13px',
-    fontWeight:'400',
-    letterSpacing:'0.1rem',
-    fontFamily:'lato'
-   
+    fontSize: "13px",
+    fontWeight: "400",
+    letterSpacing: "0.1rem",
+    fontFamily: "lato",
   }),
   singleValue: (defaultStyles) => ({ ...defaultStyles, color: "black" }),
 };
 
+const MobileScreenDetails = ({
+  onSizeChange,
+  sizeOptions,
+  colors,
+  onHandleColor,
+  ifSize,
+  setColorErr,
+  setSizeErr,
+  colorErr,
+  sizeErr,
+  productDetails,
+}) => {
+  useEffect(() => {
+    console.log("mobile view rendered");
+  }, []);
 
-
-const MobileScreenDetails =({ onSizeChange,sizeOptions,colors,onHandleColor,ifSize,setColorErr,setSizeErr,colorErr,sizeErr }) => {
-
-  useEffect(()=>{
-    console.log('mobile view rendered')
-  },[])
   const [openAccordion, setOpenAccordion] = useState(null);
- 
   const accordionRefs = useRef([]);
 
   const handleAccordion = (index) => {
     if (index === openAccordion) {
-      gsap.to(
-        accordionRefs.current[index].querySelector(".accord-details"),
-        {
-          height: 0,
-          duration: .3,
-          ease: "power1.inOut",
-          onComplete: () => setOpenAccordion(null),
-        }
-      );
-      // console.log(openAccordion);
+      gsap.to(accordionRefs.current[index].querySelector(".accord-details"), {
+        height: 0,
+        duration: 0.3,
+        ease: "power1.inOut",
+        onComplete: () => setOpenAccordion(null),
+      });
     } else {
       if (openAccordion !== null) {
         gsap.to(
-          accordionRefs.current[openAccordion].querySelector(
-            ".accord-details"
-          ),
+          accordionRefs.current[openAccordion].querySelector(".accord-details"),
           {
             height: 0,
-            duration: .3,
+            duration: 0.3,
             ease: "power1.inOut",
           }
         );
@@ -81,72 +78,69 @@ const MobileScreenDetails =({ onSizeChange,sizeOptions,colors,onHandleColor,ifSi
         { height: 0 },
         {
           height: "auto",
-          duration: .3,
+          duration: 0.3,
           ease: "power1.inOut",
         }
       );
     }
-  }
+  };
+
   return (
     <>
-     
-        
-        <div className="accord-container">
-        <div className={`accord-item ${openAccordion === 0 ? 'open':''}`}  ref={(el) => (accordionRefs.current[0] = el)}>
-          {colors && (
-            <div className="accord-header" onClick={()=>handleAccordion(0)}>
+      <div className="accord-container">
+        {colors && (
+          <div
+            className={`accord-item ${openAccordion === 0 ? "open" : ""}`}
+            ref={(el) => (accordionRefs.current[0] = el)}
+          >
+            <div className="accord-header" onClick={() => handleAccordion(0)}>
               <h4 className="product-color">COLORS</h4>
-              <FaAngleRight className="accord-arrow"/> 
-             
+              <FaAngleRight className="accord-arrow" />
             </div>
-          )}
-          {colors && (
             <div className="accord-details">
               <div className="buttons-wrapper">
-                {colors?.map((color, index) => (
-                  <span key={index} className="filter-color-btn">
-                    <button  onClick={() => onHandleColor(color)}
+                {colors.map((color, index) => (
+                  <span key={color} className="filter-color-btn">
+                    <button
+                      onClick={() => onHandleColor(color)}
                       value={color}
-                      type="submit" 
+                      type="button" // Changed to button to avoid form submission
                       style={{
-                        backgroundColor: `${color}`,
+                        backgroundColor: color,
                       }}
                     />
                   </span>
                 ))}
               </div>
             </div>
-          )}
-        </div>
-        {colorErr ? <p className="text-danger">{colorErr}</p> : null}
-       
-        <div  ref={(el) => (accordionRefs.current[2] = el)} className={`accord-item ${openAccordion === 2 ? 'open':''}`}>
-          <div className="accord-header" onClick={()=>handleAccordion(2)}>
+            {colorErr && <p className="text-danger">{colorErr}</p>}
+          </div>
+        )}
+
+        <div
+          ref={(el) => (accordionRefs.current[1] = el)}
+          className={`accord-item ${openAccordion === 1 ? "open" : ""}`}
+        >
+          <div className="accord-header" onClick={() => handleAccordion(1)}>
             <h4 className="product-details">Product Details</h4>
-          <FaAngleRight className="accord-arrow"/> 
+            <FaAngleRight className="accord-arrow" />
           </div>
           <div className="accord-details">
-            <p>Product Details: 8834941</p>
+            <p>{productDetails}</p>
             <p>Return within "30 days". For detailed information, Click.</p>
-            <p>Fabric Info: 100% BARKCLOTH</p>
           </div>
         </div>
+      </div>
 
-        
-        </div>
-     
-        {ifSize && (
-           <Select
-           isClearable={true}
-           options={sizeOptions}
-           defaultValue={{ label: "SIZE", value: 0 }}
-           onChange={onSizeChange} styles={customStyles}
-         />
-        )}
-          {sizeErr ? <p className="text-danger">{sizeErr}</p>:null}
-       
-       
-     
+      {ifSize && (
+        <Select
+          isClearable={true}
+          options={sizeOptions}
+          onChange={onSizeChange}
+          styles={customStyles}
+        />
+      )}
+      {sizeErr && <p className="text-danger">{sizeErr}</p>}
     </>
   );
 };
