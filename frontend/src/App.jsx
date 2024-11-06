@@ -10,7 +10,6 @@ import axios from "axios";
 import Protected from "./components/Protected";
 import {Toaster} from 'react-hot-toast'
 
-
 // Lazy load screens
 const Home = lazy(() => import("./screens/Home"));
 const Login = lazy(() => import("./screens/Login"));
@@ -20,7 +19,9 @@ const Cart = lazy(() => import("./screens/Cart"));
 const ProductList = lazy(() => import("./screens/ProductList"));
 const SingleProduct = lazy(() => import("./screens/SingleProduct"));
 const SearchScreen = lazy(() => import("./screens/SearchScreen"));
-
+const PlaceOrder = lazy(()=>import('./screens/PlaceOrder'))
+const Orders = lazy(()=>import('./screens/Orders'))
+const OrderDetail = lazy(()=>import('./screens/OrderDetail'))
 const App = () => {
   const [loading, setLoading] = useState(true);
   const [navItems, setNavItems] = useState([]);
@@ -74,6 +75,9 @@ const App = () => {
             <Route path="search" element={<SearchScreen />} />
             <Route path="favourites" element={<Protected><Favourites/></Protected>}/>
             <Route path="cart" element={<Cart />} />
+            <Route path="placeorder" element={<Protected><PlaceOrder/></Protected>}/>
+            <Route path='orders' element={<Protected><Orders/></Protected>}/>
+            <Route path='orders/:id' element={<Protected><OrderDetail/></Protected>}/>
             
           </Route>
         </Routes>

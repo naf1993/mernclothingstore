@@ -7,12 +7,14 @@ import { productReducer } from "./reducers/productReducer";
 import { modalReducer } from "./reducers/productModalReducer";
 import { userReducer } from "./reducers/userReducer";
 import { cartReducer } from "./reducers/cartReducer";
+import { orderReducer } from "./reducers/orderReducer";
 
 const rootReducer = combineReducers({
   product: productReducer,
   user: userReducer,
   cart:cartReducer,
   productModal: modalReducer,
+  order:orderReducer
 });
 
 const persistConfig = {

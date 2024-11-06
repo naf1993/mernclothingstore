@@ -36,12 +36,17 @@
         padding: 1rem;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
+        @media only screen and (max-width: $bp-smallest) {
+        grid-template-columns: repeat(4,1fr);
+        }
         img {
           width: 60px;
           height: 60px;
           object-fit: cover;
           border-radius: 4px;
+          @media only screen and (max-width: $bp-smallest) {
+            grid-row: 1/span 2;
+            }
         }
         &__heading {
           font-size: 1rem; /* Increased font size for better readability */
@@ -72,6 +77,10 @@
         }
         &__size {
           text-align: center;
+          @media only screen and (max-width: $bp-smallest) {
+            text-align: start;
+            
+            }
           
         }
         &__qty {
@@ -79,6 +88,9 @@
           display: flex;
           align-items: center;
           gap:0.5rem;
+          @media only screen and (max-width: $bp-smallest) {
+            grid-column: 2/span 1;
+            }
           &-btn{
             border: none;
             background-color: var(--color-grey-light-1);
@@ -110,10 +122,70 @@
       
     }
     .right {
+      padding:3rem 2rem;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      gap:1.6rem;
+      border-radius: 8px;
       background-color: white;
+      h2{
+        text-align: center;
+        font-size: 1.4rem;
+        text-transform: uppercase;
+        font-family: inherit;
+        
+      }
+      div{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+       span{
+        font-size: 1.2rem;
+        font-family: inherit;
+        
+       }
+      }
+      &_coupon{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        div{
+          display: flex;
+          align-items: center;
+          gap:1rem;
+
+          .right_coupon_item{
+            border:none;
+            background-color: var(--light-gold);
+            color:white;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-radius: 4px;
+            padding:0.5rem 1rem;
+            border:1px dashed var(--color-grey-dark-3);
+            
+          }
+        }
+        &_btn{
+          background-color: var(--green-3);
+          border:none;
+          color:white;
+          padding:0.5rem 1rem;
+          border-radius: 4px;
+          text-transform: uppercase;
+        }
+        &_btn-checkout{
+          color:white;
+          border:none;
+          background-color:var(--color-pink-dark);
+          padding:1rem 2rem;
+          border-radius: 4px;
+          text-transform: uppercase;
+          
+        }
+       
+
+      }
     }
   }
 }
