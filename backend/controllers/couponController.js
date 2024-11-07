@@ -54,7 +54,7 @@ export const validateCoupon = catchAsync(async (req, res, next) => {
       discount: coupon.discount,
     });
   } else {
-    return res.json({ message: "coupon applies" });
+    return res.json({ message: "coupon applied" });
   }
 });
 

@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { Box, useTheme, Button, Typography } from "@mui/material";
 
 import Header from "../components/Header";
@@ -13,13 +13,8 @@ const Orders = () => {
     <Box m="1.5rem 2.5rem">
       <FlexBetween>
         <Header title="Orders" subtitle="List of Orders" />
-
-      
-      
       </FlexBetween>
       <DataGridComponent type="orders" />
-    
-     
     </Box>
   );
 };

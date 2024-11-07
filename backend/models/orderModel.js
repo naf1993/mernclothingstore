@@ -4,10 +4,10 @@ import Coupon from "./couponModel.js";
 
 const orderSchema = mongoose.Schema(
   {
-    orderId:{
-      type:String,
-      unique:true,
-      required:true
+    orderId: {
+      type: String,
+      unique: true,
+      required: true,
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -110,7 +110,17 @@ const orderSchema = mongoose.Schema(
       type: Number,
       required: true,
       default: function () {
-        return this.totalPrice - this.discount;
+        let shippingFee = 0;
+        if (this.paymentMethod === "Cash on Delivery") {
+          shippingFee = 60;
+        }
+        return this.totalPrice - this.discount + shippingFee;
+      },
+    },
+    shippingFee: {
+      type: Number,
+      default: function () {
+        return this.paymentMethod === "Cash on Delivery" ? 60 : 0;
       },
     },
     saleDate: {
@@ -126,25 +136,22 @@ const orderSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-orderSchema.pre('save',async function(next){
-  if(this.isModified('paymentStatus')){
-    if(this.paymentStatus === 'Paid'){
-      this.orderStatus = 'Processing'
-     
+orderSchema.pre("save", async function (next) {
+  if (this.isModified("paymentStatus")) {
+    if (this.paymentStatus === "Paid") {
+      this.orderStatus = "Processing";
     }
   }
-  if(this.discountCode){
-   const coupon = await Coupon.findById(this.discountCode)
-   if(coupon && coupon.isActive){
-    this.discount = (this.totalPrice*coupon.discount)/100
-   }
-   else{
-    this.discountCode = null
-   }
+  if (this.discountCode) {
+    const coupon = await Coupon.findById(this.discountCode);
+    if (coupon && coupon.isActive) {
+      this.discount = (this.totalPrice * coupon.discount) / 100;
+    } else {
+      this.discountCode = null;
+    }
   }
-  next()
-})
-
+  next();
+});
 
 const Order = mongoose.model("Order", orderSchema);
 
