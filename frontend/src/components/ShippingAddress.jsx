@@ -217,6 +217,58 @@ const ShippingAddress = ({ address, setAddress }) => {
       </div>
       
       <div className="address-wrapper__right">
+      <form>
+        <label>Full Name</label>
+        <input
+          type="text"
+          placeholder="Full Name"
+          value={localAddress.fullName}
+          onChange={(e) =>
+            setLocalAddress({ ...localAddress, fullName: e.target.value })
+          }
+        />
+     <label>Street Name</label>
+        <input
+          type="text"
+          placeholder="Street Name"
+          value={localAddress.streetName}
+          onChange={(e) =>
+            setLocalAddress({ ...localAddress, streetName: e.target.value })
+          }
+        />
+      <label>City</label>
+        <input
+          type="text"
+          placeholder="City"
+          value={localAddress.city}
+          onChange={(e) =>
+            setLocalAddress({ ...localAddress, city: e.target.value })
+          }
+        />
+      <label>Country</label>
+        <input
+          type="text"
+          placeholder="Country"
+          value={localAddress.country}
+          onChange={(e) =>
+            setLocalAddress({ ...localAddress, country: e.target.value })
+          }
+        />
+     <label>Postal Code</label>
+        <input
+          type="text"
+          placeholder="Postal Code"
+          value={localAddress.postalCode}
+          onChange={(e) =>
+            setLocalAddress({ ...localAddress, postalCode: e.target.value })
+          }
+        />
+    
+    </form>
+     
+      
+    
+      </div>
       <input
           type="text"
           value={searchQuery}  // Bind the input value to searchQuery state
@@ -232,56 +284,6 @@ const ShippingAddress = ({ address, setAddress }) => {
             ))}
           </ul>
         )}
-      
-      <form>
-        
-          <input
-            type="text"
-            placeholder="Full Name"
-            value={localAddress.fullName}
-            onChange={(e) =>
-              setLocalAddress({ ...localAddress, fullName: e.target.value })
-            }
-          />
-      
-          <input
-            type="text"
-            placeholder="Street Name"
-            value={localAddress.streetName}
-            onChange={(e) =>
-              setLocalAddress({ ...localAddress, streetName: e.target.value })
-            }
-          />
-       
-          <input
-            type="text"
-            placeholder="City"
-            value={localAddress.city}
-            onChange={(e) =>
-              setLocalAddress({ ...localAddress, city: e.target.value })
-            }
-          />
-       
-          <input
-            type="text"
-            placeholder="Country"
-            value={localAddress.country}
-            onChange={(e) =>
-              setLocalAddress({ ...localAddress, country: e.target.value })
-            }
-          />
-      
-          <input
-            type="text"
-            placeholder="Postal Code"
-            value={localAddress.postalCode}
-            onChange={(e) =>
-              setLocalAddress({ ...localAddress, postalCode: e.target.value })
-            }
-          />
-      
-      </form>
-      </div>
     </div>
   );
 };
