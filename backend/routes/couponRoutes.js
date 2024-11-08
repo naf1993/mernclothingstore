@@ -5,7 +5,7 @@ import { createCoupon, deleteCoupon, getAllCoupons, getCouponById, updateCoupon,
 const router = express.Router();
 
 router.route('/').get(getAllCoupons).post(protect,restrictToAdmin,createCoupon)
-router.route('/validate-coupon').get(validateCoupon)
+router.route('/validateCoupon').post(protect,validateCoupon)
 router.route('/:id').get(protect,restrictToAdmin,getCouponById).patch(protect,restrictToAdmin,updateCoupon).delete(protect,restrictToAdmin,deleteCoupon)
 
 export default router

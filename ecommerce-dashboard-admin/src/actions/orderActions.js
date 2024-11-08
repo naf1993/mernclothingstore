@@ -44,6 +44,7 @@ export const getSingleOrder = (id) => async (dispatch, getState) => {
     dispatch({ type: ORDER_SINGLE_FAIL, payload: error.response.data.message });
   }
 };
+
 export const deleteOrder = (id)=>async(dispatch,getState)=>{
   try{
     dispatch({type:ORDER_DELETE_REQUEST})

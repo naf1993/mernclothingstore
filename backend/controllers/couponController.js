@@ -38,24 +38,36 @@ const createCoupon = catchAsync(async (req, res, next) => {
 });
 
 export const validateCoupon = catchAsync(async (req, res, next) => {
-  const { userId, couponCode } = req.body;
+  const { couponCode } = req.body;
+  console.log(couponCode)
+
+  // Ensure the couponCode is provided
+  if (!couponCode) {
+    return next(new AppError("Coupon code is required", 400));  // Bad Request
+  }
+
+  // Find the coupon in the database
   const coupon = await Coupon.findOne({ code: couponCode });
+
+  // If no coupon is found, return an error
   if (!coupon) {
-    return next(new AppError("No Coupon found", 404));
+    return next(new AppError("No coupon found with that code", 404));  // Not Found
   }
-  coupon.checkExpiration();
-  await coupon.save();
+
+  // Check if the coupon is expired or inactive
+  await coupon.checkExpiration(); // Ensure this method sets coupon.isActive correctly
+
   if (!coupon.isActive) {
-    return next(new AppError("Coupon expired", 404));
+    return next(new AppError("Coupon has expired or is inactive", 400));  // Bad Request
   }
-  const isFirstOrder = await checkIfFirstOrder(userId);
-  if (isFirstOrder) {
-    return res.json({
-      discount: coupon.discount,
-    });
-  } else {
-    return res.json({ message: "coupon applied" });
-  }
+
+  // If everything is good, return the coupon in the response
+  res.status(200).json({
+    status: "success",
+    data: {
+      coupon,
+    },
+  });
 });
 
 const getCouponById = catchAsync(async (req, res, next) => {

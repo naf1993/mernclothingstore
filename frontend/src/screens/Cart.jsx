@@ -8,14 +8,17 @@ import Loader from "../components/Loader";
 import Message from "../components/Message";
 import toast from "react-hot-toast";
 import axios from "axios";
-
-
+import { validateCoupon } from "../actions/orderActions";
 
 const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [coupons, setCoupons] = useState([]);
-  const [seletedCoupon, setSelectedCoupon] = useState("");
+  const [selectedCoupon, setSelectedCoupon] = useState({
+    code: "",
+    discount: 0,
+  });
+ 
   const user = useSelector((state) => state.user);
   const {
     products: cartItems,
@@ -26,6 +29,7 @@ const Cart = () => {
 
   const { isAuthenticated } = user;
   const [isQuantityUpdated, setIsQuantityUpdated] = useState(false);
+  const [finalPrice,setFinalPrice] = useState(subTotal.toFixed(2))
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -47,11 +51,7 @@ const Cart = () => {
     };
     fetchCoupons();
   }, []);
-  const handleClick = () => {
-    // Navigate directly to the PlaceOrder page
-    navigate("/placeorder"); // This will go to the top-level /placeorder route
-  };
-
+ 
 
   const handleQuantityChange = (productId, color, size, action) => {
     dispatch(updateCartQuantity(productId, color, size, action))
@@ -63,6 +63,27 @@ const Cart = () => {
         toast.error("Error updating cart", err.message);
         setIsQuantityUpdated(false);
       });
+  };
+
+  const handleValidateCoupon = () => {
+    dispatch(validateCoupon(selectedCoupon.code))
+      .then(() => {
+        toast.success("Coupon Applied");
+        setFinalPrice((
+          subTotal -
+          (subTotal * selectedCoupon.discount) / 100
+        ).toFixed(2))
+      })
+      .catch((err) => {
+        toast.error("Failed to apply coupon", err.message);
+      });
+  };
+
+  const handleClick = () => {
+
+    navigate("/placeorder",{state:{
+      finalPrice,selectedCoupon
+    }}); 
   };
 
   return (
@@ -106,30 +127,43 @@ const Cart = () => {
           </div>
           <div>
             <span>Any Coupon Applied</span>
-            <span> {seletedCoupon ? seletedCoupon : "NIL"}</span>
+            <span> {selectedCoupon ? selectedCoupon.code : "NIL"}</span>
           </div>
           <div>
             <span>Final Price</span>
-            <span> ${subTotal.toFixed(2)}</span>
+           {finalPrice}
           </div>
 
-          <button
-            className="right_coupon_btn-checkout"
-            onClick={handleClick}
-          >
+          <button className="right_coupon_btn-checkout" onClick={handleClick}>
             Continue To Checkout
           </button>
 
           <div className="right_coupon">
             <div>
               {coupons?.map((coupon) => (
-                <button onClick={()=>setSelectedCoupon(coupon.code)} className="right_coupon_item" key={coupon._id}>
+                <button
+                  onClick={() => {
+                    setSelectedCoupon({
+                      code: coupon.code,
+                      discount: coupon.discount,
+                    });
+                  }}
+                  className="right_coupon_item"
+                  key={coupon._id}
+                >
                   {coupon.code}
                 </button>
               ))}
             </div>
 
-            <button  className="right_coupon_btn">Apply Coupon</button>
+            {selectedCoupon && (
+              <button
+                onClick={handleValidateCoupon}
+                className="right_coupon_btn"
+              >
+                Apply Coupon
+              </button>
+            )}
           </div>
         </div>
       </div>

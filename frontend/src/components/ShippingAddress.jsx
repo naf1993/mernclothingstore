@@ -1,6 +1,7 @@
-import React, { useEffect, useState,useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import toast from "react-hot-toast";
-import debounce from 'lodash.debounce'
+import debounce from "lodash.debounce";
+import {AiOutlineClose} from 'react-icons/ai'
 import {
   MapContainer,
   TileLayer,
@@ -17,6 +18,7 @@ import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 // Make sure the marker icon images are imported correctly
 import markerIcon from "leaflet/dist/images/marker-icon.png";
+import useClickOutside from "../hooks/useClickOutside";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 const defaultIcon = new L.Icon({
   iconUrl: markerIcon,
@@ -38,6 +40,10 @@ const ShippingAddress = ({ address, setAddress }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef(null)
+  useClickOutside(searchInputRef,()=>{
+    setSuggestions([])
+  })
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -108,26 +114,31 @@ const ShippingAddress = ({ address, setAddress }) => {
   // Custom hook to force map re-centering when position changes
 
   const handleSearchChange = debounce(async (query) => {
-    setSearchQuery(query)
+    setSearchQuery(query);
     if (!query || query.length < 3) {
       setSuggestions([]);
       return;
     }
-    console.log('Searching for',query)
+    console.log("Searching for", query);
     const boundingBox = [-125, 24, -66, 50];
     try {
       const result = await axios.get(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json`, {
-            params: {
-                access_token: MAPBOX_API_KEY,
-                proximity: userPosition ? `${userPosition.lng},${userPosition.lat}` : undefined, // Optional: if you have a user's location, use proximity for better suggestions
-                bbox: boundingBox,  // Use the bounding box to limit the search area (optional)
-                limit: 5,            // Limit the number of results to return
-                types: 'place,address', // Filter by 'place' and 'address' (optional)
-                language: 'en'       // Set the language for the results
-            }
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+          query
+        )}.json`,
+        {
+          params: {
+            access_token: MAPBOX_API_KEY,
+            proximity: userPosition
+              ? `${userPosition.lng},${userPosition.lat}`
+              : undefined, // Optional: if you have a user's location, use proximity for better suggestions
+            bbox: boundingBox, // Use the bounding box to limit the search area (optional)
+            limit: 5, // Limit the number of results to return
+            types: "place,address", // Filter by 'place' and 'address' (optional)
+            language: "en", // Set the language for the results
+          },
         }
-    );
+      );
       const newSuggestions = result.data.features.map((feature) => ({
         label: feature.place_name,
         value: feature.center,
@@ -136,7 +147,7 @@ const ShippingAddress = ({ address, setAddress }) => {
     } catch (error) {
       toast.error("Error fetching search results.");
     }
-  },300)
+  }, 300);
 
   const handleSelectLocation = (selectedOption) => {
     setSelectedLocation(selectedOption);
@@ -145,7 +156,11 @@ const ShippingAddress = ({ address, setAddress }) => {
     // Set the map view to the selected location
     setUserPosition({ lat, lng });
     getAddressFromCoordinates(lat, lng); // Fetch and update address for the selected location
-  };
+  setSuggestions([])
+  setSearchQuery(selectedOption.label)  
+  
+  }
+  
 
   const UpdateMapCenter = () => {
     const map = useMap();
@@ -162,129 +177,138 @@ const ShippingAddress = ({ address, setAddress }) => {
     return null;
   };
 
+  const clearSearchQuery = () => {
+    setSearchQuery('')
+    setSuggestions([])
+  }
+
   return (
-    <div className="address-wrapper">
-      
+    <>
+      <div className="address-wrapper">
+        <div className="address-wrapper__left">
+          <MapContainer
+            center={userPosition || { lat: 51.505, lng: -0.09 }}
+            zoom={13}
+            style={{ width: "100%", height: "350px" }}
+          >
+            <TileLayer
+              url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`}
+              id="mapbox/streets-v11"
+              tileSize={512}
+              zoomOffset={-1}
+            />
+            {/* Marker for user position */}
+            {userPosition && (
+              <Marker position={userPosition} icon={defaultIcon}>
+                <Popup>
+                  You are here!
+                  <br />
+                  Latitude: {userPosition.lat}
+                  <br />
+                  Longitude: {userPosition.lng}
+                </Popup>
+              </Marker>
+            )}
 
-      <div className="address-wrapper__left">
-        <MapContainer
-          center={userPosition || { lat: 51.505, lng: -0.09 }}
-          zoom={13}
-          style={{ width: "100%", height: "350px" }}
-        >
-          <TileLayer
-            url={`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.REACT_APP_MAPBOX_API_KEY}`}
-            id="mapbox/streets-v11"
-            tileSize={512}
-            zoomOffset={-1}
-          />
-          {/* Marker for user position */}
-          {userPosition && (
-            <Marker position={userPosition} icon={defaultIcon}>
-              <Popup>
-                You are here!
-                <br />
-                Latitude: {userPosition.lat}
-                <br />
-                Longitude: {userPosition.lng}
-              </Popup>
-            </Marker>
-          )}
+            {/* Marker for searched location */}
+            {selectedLocation && (
+              <Marker
+                position={{
+                  lat: selectedLocation.value[1],
+                  lng: selectedLocation.value[0],
+                }}
+                icon={defaultIcon}
+              >
+                <Popup>
+                  Selected Location!
+                  <br />
+                  Latitude: {selectedLocation.value[1]}
+                  <br />
+                  Longitude: {selectedLocation.value[0]}
+                </Popup>
+              </Marker>
+            )}
 
-          {/* Marker for searched location */}
-          {selectedLocation && (
-            <Marker
-              position={{
-                lat: selectedLocation.value[1],
-                lng: selectedLocation.value[0],
-              }}
-              icon={defaultIcon}
-            >
-              <Popup>
-                Selected Location!
-                <br />
-                Latitude: {selectedLocation.value[1]}
-                <br />
-                Longitude: {selectedLocation.value[0]}
-              </Popup>
-            </Marker>
-          )}
+            {/* Update the map center based on position */}
+            <UpdateMapCenter />
+            <MapClickListener />
+          </MapContainer>
+        </div>
 
-          {/* Update the map center based on position */}
-          <UpdateMapCenter />
-          <MapClickListener />
-        </MapContainer>
-      </div>
+        <div className="address-wrapper__right">
+          <form>
+            <label>Full Name</label>
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={localAddress.fullName}
+              onChange={(e) =>
+                setLocalAddress({ ...localAddress, fullName: e.target.value })
+              }
+            />
+            <label>Street Name</label>
+            <input
+              type="text"
+              placeholder="Street Name"
+              value={localAddress.streetName}
+              onChange={(e) =>
+                setLocalAddress({ ...localAddress, streetName: e.target.value })
+              }
+            />
+            <label>City</label>
+            <input
+              type="text"
+              placeholder="City"
+              value={localAddress.city}
+              onChange={(e) =>
+                setLocalAddress({ ...localAddress, city: e.target.value })
+              }
+            />
+            <label>Country</label>
+            <input
+              type="text"
+              placeholder="Country"
+              value={localAddress.country}
+              onChange={(e) =>
+                setLocalAddress({ ...localAddress, country: e.target.value })
+              }
+            />
+            <label>Postal Code</label>
+            <input
+              type="text"
+              placeholder="Postal Code"
+              value={localAddress.postalCode}
+              onChange={(e) =>
+                setLocalAddress({ ...localAddress, postalCode: e.target.value })
+              }
+            />
+          </form>
+        </div>
       
-      <div className="address-wrapper__right">
-      <form>
-        <label>Full Name</label>
+      <div className="search-location">
         <input
           type="text"
-          placeholder="Full Name"
-          value={localAddress.fullName}
-          onChange={(e) =>
-            setLocalAddress({ ...localAddress, fullName: e.target.value })
-          }
-        />
-     <label>Street Name</label>
-        <input
-          type="text"
-          placeholder="Street Name"
-          value={localAddress.streetName}
-          onChange={(e) =>
-            setLocalAddress({ ...localAddress, streetName: e.target.value })
-          }
-        />
-      <label>City</label>
-        <input
-          type="text"
-          placeholder="City"
-          value={localAddress.city}
-          onChange={(e) =>
-            setLocalAddress({ ...localAddress, city: e.target.value })
-          }
-        />
-      <label>Country</label>
-        <input
-          type="text"
-          placeholder="Country"
-          value={localAddress.country}
-          onChange={(e) =>
-            setLocalAddress({ ...localAddress, country: e.target.value })
-          }
-        />
-     <label>Postal Code</label>
-        <input
-          type="text"
-          placeholder="Postal Code"
-          value={localAddress.postalCode}
-          onChange={(e) =>
-            setLocalAddress({ ...localAddress, postalCode: e.target.value })
-          }
-        />
-    
-    </form>
-     
-      
-    
-      </div>
-      <input
-          type="text"
-          value={searchQuery}  // Bind the input value to searchQuery state
-          onChange={(e) => handleSearchChange(e.target.value)}  // Update search query on change
+          value={searchQuery} // Bind the input value to searchQuery state
+          onChange={(e) => handleSearchChange(e.target.value)} // Update search query on change
           placeholder="Search for a location"
         />
-        {suggestions && suggestions.length > 0 && (
-          <ul className="suggestions-list">
-            {suggestions.map((suggestion, index) => (
-              <li key={index} onClick={() => handleSelectLocation(suggestion)}>
-                {suggestion.label}
-              </li>
-            ))}
-          </ul>
+        {searchQuery && (
+          <button className="search-clear-btn" onClick={clearSearchQuery}><AiOutlineClose className="icon"/></button>
         )}
-    </div>
+      
+          <ul className="suggestions-list" ref={searchInputRef}>
+          <li>Select location</li>
+          {suggestions?.map((suggestion, index) => (
+            <li key={index} onClick={() => handleSelectLocation(suggestion)}>
+              {suggestion.label}
+            </li>
+          ))}
+        </ul>
+        
+          
+        </div>
+      </div>
+    </>
   );
 };
 

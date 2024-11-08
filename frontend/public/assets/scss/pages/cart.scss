@@ -181,6 +181,9 @@
           padding:1rem 2rem;
           border-radius: 4px;
           text-transform: uppercase;
+          &:hover{
+            background-color: var(--dark-gold);
+          }
           
         }
        
