@@ -17,9 +17,9 @@ const OrderSuccess = () => {
   }
 
   return (
-    <div className="order-success-container">
-      <div className="order-success-wrapper">
-        <Headings>Your Order Has Been Placed Successfully!</Headings>
+    <div className="page-container">
+      <div className="order-success-container">
+        <h3>Your Order Has Been Placed Successfully!</h3>
 
         <div className="order-summary">
           <p>Thank you for your purchase. Your order has been successfully placed!</p>

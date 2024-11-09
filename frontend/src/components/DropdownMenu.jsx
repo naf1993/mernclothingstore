@@ -4,7 +4,7 @@ import { logOutUser } from "../actions/userActions";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-const DropdownMenu = ({ submenus, dropdown ,category}) => {
+const DropdownMenu = ({ submenus, dropdown ,categoryId}) => {
   const dispatch = useDispatch()
   const history = useNavigate()
   const logoutHandler = ()=>{
@@ -16,8 +16,8 @@ const DropdownMenu = ({ submenus, dropdown ,category}) => {
     <ul className={`dropdown ${dropdown ? "show" : ""}`}>
       {submenus.map((submenu, index) => (
         <li key={index} className="menu-items-dropdown">
-          {(submenu.url && category) ? (
-            <Link to={`/products/category/${category}`} className="menu-items-dropdown-item">
+          {(submenu.url && categoryId) ? (
+            <Link to={`products/${categoryId}/${submenu.subcategoryId}`} className="menu-items-dropdown-item">
             {submenu.title}
           </Link>
           )

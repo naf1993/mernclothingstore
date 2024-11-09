@@ -1,0 +1,20 @@
+.order-success-container{
+    margin-top: 2rem;
+    grid-column: center-start/center-end;
+    background-color: white;
+    padding:2rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap:1rem;
+    font-family:'Lato',sans-serif;
+    h3{
+        font-size: 1.3rem;
+        
+        text-transform: uppercase;
+        font-family: inherit;
+        color:var(--color-grey-dark-3);
+        letter-spacing: 1px;
+        
+
+      }
+}

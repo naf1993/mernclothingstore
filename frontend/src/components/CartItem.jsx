@@ -1,4 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
+import { AiOutlineDelete, AiOutlineHeart } from "react-icons/ai";
+import { useDispatch } from "react-redux";
+import { removeFromCart } from "../actions/cartActions";
+import toast from "react-hot-toast";
 
 const CartItem = ({
   color,
@@ -11,15 +15,19 @@ const CartItem = ({
   addQuantity,
   subQuantity,
   productId,
+  removeItem,
 }) => {
-  const handleDecreseQuantity = () => {
-    console.log("decreasing ");
-  };
-  const handleIncreaseQuantity = () => {
-    console.log("increasing");
-  };
+  const dispatch = useDispatch();
+  const [isRemoving,setIsRemoving] = useState(false)
+
+  const handleRemoveItem = () => {
+    setIsRemoving(true)
+    setTimeout(()=>{
+      removeItem(productId,color,size)
+    },400)
+  }
   return (
-    <div className="cart-item">
+    <div className={`cart-item ${isRemoving ? 'removing' : ''}`}>
       <img src={productImg} alt={productName} />
       <h6 className="cart-item__heading">{productName}</h6>
       <div className="cart-item__color">
@@ -51,6 +59,17 @@ const CartItem = ({
       <div className="cart-item__price">
         <span>Total:</span>
         <h6>${total}</h6>
+      </div>
+      <div className="cart-item__action">
+        <button type='button' data-tooltip="Add to Favourites">
+          <AiOutlineHeart />
+        </button>
+        <button type="button"
+          data-tooltip="Remove from Cart"
+          onClick={handleRemoveItem}
+        >
+          <AiOutlineDelete />
+        </button>
       </div>
     </div>
   );

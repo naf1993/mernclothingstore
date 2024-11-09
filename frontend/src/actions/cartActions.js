@@ -103,7 +103,7 @@ export const removeFromCart =
       );
       const { products, subTotal } = processCartData(data.data.cart);
       dispatch({ type: REMOVE_FROM_CART_SUCCESS, payload: {products,subTotal} });
-      toast.success("Product removed from cart");
+     
     } catch (error) {
       dispatch({
         type: REMOVE_FROM_CART_ERROR,
@@ -112,7 +112,7 @@ export const removeFromCart =
             ? error.response.data.message
             : error.message,
       });
-      toast.error("Cannot remove product from cart");
+      
     }
   };
 

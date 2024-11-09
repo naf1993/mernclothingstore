@@ -2,15 +2,15 @@ import React from "react";
 import { BsSearch } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { menuItems } from "../menuItems";
+
 import MenuItems from "./MenuItems";
 import { useLocation } from "react-router-dom";
-import { usernav } from "../usernav";
+
 import { BsHeart } from "react-icons/bs";
 import { CiUser } from "react-icons/ci";
 import { BsCart } from "react-icons/bs";
 import UserNav from "./UserNav";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
 
 const Navbar = ({ navItems }) => {
@@ -19,8 +19,25 @@ const Navbar = ({ navItems }) => {
   const depthLevel = 0;
   const { pathname } = useLocation();
   const user = useSelector((state) => state.user);
-  const {loading,error,categories} = useSelector((state)=>state.product)
-  const { user:userPresent,favourites } = user;
+  const { loading, error, categories } = useSelector((state) => state.product);
+  const { user: userPresent, favourites } = user;
+  const { products: cartItems } = useSelector((state) => state.cart);
+  const menus = navItems.map((category) => {
+    return {
+      title: category.name,
+      url: `/${category.slug}`,
+      category: category.name.replace(" ", ""),
+      categoryId: category._id,
+      submenu: category.subcategories.map((subcategory) => {
+        return {
+          title: subcategory.name,
+          url: `/${subcategory.slug}`,
+          subcategoryId: subcategory._id,
+        };
+      }),
+    };
+  });
+  console.log(menus);
   const usernav = [
     {
       title: "Favourites",
@@ -52,12 +69,13 @@ const Navbar = ({ navItems }) => {
       title: "Favourites",
       url: "/favourites",
       icon: <BsHeart />,
-      count:favourites?.length
+      count: favourites?.length,
     },
     {
       title: "Cart",
       url: "/cart",
       icon: <BsCart />,
+      count: cartItems?.length,
     },
     {
       title: "",
@@ -71,11 +89,10 @@ const Navbar = ({ navItems }) => {
           title: "My Account",
           url: "/myaccount",
         },
-       {
-        title:'Log out',
-        action:'logout'
-        
-       }
+        {
+          title: "Log out",
+          action: "logout",
+        },
       ],
     },
   ];
@@ -87,7 +104,7 @@ const Navbar = ({ navItems }) => {
 
   useEffect(() => {
     const keyDownHandler = (event) => {
-      if (event.key === "Enter") {      
+      if (event.key === "Enter") {
         handleSubmit();
       }
     };
@@ -134,7 +151,7 @@ const Navbar = ({ navItems }) => {
 
         <div className="mega-menu">
           <ul className="mega-menu__nav">
-            {menuItems.map((menu, index) => {
+            {menus?.map((menu, index) => {
               return (
                 <MenuItems items={menu} key={index} depthLevel={depthLevel} />
               );

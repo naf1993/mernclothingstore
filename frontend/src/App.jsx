@@ -9,6 +9,7 @@ import { loginUserWithOauth, loadUser } from "./actions/userActions";
 import axios from "axios";
 import Protected from "./components/Protected";
 import {Toaster} from 'react-hot-toast'
+import ProductsCategory from "./screens/ProductsCategory";
 
 // Lazy load screens
 const Home = lazy(() => import("./screens/Home"));
@@ -73,6 +74,7 @@ const App = () => {
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path="products/:category/:id" element={<ProductList />} />
+            <Route path="products/:categoryId/:subcategoryId" element={<ProductsCategory />} />
             <Route path="products/:id" element={<SingleProduct/>} />
             <Route path="search" element={<SearchScreen />} />
             <Route path="favourites" element={<Protected><Favourites/></Protected>}/>

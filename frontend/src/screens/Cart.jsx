@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Headings from "../components/Headings";
 import CartItem from "../components/CartItem"; // Ensure you have a CartItem component
-import { getMyCart, updateCartQuantity } from "../actions/cartActions";
+import { getMyCart, updateCartQuantity,removeFromCart } from "../actions/cartActions";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
 import toast from "react-hot-toast";
@@ -86,6 +86,20 @@ const Cart = () => {
     });
   };
 
+  const handleRemoveItem = async (productId,color,size) => {
+    dispatch(removeFromCart(productId, color, size))
+      .then(() => {
+        toast.success("Product removed from cart");
+        dispatch(getMyCart())
+      })
+      .catch((err) => {
+        toast.error(
+          "Unable to remove item from cart..Plase try again later",
+          err.message
+        );
+      });
+  };
+
   return (
     <div className="cart-container">
       <div className="heading">
@@ -106,7 +120,7 @@ const Cart = () => {
               count={item.count}
               size={item.size || ""}
               productName={item.name}
-              productImg={item.image}
+              productImg={item.image} removeItem={handleRemoveItem}
               addQuantity={(productId, color, size) =>
                 handleQuantityChange(productId, color, size, "add")
               }
