@@ -8,16 +8,19 @@ import {
   REMOVE_FROM_CART_SUCCESS,
   GET_MY_CART_ERROR,
   GET_MY_CART_REQUEST,
-  GET_MY_CART_SUCCESS,UPDATE_CART_QTY_FAIL,UPDATE_CART_QTY_REQUEST,UPDATE_CART_QTY_SUCCESS
+  GET_MY_CART_SUCCESS,UPDATE_CART_QTY_FAIL,UPDATE_CART_QTY_REQUEST,UPDATE_CART_QTY_SUCCESS,
+  CLEAR_MY_CART_REQUEST,
+  CLEAR_MY_CART_SUCCESS,
+  CLEAR_MY_CART_FAIL
 } from "../constants/cartConstants";
 import toast from "react-hot-toast";
 
 const processCartData = (cartData) => {
+
+ 
   
   const cart = cartData[0]
-  // if(!cart?.products || !Array.isArray(cart?.products)){
-  //   throw new Error('Products data in not in expected format')
-  // }
+  
   const products = cart?.products.map((item)=>({
     productId:item.productId._id,
     name:item.productId.name,
@@ -170,6 +173,37 @@ export const updateCartQuantity = (productId, color, size, action) => async (dis
   } catch (error) {
     dispatch({
       type: UPDATE_CART_QTY_FAIL,
+      payload: error.response ? error.response.data.message : error.message,
+    });
+    toast.error("Cannot get user cart: " + (error.message || "Unknown error"));
+  }
+};
+
+
+export const clearMyCart = () => async (dispatch, getState) => {
+  try {
+    dispatch({ type: CLEAR_MY_CART_REQUEST });
+
+    const {
+      user: { token, isAuthenticated },
+    } = getState();
+
+    if (!isAuthenticated || !token) {
+      throw new Error("User not logged in");
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    await axios.delete("/api/cart", config);
+    dispatch({ type: CLEAR_MY_CART_SUCCESS });
+  } catch (error) {
+    dispatch({
+      type: CLEAR_MY_CART_FAIL,
       payload: error.response ? error.response.data.message : error.message,
     });
     toast.error("Cannot get user cart: " + (error.message || "Unknown error"));

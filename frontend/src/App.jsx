@@ -22,6 +22,8 @@ const SearchScreen = lazy(() => import("./screens/SearchScreen"));
 const PlaceOrder = lazy(()=>import('./screens/PlaceOrder'))
 const Orders = lazy(()=>import('./screens/Orders'))
 const OrderDetail = lazy(()=>import('./screens/OrderDetail'))
+const OrderSucess = lazy(()=>import('./screens/OrderSuccess'))
+
 const App = () => {
   const [loading, setLoading] = useState(true);
   const [navItems, setNavItems] = useState([]);
@@ -77,6 +79,7 @@ const App = () => {
             <Route path="cart" element={<Cart />} />
             <Route path="placeorder" element={<Protected><PlaceOrder/></Protected>}/>
             <Route path='orders' element={<Protected><Orders/></Protected>}/>
+            <Route path='ordersuccess' element={<Protected><OrderSucess/></Protected>}/>
             <Route path='orders/:id' element={<Protected><OrderDetail/></Protected>}/>
             
           </Route>

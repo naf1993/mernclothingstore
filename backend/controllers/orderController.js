@@ -59,13 +59,17 @@ const sendOrderConfirmationEmail = async (order, email) => {
 
 export const createOrder = catchAsync(async (req, res, next) => {
   const { userId, products, address, paymentMethod, discountCode } = req.body;
-  const userordered = await User.findById(userId);
+ 
+  const user = await User.findById(userId);
+  
 
   const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
+  
   const totalPrice = products.reduce(
-    (acc, item) => acc + item.count * item.price,
+    (acc, item) => acc + item.total,
     0
   );
+
   const order = await Order.create({
     orderId,
     user: userId,
@@ -73,7 +77,7 @@ export const createOrder = catchAsync(async (req, res, next) => {
     address,
     paymentMethod,
     totalPrice,
-    discountCode: discountCode || null,
+    discountCode: discountCode || '',
   });
   for (const item of products) {
     const product = await Product.findById(item.product);

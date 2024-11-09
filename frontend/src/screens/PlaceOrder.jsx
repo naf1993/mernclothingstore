@@ -4,30 +4,46 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader"; // Assuming you have a Loader component
 import { createNewOrder } from "../actions/orderActions";
-import { getMyCart } from "../actions/cartActions";
+import { clearMyCart, getMyCart } from "../actions/cartActions";
 import Headings from "../components/Headings";
 import ShippingAddress from "../components/ShippingAddress";
+import toast from "react-hot-toast";
 
 const PlaceOrder = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation()
-  const {finalPrice:priceAfterApplyingCoupon = 0,selectedCoupon = {}} = location.state || {}
-console.log('final and disocunt from cart page',priceAfterApplyingCoupon,selectedCoupon)
+  const location = useLocation();
+  const { finalPrice: priceAfterApplyingCoupon = 0, selectedCoupon = {} } =
+    location.state || {};
+  console.log(
+    "final and disocunt from cart page",
+    priceAfterApplyingCoupon,
+    selectedCoupon
+  );
   const user = useSelector((state) => state.user);
   const {
+    cartId,
     products: cartItems,
     subTotal,
     loading: loadingCart,
     error: errorCart,
   } = useSelector((state) => state.cart);
 
-  const { isAuthenticated } = user;
-  // const { order, loading, error } = useSelector((state) => state.order);
+  const { isAuthenticated, user: loggedInUser } = user;
+  const { _id: userId } = loggedInUser;
+  console.log(userId);
+  const {
+    order: userOrder,
+    loading: orderLoading,
+    error: orderError,
+    success:orderSuccess
+  } = useSelector((state) => state.order);
 
-  const [shippingFee, setShippingFee] = useState(0); 
+  const [shippingFee, setShippingFee] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
-  const [finalPrice, setFinalPrice] = useState(Number(priceAfterApplyingCoupon) + shippingFee || 0);
+  const [finalPrice, setFinalPrice] = useState(
+    Number(priceAfterApplyingCoupon) + shippingFee || 0
+  );
 
   const [address, setAddress] = useState({
     fullName: "",
@@ -52,30 +68,49 @@ console.log('final and disocunt from cart page',priceAfterApplyingCoupon,selecte
   // Recalculate final price whenever subtotal or shipping fee changes
   useEffect(() => {
     // Ensure priceAfterApplyingCoupon and shippingFee are valid numbers before updating
-    const updatedFinalPrice = (Number(priceAfterApplyingCoupon) + shippingFee).toFixed(2);
+    const updatedFinalPrice = (
+      Number(priceAfterApplyingCoupon) + shippingFee
+    ).toFixed(2);
     setFinalPrice(parseFloat(updatedFinalPrice));
   }, [priceAfterApplyingCoupon, shippingFee]);
 
-
   const handlePlaceOrder = () => {
     const orderData = {
+      userId: userId,
       products: cartItems,
-      paymentMethod,
-      totalPrice: subTotal,
-      shippingFee,
-      finalPrice,
       address,
+      paymentMethod,
+      discountCode: selectedCoupon.code || "",
     };
-    console.log(orderData)
-    //dispatch(createNewOrder(orderData)); // Dispatch the action to create the order
-  };
 
-  // Redirect if order is created successfully
-  // useEffect(() => {
-  //   if (order) {
-  //     navigate(`/orders/${order._id}`); // Redirect to order details page (for example)
-  //   }
-  // }, [order, navigate]);
+    dispatch(createNewOrder(orderData))
+      .then(() => {
+        toast.success("New Order Placed");    
+      })
+      .catch((err) => {
+        toast.error("Order placing failed", err);
+      }); // Dispatch the action to create the order
+  };
+  useEffect(()=>{
+    if(orderSuccess){
+      if (userOrder) {    
+
+        navigate("/ordersuccess", {
+          state: {
+            orderId:userOrder?.orderId,
+            totalPrice: userOrder?.finalPrice,
+            items: userOrder?.products,
+            shippingAddress: address,
+          },
+        });
+        dispatch(clearMyCart());      
+      } else {
+        toast.error("Failed to get order details");
+      }
+
+    }
+   
+  },[userOrder,navigate,orderSuccess])
 
   // if (loading) return <Loader />;  // Show loader while order is being created
   // if (error) return <div>{error}</div>;  // Show error message if any
@@ -92,7 +127,7 @@ console.log('final and disocunt from cart page',priceAfterApplyingCoupon,selecte
               {cartItems.reduce((acc, it) => acc + it.count, 0)})
             </h3>
 
-            {cartItems?.map((item,index) => (
+            {cartItems?.map((item, index) => (
               <div key={index}>
                 <span>{item.name}</span>
                 <span>Quantity {item.count}</span>
@@ -134,15 +169,21 @@ console.log('final and disocunt from cart page',priceAfterApplyingCoupon,selecte
           </div>
           <div>
             <span>Coupon Applied:</span>
-            {selectedCoupon.discount > 0 && (<span>{selectedCoupon.code}</span>)}
-           {selectedCoupon.discount < 0 && (<span>NIL</span>)}
+            {selectedCoupon.discount > 0 && <span>{selectedCoupon.code}</span>}
+            {selectedCoupon.discount < 0 && <span>NIL</span>}
           </div>
           <div>
             <span>Final Price:</span>
             <span> ${finalPrice.toFixed(2)}</span>
           </div>
 
-          <button onClick={handlePlaceOrder} className="place-order-btn">Place Order</button>
+          <button
+            disabled={orderLoading}
+            onClick={handlePlaceOrder}
+            className="place-order-btn"
+          >
+            Place Order
+          </button>
         </div>
       </div>
     </div>

@@ -174,7 +174,7 @@ const getUserCart = catchAsync(async (req, res, next) => {
 
 const emptyCartByUser = catchAsync(async (req, res, next) => {
   const query = { user: req.user._id };
-  await Cart.remove(query);
+  await Cart.deleteMany(query);
 
   res.status(204).json({
     status: "success",

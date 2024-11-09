@@ -16,7 +16,7 @@ const orderSchema = mongoose.Schema(
     },
     products: [
       {
-        product: {
+        productId: {
           type: mongoose.Schema.Types.ObjectId,
           required: [true, "An order must contain a product"],
           ref: "Product",
@@ -30,7 +30,11 @@ const orderSchema = mongoose.Schema(
         size: String,
         price: {
           type: Number,
-          required: [true, "Please provide the product price"],
+          required: [true, "An Product must have price"],
+        },
+        total: {
+          type: Number,
+          required: [true, "An Product must have price"],
         },
       },
     ],
@@ -103,19 +107,10 @@ const orderSchema = mongoose.Schema(
       default: 0, // Default no discount
     },
     discountCode: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Coupon", // Reference to the Coupon model
+      type: String,
     },
     finalPrice: {
       type: Number,
-      required: true,
-      default: function () {
-        let shippingFee = 0;
-        if (this.paymentMethod === "Cash on Delivery") {
-          shippingFee = 60;
-        }
-        return this.totalPrice - this.discount + shippingFee;
-      },
     },
     shippingFee: {
       type: Number,
@@ -142,13 +137,15 @@ orderSchema.pre("save", async function (next) {
       this.orderStatus = "Processing";
     }
   }
-  if (this.discountCode) {
-    const coupon = await Coupon.findById(this.discountCode);
+  if (this.discountCode && this.discountCode.trim() !== "") {
+    const coupon = await Coupon.findOne({ code: this.discountCode });;
     if (coupon && coupon.isActive) {
       this.discount = (this.totalPrice * coupon.discount) / 100;
     } else {
       this.discountCode = null;
+      this.discount = 0;
     }
+    this.finalPrice = this.totalPrice - this.discount + this.shippingFee;
   }
   next();
 });

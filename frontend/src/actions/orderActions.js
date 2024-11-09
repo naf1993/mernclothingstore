@@ -66,7 +66,7 @@ export const createNewOrder = (orderData) => async (dispatch, getState) => {
     console.log(data.data.order);
     toast.success("New Order Placed");
 
-    dispatch({ type: ORDER_CREATE_SUCCESS, payload: data.data.orders });
+    dispatch({ type: ORDER_CREATE_SUCCESS, payload: data.data.order });
   } catch (error) {
     dispatch({ type: ORDER_CREATE_FAIL, payload: error.response.data.message });
   }
