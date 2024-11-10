@@ -9,6 +9,7 @@ import Message from "../components/Message";
 import toast from "react-hot-toast";
 import axios from "axios";
 import { validateCoupon } from "../actions/orderActions";
+import EmptyMessage from "../components/EmptyMessage";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -106,9 +107,10 @@ const Cart = () => {
         <Headings>YOUR CART</Headings>
       </div>
       <div className="cart-wrapper">
+      {cartItems && cartItems.length === 0 && (<EmptyMessage message="Your Cart is empty" />)}
         <div className="left">
           {loading && <Loader />}
-          {cartItems && cartItems.length === 0 && <p>cartitems empty</p>}
+         
           {error && <Message error={error} />}
           {cartItems && cartItems.length > 0 && cartItems?.map((item, index) => (
             <CartItem

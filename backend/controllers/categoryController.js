@@ -5,12 +5,6 @@ import AppError from "../utils/appError.js";
 import APIFeatures from "../utils/apiFeatures.js";
 
 
-
-
-
-
-
-
 const createCategory = catchAsync(async (req, res, next) => {
   const category = await Category.create(req.body);
 

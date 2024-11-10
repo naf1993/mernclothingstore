@@ -1,6 +1,6 @@
 import express from 'express';
 import {  login, protect,  restrictToAdmin } from '../controllers/authController.js';
-import { addToWishList, createProduct, deleteProduct ,getAllProducts, getProductById, getProductStatistics, getProductsByCategory, getProductsBySubCategory, getSimilarProducts, productSearch, updateProduct, upload, resizeImages, deleteImageFromProduct, topSellingProducts, bulkUpdateProductStock } from '../controllers/productController.js';
+import { addToWishList, createProduct, deleteProduct ,getAllProducts, getProductById, getProductStatistics, getProductsByCategory, getProductsBySubCategory, getSimilarProducts, productSearch, updateProduct, upload, resizeImages, deleteImageFromProduct, topSellingProducts, bulkUpdateProductStock, productsSearchByName } from '../controllers/productController.js';
 import { getSoldProductCount,getAllColorsOfAllProducts } from '../controllers/productController.js';
 import reviewRoutes from './reviewRoutes.js'
 
@@ -12,7 +12,7 @@ router.route('/bulk-update-stock').post(protect,restrictToAdmin,bulkUpdateProduc
 router.get('/getProductBySubCategory',getProductsBySubCategory)
 router.get("/relatedproducts/:productId/:categoryId", getSimilarProducts);
 router.route('/getproductstats').get(getProductStatistics)
-router.route('/search/:keyword').get(productSearch)
+router.route('/search').get(productsSearchByName)
 router.route('/allcolors').get(getAllColorsOfAllProducts)
 router.route('/images/').delete(protect,restrictToAdmin,deleteImageFromProduct)
 router.route('/top-selling').get(protect,restrictToAdmin,topSellingProducts)

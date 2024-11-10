@@ -203,10 +203,10 @@ export const bulkUpdateOrders = catchAsync(async (req, res, next) => {
   }
 });
 export const getSingleOrder = catchAsync(async (req, res, next) => {
-  console.log(req.params.id);
+
   const order = await Order.findById(req.params.id)
     .populate("user")
-    .populate("products");
+    .populate("products.productId");
   if (!order) {
     return next(new AppError("No order found", 400));
   }
@@ -349,7 +349,7 @@ const getOrdersByUser = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
   const orders = await Order.find({ user: _id })
     .populate("products")
-    .populate("user products.product")
+    .populate("user products.productId")
     .exec();
 
   if (!orders) {

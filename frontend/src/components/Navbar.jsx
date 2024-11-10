@@ -12,6 +12,7 @@ import { BsCart } from "react-icons/bs";
 import UserNav from "./UserNav";
 import { useSelector } from "react-redux";
 import { useState, useEffect } from "react";
+import ProductSearch from './ProductSearch'
 
 const Navbar = ({ navItems }) => {
   const navigate = useNavigate();
@@ -126,18 +127,7 @@ const Navbar = ({ navItems }) => {
           </Link>
         </h1>
 
-        <form onSubmit={handleSubmit} className="searchbox-wrapper">
-          <input
-            type="text"
-            value={searchText}
-            className="search__input"
-            onChange={(e) => setSearchText(e.target.value)}
-            placeholder="Search for Abaya,Hijabs.."
-          />
-          <button className="search__button">
-            <BsSearch className="search__icon" />
-          </button>
-        </form>
+       <ProductSearch/>
 
         <ul className="user-nav">
           {userPresent

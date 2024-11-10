@@ -259,11 +259,12 @@ export const bulkUpdateProductStock = catchAsync(async (req, res, next) => {
     );
     return res.status(200).json({ message: "Products stock updated" });
   } catch (error) {
-    console.error('Error performing bulk update:', error);
-    return res.status(500).json({ error: 'Bulk update failed', details: error.message });
+    console.error("Error performing bulk update:", error);
+    return res
+      .status(500)
+      .json({ error: "Bulk update failed", details: error.message });
   }
-
-})
+});
 const addToWishList = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
   const { prodId } = req.body;
@@ -321,7 +322,7 @@ const getSimilarProducts = catchAsync(async (req, res, next) => {
 
   // Validate categoryId and productId
   if (!categoryId || !productId) {
-    return next(new AppError('Invalid categoryId or productId', 400));
+    return next(new AppError("Invalid categoryId or productId", 400));
   }
 
   try {
@@ -334,7 +335,7 @@ const getSimilarProducts = catchAsync(async (req, res, next) => {
       return next(new AppError("No Similar Products", 404));
     }
 
-    console.log('this is related products length', products.length);
+    console.log("this is related products length", products.length);
     res.status(200).json({
       status: "success",
       length: products.length,
@@ -343,7 +344,7 @@ const getSimilarProducts = catchAsync(async (req, res, next) => {
       },
     });
   } catch (error) {
-    return next(new AppError('Error fetching similar products', 500));
+    return next(new AppError("Error fetching similar products", 500));
   }
 });
 
@@ -434,6 +435,31 @@ const getSoldProductCount = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       noOfProducts: products[0].numProducts,
+    },
+  });
+});
+
+export const productsSearchByName = catchAsync(async (req, res, next) => {
+  const { query } = req.query;
+
+  // If the search query is too short, return an error
+  if (!query || query.length < 3) {
+    return next(new AppError("Please enter at least 3 characters", 400)); // Change the status code to 400 for bad request
+  }
+
+  // Search for products that match the query
+  const products = await Product.find({
+    name: { $regex: `^${query}`, $options: "i" },
+  }).populate('Category').limit(5);
+
+ 
+
+  // Return the search results
+  res.status(200).json({
+    status: "success",
+    length: products.length,
+    data: {
+      products,
     },
   });
 });
