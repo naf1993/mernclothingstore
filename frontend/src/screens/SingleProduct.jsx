@@ -15,7 +15,8 @@ import {
   getRelatedProducts,
 } from "../actions/productActions";
 import { addToCart, getMyCart } from "../actions/cartActions";
-
+import { checkEligibleForReview, createNewReview } from "../actions/reviewActions";
+import { AiOutlineStar, AiFillStar } from 'react-icons/ai';
 const SingleProduct = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -35,11 +36,18 @@ const SingleProduct = () => {
   const [selectedColor, setSelectedColor] = useState("");
   const [colorErr, setColorErr] = useState(null);
   const [sizeErr, setSizeErr] = useState(null);
+  const [review, setReview] = useState('');
+  const [rating, setRating] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 400);
   const user = useSelector((state) => state.user);
   const { products } = useSelector((state) => state.cart);
   const { products: cartItems } = products;
   const { isAuthenticated } = user;
+  const {
+    loading: loadingReview,
+    error: errorReview,
+    eligible,
+  } = useSelector((state) => state.review);
 
   useEffect(() => {
     if (id) {
@@ -75,6 +83,11 @@ const SingleProduct = () => {
       setColors(uniqueColors);
     }
   }, [product]);
+  useEffect(() => {
+    if (isAuthenticated && product) {
+      dispatch(checkEligibleForReview(product.id));
+    }
+  }, [isAuthenticated, product, dispatch]);
 
   const handleChange = (selectedOption) => {
     setSelectedSize(selectedOption.value);
@@ -170,7 +183,7 @@ const SingleProduct = () => {
     }
   };
   const handleGoToCart = () => {
-    navigate('/cart');  // Navigates to the cart page
+    navigate("/cart"); // Navigates to the cart page
   };
 
   const buyNow = () => {
@@ -189,6 +202,14 @@ const SingleProduct = () => {
     return () => window.removeEventListener("resize", handleScreenSize);
   }, []);
 
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+    if (rating === 0) {
+      alert('Please select a rating');
+      return;
+    }
+    dispatch(createNewReview(id, review, rating));
+  };
   return (
     <>
       {loading ? (
@@ -250,9 +271,9 @@ const SingleProduct = () => {
                       className="submit-btn"
                       onClick={() => {
                         if (isInCart) {
-                          handleGoToCart();  // If product is already in cart, navigate to the cart page
+                          handleGoToCart(); // If product is already in cart, navigate to the cart page
                         } else {
-                          handleAddToCart(product.id);  // If not in cart, add to cart
+                          handleAddToCart(product.id); // If not in cart, add to cart
                         }
                       }}
                     >
@@ -284,6 +305,34 @@ const SingleProduct = () => {
             </div>
 
             <div className="reviews-container">
+              {eligible && (
+                <div className="review-form">
+                  <h3>Write a review</h3>
+                  <form onSubmit={handleReviewSubmit}>
+                    <div className="rating">
+                      {[...Array(5)].map((_, index) => (
+                        <button
+                          type="button"
+                          key={index}
+                          onClick={() => setRating(index + 1)}
+                          className={rating > index ? "active" : ""}
+                        >
+                          {rating > index ? <AiFillStar /> : <AiOutlineStar />}
+                        </button>
+                      ))}
+                    </div>
+
+                    <textarea
+                      value={review}
+                      onChange={(e) => setReview(e.target.value)}
+                      placeholder="Write your review here"
+                      required
+                    />
+
+                    <button type="submit">Submit Review</button>
+                  </form>
+                </div>
+              )}
               <ReviewsList product={product} />
             </div>
           </div>

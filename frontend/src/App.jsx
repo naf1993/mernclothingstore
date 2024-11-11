@@ -11,6 +11,7 @@ import Protected from "./components/Protected";
 import {Toaster} from 'react-hot-toast'
 import ProductsCategory from "./screens/ProductsCategory";
 
+
 // Lazy load screens
 const Home = lazy(() => import("./screens/Home"));
 const Login = lazy(() => import("./screens/Login"));
@@ -21,8 +22,8 @@ const ProductList = lazy(() => import("./screens/ProductList"));
 const SingleProduct = lazy(() => import("./screens/SingleProduct"));
 const SearchScreen = lazy(() => import("./screens/SearchScreen"));
 const PlaceOrder = lazy(()=>import('./screens/PlaceOrder'))
-const Orders = lazy(()=>import('./screens/Orders'))
-const OrderDetail = lazy(()=>import('./screens/OrderDetail'))
+const OrdersPage = lazy(()=>import('./screens/OrdersPage'))
+
 const OrderSucess = lazy(()=>import('./screens/OrderSuccess'))
 
 const App = () => {
@@ -80,9 +81,9 @@ const App = () => {
             <Route path="favourites" element={<Protected><Favourites/></Protected>}/>
             <Route path="cart" element={<Cart />} />
             <Route path="placeorder" element={<Protected><PlaceOrder/></Protected>}/>
-            <Route path='orders' element={<Protected><Orders/></Protected>}/>
+            <Route path='orders' element={<Protected><OrdersPage/></Protected>}/>
             <Route path='ordersuccess' element={<Protected><OrderSucess/></Protected>}/>
-            <Route path='orders/:id' element={<Protected><OrderDetail/></Protected>}/>
+            
             
           </Route>
         </Routes>
