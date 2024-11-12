@@ -4,8 +4,8 @@ import { createReview, deleteReview, getAllReviews, getReviewById, setProductUse
 
 const router = express.Router({mergeParams:true});
 
-router.route('/productId').get(protect,checkReviewCreateEligible)
-router.route('/').get(protect,restrictToAdmin,getAllReviews).post(protect,restrictToUser,setProductUserIds,createReview)
+router.route('/:productId').get(protect,checkReviewCreateEligible)
+router.route('/').get(protect,restrictToAdmin,getAllReviews).post(protect,createReview)
 
 router.route('/:id').get(getReviewById).delete(protect,deleteReview)
 router.route('/:id').patch(protect,restrictToUser,setProductUserIds,updateReview)

@@ -73,6 +73,7 @@ export const createNewOrder = (orderData) => async (dispatch, getState) => {
     dispatch({ type: ORDER_CREATE_SUCCESS, payload: data.data.order });
   } catch (error) {
     dispatch({ type: ORDER_CREATE_FAIL, payload: error.response.data.message });
+    throw new Error(error.response ? error.response.data.message : error.message)
   }
 };
 

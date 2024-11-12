@@ -1,6 +1,8 @@
 import React, { useEffect, useState, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import Layout from "./components/Layout";
 import LoadingFullScreen from "./components/LoadingFullScreen";
 import ScrollToTop from "./components/ScrollToTop";
@@ -11,6 +13,7 @@ import Protected from "./components/Protected";
 import {Toaster} from 'react-hot-toast'
 import ProductsCategory from "./screens/ProductsCategory";
 
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
 // Lazy load screens
 const Home = lazy(() => import("./screens/Home"));
@@ -67,6 +70,7 @@ const App = () => {
   return (
     <>
      <Router>
+      <Elements stripe={stripePromise}>
       <ScrollToTop />
       <Suspense fallback={<LoadingFullScreen />}>
         <Routes>
@@ -88,6 +92,7 @@ const App = () => {
           </Route>
         </Routes>
       </Suspense>
+      </Elements>
     </Router>
     <Toaster
         position="bottom-right"

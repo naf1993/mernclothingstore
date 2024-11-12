@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import validator from "validator";
 import Coupon from "./couponModel.js";
 
 const orderSchema = mongoose.Schema(
@@ -82,7 +81,8 @@ const orderSchema = mongoose.Schema(
       ],
       validate: {
         validator: function (v) {
-          const paymentStatus = this.paymentStatus; // Store paymentStatus in a variable
+          const paymentStatus = this.paymentStatus; // Access paymentStatus directly from this
+          
           if (paymentStatus === "Failed") {
             return v === "Cancelled";
           }
@@ -90,12 +90,12 @@ const orderSchema = mongoose.Schema(
             return v === "Not Processed" || v === "Cancelled";
           }
           if (paymentStatus === "Paid") {
-            return v === "Processing" || v === "Cancelled";
+            return v === "Processing" || v === "Cancelled" || v === 'Delivered';
           }
           return false;
         },
         message: (props) =>
-          `Invalid order status for payment status '${props.instance.paymentStatus}'. Current value: ${props.value}`,
+          `Invalid order status for payment status '${props.value}'. Current payment status: '${this.paymentStatus}'`,
       },
     },
     totalPrice: {
@@ -131,14 +131,23 @@ const orderSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Pre-save hook for paymentStatus and orderStatus
 orderSchema.pre("save", async function (next) {
   if (this.isModified("paymentStatus")) {
-    if (this.paymentStatus === "Paid") {
+    if (this.paymentStatus === "Paid" && this.orderStatus != 'Delivered') {
       this.orderStatus = "Processing";
     }
   }
+  
+  // If the payment method is COD and the order is delivered, automatically set the paymentStatus to Paid
+  if (this.paymentMethod === 'Cash on Delivery' && this.orderStatus === 'Delivered') {
+    this.paymentStatus = 'Paid';
+  }
+
+  // Handle discounts if applicable
   if (this.discountCode && this.discountCode.trim() !== "") {
-    const coupon = await Coupon.findOne({ code: this.discountCode });;
+    const coupon = await Coupon.findOne({ code: this.discountCode });
     if (coupon && coupon.isActive) {
       this.discount = (this.totalPrice * coupon.discount) / 100;
     } else {
@@ -147,6 +156,7 @@ orderSchema.pre("save", async function (next) {
     }
     this.finalPrice = this.totalPrice - this.discount + this.shippingFee;
   }
+
   next();
 });
 

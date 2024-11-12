@@ -15,8 +15,14 @@ import {
   getRelatedProducts,
 } from "../actions/productActions";
 import { addToCart, getMyCart } from "../actions/cartActions";
-import { checkEligibleForReview, createNewReview } from "../actions/reviewActions";
-import { AiOutlineStar, AiFillStar } from 'react-icons/ai';
+import {
+  checkEligibleForReview,
+  createNewReview,
+} from "../actions/reviewActions";
+import { AiOutlineStar, AiFillStar } from "react-icons/ai";
+import { RiStarHalfLine } from "react-icons/ri";
+import toast from "react-hot-toast";
+import StarRating from "../components/StarRating";
 const SingleProduct = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
@@ -36,7 +42,7 @@ const SingleProduct = () => {
   const [selectedColor, setSelectedColor] = useState("");
   const [colorErr, setColorErr] = useState(null);
   const [sizeErr, setSizeErr] = useState(null);
-  const [review, setReview] = useState('');
+  const [review, setReview] = useState("");
   const [rating, setRating] = useState(0);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 400);
   const user = useSelector((state) => state.user);
@@ -202,13 +208,21 @@ const SingleProduct = () => {
     return () => window.removeEventListener("resize", handleScreenSize);
   }, []);
 
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (rating === 0) {
-      alert('Please select a rating');
+      alert("Please select a rating");
       return;
     }
-    dispatch(createNewReview(id, review, rating));
+    try {
+      await dispatch(createNewReview(id, review, rating));
+      toast.success("New Review Added");
+      dispatch(listProductDetails(id));
+    } catch (error) {
+      toast.error(
+        `Unable to submit review. Please try again later. Error: ${error.message}`
+      );
+    }
   };
   return (
     <>
@@ -231,7 +245,7 @@ const SingleProduct = () => {
                   {product.SubCategory?.name}
                 </h2>
                 <h1 className="product-name">{product.name}</h1>
-                <Rating value={product.ratingsAverage} text={""} />
+                <StarRating rating={product.ratingsAverage}  />
 
                 {isMobile ? (
                   <MobileScreenDetails
@@ -305,35 +319,59 @@ const SingleProduct = () => {
             </div>
 
             <div className="reviews-container">
+              {product?.reviews && product.reviews?.length > 0 && ( <ReviewsList product={product} />)}
+              {product?.reviews && product.reviews?.length == 0 && (<p style={{textAlign:'center'}}>No Reviews yet</p>)}
+             
               {eligible && (
-                <div className="review-form">
-                  <h3>Write a review</h3>
-                  <form onSubmit={handleReviewSubmit}>
-                    <div className="rating">
-                      {[...Array(5)].map((_, index) => (
-                        <button
-                          type="button"
-                          key={index}
-                          onClick={() => setRating(index + 1)}
-                          className={rating > index ? "active" : ""}
-                        >
-                          {rating > index ? <AiFillStar /> : <AiOutlineStar />}
-                        </button>
-                      ))}
+                <form className="review-form" onSubmit={handleReviewSubmit}>
+                  <textarea
+                    value={review}
+                    onChange={(e) => setReview(e.target.value)}
+                    placeholder="Write your review here"
+                    required
+                  />
+                  <div className="rating-starbtn-container">
+                    <div className="rating-star">
+                      {[...Array(5)].map((_, index) => {
+                        const fullStarValue = index + 1;
+                        const halfStarValue = index + 0.5;
+                        return (
+                          <button
+                            type="button"
+                            key={index}
+                            onClick={() =>
+                              setRating((prev) =>
+                                prev === fullStarValue
+                                  ? fullStarValue - 0.5
+                                  : fullStarValue
+                              )
+                            }
+                            className={
+                              rating >= fullStarValue
+                                ? "active"
+                                : rating >= halfStarValue
+                                ? "half-active"
+                                : ""
+                            }
+                          >
+                            {rating >= fullStarValue ? (
+                              <AiFillStar />
+                            ) : rating >= halfStarValue ? (
+                              <RiStarHalfLine />
+                            ) : (
+                              <AiOutlineStar />
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
 
-                    <textarea
-                      value={review}
-                      onChange={(e) => setReview(e.target.value)}
-                      placeholder="Write your review here"
-                      required
-                    />
-
-                    <button type="submit">Submit Review</button>
-                  </form>
-                </div>
+                    <button className="btn-submit" type="submit">
+                      Submit Review
+                    </button>
+                  </div>
+                </form>
               )}
-              <ReviewsList product={product} />
             </div>
           </div>
         )

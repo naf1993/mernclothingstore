@@ -57,6 +57,23 @@ const sendOrderConfirmationEmail = async (order, email) => {
 //   }
 // });
 
+export const createPaymentIntent = async(req,res)=>{
+  const { amount } = req.body; // Amount should be in cents
+
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount * 100, // Convert dollars to cents
+      currency: 'usd',
+      payment_method_types: ['card'],
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    console.error('Error creating PaymentIntent:', error);
+    res.status(500).send('Error creating payment intent');
+  }
+}
+
 export const createOrder = catchAsync(async (req, res, next) => {
   const { userId, products, address, paymentMethod, discountCode } = req.body;
  
@@ -394,26 +411,30 @@ const getOrderByUserId = catchAsync(async (req, res, next) => {
 const updateOrderStatusByAdmin = catchAsync(async (req, res, next) => {
   const order = await Order.findById(req.params.id);
 
-  const { status } = req.body;
-  console.log(status);
   if (!order) {
     return next(new AppError("No Order with that ID", 404));
   }
 
-  const updatedOrder = await Order.findByIdAndUpdate(
-    req.params.id,
-    { orderStatus: status },
-    { new: true }
-  );
-  console.log(updatedOrder);
+  const { status } = req.body;
+
+  // If status is being updated to Delivered, and paymentMethod is COD, set paymentStatus to Paid
+  if (status === 'Delivered' && order.paymentMethod === 'Cash on Delivery') {
+    order.paymentStatus = 'Paid';
+  }
+
+  // Update the order status and payment status if needed
+  order.orderStatus = status;
+
+  await order.save();
+
   res.status(200).json({
     status: "success",
-
     data: {
-      updatedOrder,
+      order,
     },
   });
 });
+
 
 const getDailyOrders = catchAsync(async (req, res, next) => {
   const dailyOrders = await Order.aggregate([

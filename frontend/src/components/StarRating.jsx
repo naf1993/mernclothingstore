@@ -7,7 +7,7 @@ const StarRating = ({ rating }) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 >= 0.5;
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<BsFillStarFill key={`full-${i}`} className="star" style={{color:'#E4B400',fontSize:'1rem'}} />);
+      stars.push(<BsFillStarFill key={`full-${i}`} className="star" style={{color:'#E4B400',fontSize:'1.3rem'}} />);
     }
     if (hasHalfStar) {
       stars.push(<BsStarHalf key="half" className="star" />);
@@ -17,7 +17,7 @@ const StarRating = ({ rating }) => {
         <BsFillStarFill
           key={`empty-${i}`}
           className="star"
-          style={{ color: "#fff" }}
+          style={{ color: "#fff",fontSize:'1.3rem' }}
         />
       );
     }

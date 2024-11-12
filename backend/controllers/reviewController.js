@@ -1,5 +1,6 @@
 import Review from "../models/reviewModel.js";
 import catchAsync from "../utils/catchAsync.js";
+import Order from "../models/orderModel.js";
 
 import AppError from "../utils/appError.js";
 import Product from "../models/productModel.js";
@@ -12,29 +13,51 @@ const setProductUserIds = (req, res, next) => {
 export const checkReviewCreateEligible = catchAsync(async (req, res, next) => {
   const { productId } = req.params;
   const userId = req.user._id;
-  const order = await OrderSuccess.findOne({
+
+  // Check if the user has ordered the product
+  const order = await Order.findOne({
     user: userId,
     "products.productId": productId,
     orderStatus: "Delivered",
   });
+  
+  // If no order is found, the user is not eligible to leave a review
   if (!order) {
-    res.status(400).json({
+    return res.status(400).json({
       data: {
         eligible: false,
       },
     });
   }
-  res.status(200).json({
+
+  // Check if the user has already left a review for this product
+  const existingReview = await Review.findOne({
+    product: productId,
+    user: userId,
+  });
+
+  // If the user has already reviewed the product, they are not eligible to leave another review
+  if (existingReview) {
+    return res.status(400).json({
+      data: {
+        eligible: false,
+      },
+    });
+  }
+
+  // If neither condition is met, the user is eligible to leave a review
+  return res.status(200).json({
     data: {
       eligible: true,
     },
   });
 });
 
+
 export const createReview = catchAsync(async (req, res, next) => {
-  const { productId, review, rating } = re.body;
+  const { productId, review, rating } = req.body;
   const userId = req.user._id;
-  const order = await OrderSuccess.findOne({
+  const order = await Order.findOne({
     user: userId,
     "products.productId": productId,
     orderStatus: "Delivered",
@@ -74,6 +97,7 @@ export const createReview = catchAsync(async (req, res, next) => {
       newReview,
     },
   });
+  console.log(newReview);
 });
 const getAllReviews = catchAsync(async (req, res, next) => {
   const reviews = await Review.find();
