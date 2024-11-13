@@ -1,7 +1,4 @@
 import React from "react";
-import RatingReview from "./RatingReview";
-import Rating from "./Rating";
-import moment from "moment";
 import StarRating from "./StarRating";
 
 const ReviewsList = ({ product}) => {

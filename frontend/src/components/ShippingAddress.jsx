@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
 import toast from "react-hot-toast";
 import debounce from "lodash.debounce";
-import {AiOutlineClose} from 'react-icons/ai'
+import { AiOutlineClose } from "react-icons/ai";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css"; // Importing default styles
 import {
   MapContainer,
   TileLayer,
@@ -10,6 +12,7 @@ import {
   useMap,
   useMapEvent,
 } from "react-leaflet";
+
 import axios from "axios";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -40,10 +43,10 @@ const ShippingAddress = ({ address, setAddress }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const searchInputRef = useRef(null)
-  useClickOutside(searchInputRef,()=>{
-    setSuggestions([])
-  })
+  const searchInputRef = useRef(null);
+  useClickOutside(searchInputRef, () => {
+    setSuggestions([]);
+  });
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -120,7 +123,7 @@ const ShippingAddress = ({ address, setAddress }) => {
       return;
     }
     console.log("Searching for", query);
-    const boundingBox = [-125, 24, -66, 50];
+    const boundingBox = [68.7, 6.7, 97.4, 37.6];
     try {
       const result = await axios.get(
         `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
@@ -156,11 +159,9 @@ const ShippingAddress = ({ address, setAddress }) => {
     // Set the map view to the selected location
     setUserPosition({ lat, lng });
     getAddressFromCoordinates(lat, lng); // Fetch and update address for the selected location
-  setSuggestions([])
-  setSearchQuery(selectedOption.label)  
-  
-  }
-  
+    setSuggestions([]);
+    setSearchQuery(selectedOption.label);
+  };
 
   const UpdateMapCenter = () => {
     const map = useMap();
@@ -178,9 +179,9 @@ const ShippingAddress = ({ address, setAddress }) => {
   };
 
   const clearSearchQuery = () => {
-    setSearchQuery('')
-    setSuggestions([])
-  }
+    setSearchQuery("");
+    setSuggestions([]);
+  };
 
   return (
     <>
@@ -246,6 +247,36 @@ const ShippingAddress = ({ address, setAddress }) => {
                 setLocalAddress({ ...localAddress, fullName: e.target.value })
               }
             />
+
+            <label htmlFor="phone">Contact Number:</label>
+            <PhoneInput
+              id="phone"
+              defaultCountry="IN" // Set default country to India (country code +91)
+              value={localAddress.contactNumber}
+              onChange={(value) =>
+              {console.log(value)
+                setLocalAddress({
+                  ...localAddress,
+                  contactNumber: value,
+                })
+
+              }
+               
+              }
+              international
+              countryCallingCodeEditable={false} // Prevent changing the country code
+            />
+
+            <label>House Name/Apartment</label>
+            <input
+              type="text"
+              placeholder="Apartment/Building No"
+              value={localAddress.houseName}
+              onChange={(e) =>
+                setLocalAddress({ ...localAddress, houseName: e.target.value })
+              }
+            />
+
             <label>Street Name</label>
             <input
               type="text"
@@ -284,28 +315,28 @@ const ShippingAddress = ({ address, setAddress }) => {
             />
           </form>
         </div>
-      
-      <div className="search-location">
-        <input
-          type="text"
-          value={searchQuery} // Bind the input value to searchQuery state
-          onChange={(e) => handleSearchChange(e.target.value)} // Update search query on change
-          placeholder="Search for a location"
-        />
-        {searchQuery && (
-          <button className="search-clear-btn" onClick={clearSearchQuery}><AiOutlineClose className="icon"/></button>
-        )}
-      
+
+        <div className="search-location">
+          <input
+            type="text"
+            value={searchQuery} // Bind the input value to searchQuery state
+            onChange={(e) => handleSearchChange(e.target.value)} // Update search query on change
+            placeholder="Search for a location"
+          />
+          {searchQuery && (
+            <button className="search-clear-btn" onClick={clearSearchQuery}>
+              <AiOutlineClose className="icon" />
+            </button>
+          )}
+
           <ul className="suggestions-list" ref={searchInputRef}>
-          <li>Select location</li>
-          {suggestions?.map((suggestion, index) => (
-            <li key={index} onClick={() => handleSelectLocation(suggestion)}>
-              {suggestion.label}
-            </li>
-          ))}
-        </ul>
-        
-          
+            <li>Select location</li>
+            {suggestions?.map((suggestion, index) => (
+              <li key={index} onClick={() => handleSelectLocation(suggestion)}>
+                {suggestion.label}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </>

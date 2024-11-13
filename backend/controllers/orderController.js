@@ -38,54 +38,52 @@ const sendOrderConfirmationEmail = async (order, email) => {
   await transporter.sendMail(mailOptions);
 };
 
-// const makePayment = catchAsync(async (req, res) => {
-//   const { amount, currency } = req.body; // Assuming you're sending these in the request body
-
-//   try {
-//     const paymentIntent = await stripe.paymentIntents.create({
-//       amount, // amount in cents
-//       currency,
-//       payment_method_types: ["card"], // Adjust if you support other methods
-//     });
-
-//     res.status(200).json({
-//       clientSecret: paymentIntent.client_secret,
-//     });
-//   } catch (error) {
-//     console.error("Error creating payment intent:", error);
-//     res.status(500).json({ error: "Payment failed" });
-//   }
-// });
-
-export const createPaymentIntent = async(req,res)=>{
-  const { amount } = req.body; // Amount should be in cents
-
-  try {
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount * 100, // Convert dollars to cents
-      currency: 'usd',
-      payment_method_types: ['card'],
-    });
-
-    res.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-    console.error('Error creating PaymentIntent:', error);
-    res.status(500).send('Error creating payment intent');
-  }
-}
-
-export const createOrder = catchAsync(async (req, res, next) => {
+export const getPaymentIntent = catchAsync(async (req, res) => {
   const { userId, products, address, paymentMethod, discountCode } = req.body;
- 
+  console.log(req.body)
+
   const user = await User.findById(userId);
-  
 
   const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
-  
-  const totalPrice = products.reduce(
-    (acc, item) => acc + item.total,
-    0
-  );
+
+  const totalPrice = products.reduce((acc, item) => acc + item.total, 0) * 100;
+
+  const order = await Order.create({
+    orderId,
+    user: user._id,
+    products,
+    address,
+    paymentMethod,
+    totalPrice: totalPrice / 100,
+    discountCode: discountCode || "",
+  });
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: totalPrice, // amount in paise (INR)
+    currency: "inr",
+    metadata: {
+      orderId, // Store the order ID in metadata
+      userId, // Store the user ID in metadata
+    },
+  });
+
+  return res.status(200).json({
+    status: "success",
+    data: {
+      orderId: order.orderId,
+      clientSecret: paymentIntent.client_secret,
+    },
+  });
+});
+
+export const createCashOrder = catchAsync(async (req, res, next) => {
+  const { userId, products, address, paymentMethod, discountCode } = req.body;
+  console.log(address)
+
+  const user = await User.findById(userId);
+
+  const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
+
+  const totalPrice = products.reduce((acc, item) => acc + item.total, 0);
 
   const order = await Order.create({
     orderId,
@@ -94,7 +92,7 @@ export const createOrder = catchAsync(async (req, res, next) => {
     address,
     paymentMethod,
     totalPrice,
-    discountCode: discountCode || '',
+    discountCode: discountCode || "",
   });
   for (const item of products) {
     const product = await Product.findById(item.product);
@@ -117,11 +115,7 @@ export const createOrder = catchAsync(async (req, res, next) => {
       },
     });
   }
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: totalPrice * 100,
-    currency: "usd",
-    payment_method_types: ["card"],
-  });
+
   const userMail = userordered.email;
   await sendOrderConfirmationEmail(order, userMail);
   const notification = {
@@ -134,56 +128,6 @@ export const createOrder = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       order,
-      clientSecret: paymentIntent.client_secret,
-    },
-  });
-});
-
-const createCashOrder = catchAsync(async (req, res, next) => {
-  const { COD, couponApplied } = req.body;
-  if (!COD) {
-    return next(new AppError("Cash on Delivery failed", 404));
-  }
-  const user = await User.findById(req.user._id);
-  if (!user) {
-    return next(new AppError("User found with that ID", 404));
-  }
-  const userCart = await Cart.findOne({ user: user._id });
-  let finalAmount = 0;
-  if (couponApplied ** userCart.totalAfterDiscount) {
-    finalAmount = userCart.totalAfterDiscount;
-  } else {
-    finalAmount = userCart.cartTotal;
-  }
-  let newOrder = await new Order({
-    products: userCart.products,
-    address: req.body.address,
-    totalPrice: finalAmount,
-    paymentIntent: {
-      id: uniqid(),
-      method: "COD",
-      amount: finalAmount,
-      status: "Cash on Delivery",
-      created: Date.now(),
-      currency: "usd",
-    },
-    user: user._id,
-    orderStatus: "Cash on Delivery",
-  }).save();
-
-  let update = userCart.products.map((item) => {
-    return {
-      updateOne: {
-        filter: { _id: item.product._id },
-        update: { $inc: { countInStock: -item.count, sold: +item.count } },
-      },
-    };
-  });
-  const updated = await Product.bulkWrite(update, {});
-  res.status(201).json({
-    status: "success",
-    data: {
-      newOrder,
     },
   });
 });
@@ -220,7 +164,6 @@ export const bulkUpdateOrders = catchAsync(async (req, res, next) => {
   }
 });
 export const getSingleOrder = catchAsync(async (req, res, next) => {
-
   const order = await Order.findById(req.params.id)
     .populate("user")
     .populate("products.productId");
@@ -235,20 +178,24 @@ export const getSingleOrder = catchAsync(async (req, res, next) => {
   });
 });
 
-
-
 const generateOrdersHtml = (orders) => {
-  return orders.map(order => {
-    const itemsHtml = order.products && order.products.length > 0
-      ? order.products.map(item => `
+  return orders
+    .map((order) => {
+      const itemsHtml =
+        order.products && order.products.length > 0
+          ? order.products
+              .map(
+                (item) => `
         <tr>
           <td>${item.product}</td>
           <td>$${item.price}</td>
           <td>${item.count}</td>
-        </tr>`).join("")
-      : '<tr><td colspan="3">No items found</td></tr>';
+        </tr>`
+              )
+              .join("")
+          : '<tr><td colspan="3">No items found</td></tr>';
 
-    return `
+      return `
       <div class="order">
         <div class="order-details">
           <p>Order ID: ${order._id}</p>
@@ -268,7 +215,8 @@ const generateOrdersHtml = (orders) => {
           </tbody>
         </table>
       </div>`;
-  }).join("");
+    })
+    .join("");
 };
 
 export const generateInvoiceSingle = catchAsync(async (req, res, next) => {
@@ -279,7 +227,7 @@ export const generateInvoiceSingle = catchAsync(async (req, res, next) => {
   if (orderId) {
     orderIdList = [orderId];
   } else if (orderIds) {
-    orderIdList = orderIds.split(',');
+    orderIdList = orderIds.split(",");
   } else {
     return next(new AppError("No order ID(s) provided", 400));
   }
@@ -304,7 +252,7 @@ export const generateInvoiceSingle = catchAsync(async (req, res, next) => {
   }
 
   const ordersHtml = generateOrdersHtml(orders);
-  const orderTitle = orders.length > 1 ? 's' : '';
+  const orderTitle = orders.length > 1 ? "s" : "";
 
   template = template
     .replace("{{orders}}", ordersHtml)
@@ -339,7 +287,8 @@ export const generateInvoiceSingle = catchAsync(async (req, res, next) => {
 
     await browser.close();
 
-    const filename = orders.length > 1 ? 'invoices.pdf' : `invoice-${orderIdList[0]}.pdf`;
+    const filename =
+      orders.length > 1 ? "invoices.pdf" : `invoice-${orderIdList[0]}.pdf`;
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     res.setHeader("Content-Type", "application/pdf");
     res.send(pdfBuffer);
@@ -418,8 +367,8 @@ const updateOrderStatusByAdmin = catchAsync(async (req, res, next) => {
   const { status } = req.body;
 
   // If status is being updated to Delivered, and paymentMethod is COD, set paymentStatus to Paid
-  if (status === 'Delivered' && order.paymentMethod === 'Cash on Delivery') {
-    order.paymentStatus = 'Paid';
+  if (status === "Delivered" && order.paymentMethod === "Cash on Delivery") {
+    order.paymentStatus = "Paid";
   }
 
   // Update the order status and payment status if needed
@@ -434,7 +383,6 @@ const updateOrderStatusByAdmin = catchAsync(async (req, res, next) => {
     },
   });
 });
-
 
 const getDailyOrders = catchAsync(async (req, res, next) => {
   const dailyOrders = await Order.aggregate([
@@ -629,7 +577,6 @@ export const getSalesData = catchAsync(async (req, res, next) => {
 export {
   updateOrderStatusByAdmin,
   getOrderByUserId,
-  createCashOrder,
   getOrdersByUser,
   getAllOrdersByAdmin,
   getOrderSummary,

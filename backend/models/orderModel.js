@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import Coupon from "./couponModel.js";
+import {isValidPhoneNumber} from 'libphonenumber-js'
+import { validate } from "uuid";
 
 const orderSchema = mongoose.Schema(
   {
@@ -41,6 +43,19 @@ const orderSchema = mongoose.Schema(
       fullName: {
         type: String,
         required: [true, "Please provide your name"],
+      },
+      houseName:{
+        type:String,
+      },
+      contactNumber:{
+        type: String,
+        required: [true, "Please provide phone number"],
+        validate:{
+          validator:function(v){
+            return isValidPhoneNumber(v,'IN')
+          },
+          message:props=>`${props.value} is not a valid phone number`
+        }
       },
       streetName: {
         type: String,
