@@ -1,10 +1,5 @@
 import React, { useEffect } from "react";
-import Categories from "../components/Categories";
-
 import Policy from "../components/Policy";
-
-import ProductsSlider from "../components/ProductsSlider";
-import NewProducts from "../components/NewProducts";
 import HomeCategories from "../components/HomeCategories";
 import MainSlider from "../components/MainSlider";
 import Review from "../components/Review";
@@ -24,11 +19,11 @@ const Home = () => {
 
   const newProducts =
     Array.isArray(products) && products.length > 0
-      ? products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      ? products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10)
       : [];
   const featuredProducts =
     Array.isArray(products) && products.length > 0
-      ? products.filter((item) => item.isFeatured)
+      ? products.filter((item) => item.isFeatured).slice(0, 10)
       : [];
 
   return (

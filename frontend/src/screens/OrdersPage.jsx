@@ -42,7 +42,7 @@ const OrdersPage = () => {
     });
   };
 
-  const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
+  //const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
   return (
     <div className="page-container">
       <div className="orders-wrapper">
@@ -139,8 +139,8 @@ const OrdersPage = () => {
                       <div className="item-details">
                         <p>{item.productId.name}</p>
                         <p>Qty: {item.count}</p>
-                        <p>Price: {formatCurrency(item.price)}</p>
-                        <p>Total: {formatCurrency(item.total)}</p>
+                        <p>Price: {item.price}</p>
+                        <p>Total: {item.total}</p>
                       </div>
                     </div>
                   ))}
@@ -149,18 +149,18 @@ const OrdersPage = () => {
                   <h3>Order Summary</h3>
                   <p>
                     <strong>Items Total:</strong>{" "}
-                    {formatCurrency(order.totalPrice)}
+                    {order.totalPrice}
                   </p>
                   <p>
-                    <strong>Discount:</strong> -{formatCurrency(order.discount)}
+                    <strong>Discount:</strong> -{order.discount}
                   </p>
                   <p>
                     <strong>Shipping Fee:</strong>{" "}
-                    {formatCurrency(order.shippingFee)}
+                    {order.shippingFee}
                   </p>
                   <p>
                     <strong>Final Price:</strong>{" "}
-                    {formatCurrency(order.finalPrice)}
+                    {order.finalPrice}
                   </p>
                 </div>
                 <div className="payment-method">

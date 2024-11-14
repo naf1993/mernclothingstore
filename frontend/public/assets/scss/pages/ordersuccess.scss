@@ -17,4 +17,24 @@
         
 
       }
+      .order-summary{
+        p{
+          font-size: 1.2rem;
+          font-family: inherit;
+          color:var(--color-grey-dark-3);
+        }
+      }
+      .order-actions{
+        button{
+          background: none;
+          border:none;
+          background-color: var(--color-pink-dark);
+          color:white;
+          padding:0.7rem 2rem;
+          border-radius: 4px;
+          &:hover{
+            background-color: var(--light-gold);
+          }
+        }
+      }
 }

@@ -10,6 +10,9 @@ import {
   ORDER_DETAIL_FAIL,
   ORDER_DETAIL_REQUEST,
   ORDER_DETAIL_SUCCESS,
+  ORDER_UPDATE_FAIL,
+  ORDER_UPDATE_REQUEST,
+  ORDER_UPDATE_SUCCESS,
   ORDERS_MY_FAIL,
   ORDERS_MY_REQUEST,
   ORDERS_MY_SUCCESS,
@@ -73,6 +76,33 @@ export const createNewOrder = (orderData) => async (dispatch, getState) => {
     dispatch({ type: ORDER_CREATE_SUCCESS, payload: data.data.order });
   } catch (error) {
     dispatch({ type: ORDER_CREATE_FAIL, payload: error.response.data.message });
+    throw new Error(error.response ? error.response.data.message : error.message)
+  }
+};
+
+export const getUpdatedOrder = (orderId) => async (dispatch, getState) => {
+  try {
+    dispatch({ type: ORDER_UPDATE_REQUEST });
+    const {
+      user: { token, isAuthenticated },
+    } = getState();
+
+    if (!isAuthenticated || !token) {
+      throw new Error("User not logged in");
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const { data } =  await axios.get(`/api/orders/updatedOrder?orderId=${orderId}`, config);
+    
+    dispatch({ type: ORDER_UPDATE_SUCCESS, payload: data.data.order });
+  } catch (error) {
+    dispatch({ type: ORDER_UPDATE_FAIL, payload: error.response.data.message });
     throw new Error(error.response ? error.response.data.message : error.message)
   }
 };

@@ -43,10 +43,14 @@ const ShippingAddress = ({ address, setAddress }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
   const searchInputRef = useRef(null);
   useClickOutside(searchInputRef, () => {
     setSuggestions([]);
   });
+  useEffect(() => {
+    setLocalAddress(address);
+  }, [address]); // Runs when 'address' prop changes
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -248,21 +252,18 @@ const ShippingAddress = ({ address, setAddress }) => {
               }
             />
 
-            <label htmlFor="phone">Contact Number:</label>
+            <label>Contact Number:</label>
             <PhoneInput
-              id="phone"
               defaultCountry="IN" // Set default country to India (country code +91)
               value={localAddress.contactNumber}
-              onChange={(value) =>
-              {console.log(value)
-                setLocalAddress({
+              onChange={(value) => {
+                const updatedAddress = {
                   ...localAddress,
                   contactNumber: value,
-                })
-
-              }
-               
-              }
+                };
+                setLocalAddress(updatedAddress);
+                setAddress(updatedAddress);
+              }}
               international
               countryCallingCodeEditable={false} // Prevent changing the country code
             />
@@ -272,9 +273,14 @@ const ShippingAddress = ({ address, setAddress }) => {
               type="text"
               placeholder="Apartment/Building No"
               value={localAddress.houseName}
-              onChange={(e) =>
-                setLocalAddress({ ...localAddress, houseName: e.target.value })
-              }
+              onChange={(e) => {
+                const updatedAddress = {
+                  ...localAddress,
+                  houseName: e.target.value,
+                };
+                setLocalAddress(updatedAddress);
+                setAddress(updatedAddress);
+              }}
             />
 
             <label>Street Name</label>

@@ -105,7 +105,7 @@ const orderSchema = mongoose.Schema(
             return v === "Not Processed" || v === "Cancelled";
           }
           if (paymentStatus === "Paid") {
-            return v === "Processing" || v === "Cancelled" || v === 'Delivered';
+            return v === "Processing" || v === "Cancelled" || v === 'Delivered' || 'Dispatched' || 'Not Processed';
           }
           return false;
         },

@@ -3,9 +3,9 @@ import { useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Loader from "../components/Loader"; // Assuming you have a Loader component
-import { createNewOrder } from "../actions/orderActions";
+import { createNewOrder, getUpdatedOrder } from "../actions/orderActions";
 import { clearMyCart, getMyCart } from "../actions/cartActions";
-import { isValidPhoneNumber } from 'libphonenumber-js';
+import { isValidPhoneNumber } from "libphonenumber-js";
 import Headings from "../components/Headings";
 import ShippingAddress from "../components/ShippingAddress";
 import toast from "react-hot-toast";
@@ -40,7 +40,7 @@ const PlaceOrder = () => {
   } = useSelector((state) => state.order);
 
   const [shippingFee, setShippingFee] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState("Cash On Delivery");
+  const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
   const [finalPrice, setFinalPrice] = useState(
     Number(priceAfterApplyingCoupon) + shippingFee || 0
   );
@@ -51,10 +51,11 @@ const PlaceOrder = () => {
     city: "",
     country: "",
     postalCode: "",
-    contactNumber:'',
-    houseName:''
+    contactNumber: "",
+    houseName: "",
   });
   const [clientSecret, setClientSecret] = useState(null);
+  const [orderId, setOrderId] = useState(null);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -79,10 +80,16 @@ const PlaceOrder = () => {
   }, [priceAfterApplyingCoupon, shippingFee]);
 
   useEffect(() => {
-    if (paymentMethod === "Credit Card") {
+    if (address) {
+      console.log("this is address");
+      console.log(address);
+    }
+  }, [address]);
+  useEffect(() => {
+    if (paymentMethod === "Credit Card" && address.contactNumber !== '' && address.houseName !== '') {
       const fetchClientSecret = async () => {
         try {
-          console.log(token)
+          console.log(token);
           const config = {
             headers: {
               "Content-Type": "application/json",
@@ -93,18 +100,17 @@ const PlaceOrder = () => {
           const { data } = await axios.post(
             "http://localhost:5000/api/orders/create-payment-intent",
             {
+              products: cartItems,
               address,
-              products: cartItems, // List of products in the cart
-              userId: userId, // Logged-in user ID
-              paymentMethod: paymentMethod, // Payment method chosen by the user
-              discountCode: selectedCoupon.code, // Discount code if applicable
+              paymentMethod,
+              discountCode: selectedCoupon.code || "",
             },
             config
           );
 
-         
-          setClientSecret(data.data.clientSecret)
-        
+          setClientSecret(data.data.clientSecret);
+          setOrderId(data.data.orderId);
+
           return { clientSecret };
         } catch (error) {
           console.error("Error fetching client secret:", error);
@@ -113,33 +119,18 @@ const PlaceOrder = () => {
       };
       fetchClientSecret();
     }
-  }, [paymentMethod]);
-
-  // useEffect(() => {
-  //   if (orderSuccess) {
-  //     if (userOrder) {
-  //       navigate("/ordersuccess", {
-  //         state: {
-  //           orderId: userOrder?.orderId,
-  //           totalPrice: userOrder?.finalPrice,
-  //           items: userOrder?.products,
-  //           shippingAddress: address,
-  //         },
-  //       });
-  //       dispatch(clearMyCart());
-  //     } else {
-  //       toast.error("Failed to get order details");
-  //     }
-  //   }
-  // }, [userOrder, navigate, orderSuccess]);
+  }, [paymentMethod,address.contactNumber,address.houseName]);
 
   const stripe = useStripe();
   const elements = useElements();
 
   const handlePlaceOrderCashOrCard = async () => {
+    if (!address.contactNumber || !address.streetName) {
+      toast.error("Please enter building no/house name and contact number");
+      return;
+    }
 
-   
-    if (paymentMethod === "Cash On Delivery") {
+    if (paymentMethod === "Cash on Delivery") {
       const orderData = {
         userId: userId,
         products: cartItems,
@@ -150,14 +141,22 @@ const PlaceOrder = () => {
       try {
         await dispatch(createNewOrder(orderData));
         toast.success("New Order Placed");
+        navigate("/ordersuccess", {
+          state: {
+            orderId: userOrder?.orderId,
+            totalPrice: userOrder?.finalPrice,
+            items: userOrder?.products,
+            shippingAddress: address,
+          },
+        });
         await dispatch(clearMyCart());
       } catch (error) {
         toast.error("Unable to process order", error.message);
       }
-    } else if(paymentMethod === 'Credit Card') {
+    } else if (paymentMethod === "Credit Card") {
       if (!stripe || !elements || !clientSecret) {
-        console.log('no stripe configuration')
-        return
+        console.log("no stripe configuration");
+        return;
       }
 
       const cardElement = elements.getElement(CardElement);
@@ -174,8 +173,22 @@ const PlaceOrder = () => {
       if (error) {
         toast.error(error.message);
       } else if (paymentIntent.status === "succeeded") {
-        toast.success("Payment successful");
-        await dispatch(clearMyCart());
+        try {
+          await dispatch(getUpdatedOrder(orderId));
+          toast.success("New Order Placed");
+          console.log('navigating')
+          navigate("/ordersuccess", {
+            state: {
+              orderId: orderId,
+              totalPrice: userOrder?.finalPrice,
+              items: userOrder?.products,
+              shippingAddress: address,
+            },
+          });
+          await dispatch(clearMyCart());
+        } catch (error) {
+          toast.error("Unable to process order", error.message);
+        }
       }
     }
   };
@@ -200,6 +213,7 @@ const PlaceOrder = () => {
               </div>
             ))}
           </div>
+          {paymentMethod === "Credit Card" && <CardElement />}
 
           <div className="payment-wrapper">
             <div>
@@ -211,12 +225,11 @@ const PlaceOrder = () => {
                 onChange={(e) => setPaymentMethod(e.target.value)}
               >
                 <option value="Cash on Delivery">Cash on Delivery</option>
-                
+
                 <option value="Credit Card">Credit Card</option>
               </select>
             </div>
           </div>
-         
         </div>
         <div className="place-order-wrapper__right">
           <h3>Order Summary</h3>
@@ -242,7 +255,6 @@ const PlaceOrder = () => {
             <span>Final Price:</span>
             <span> ${finalPrice.toFixed(2)}</span>
           </div>
-         
 
           <button
             onClick={handlePlaceOrderCashOrCard}
@@ -250,7 +262,6 @@ const PlaceOrder = () => {
           >
             Place Order
           </button>
-          {paymentMethod === "Credit Card" && <CardElement />}
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ const OrderSuccess = () => {
 
   // Get state passed through navigation (order details)
   const { orderId, totalPrice, items, shippingAddress } = location.state || {}; 
+  console.log(orderId,totalPrice)
 
   // If no orderId is passed, redirect to home or show an error
   if (!orderId) {
@@ -58,7 +59,7 @@ const OrderSuccess = () => {
         </div> 
 
          <div className="order-actions">
-          <button onClick={() => navigate("/")}>Go to Homepage</button>
+          
           <button onClick={() => navigate("/")}>Continue Shopping</button>
         </div>
       </div>

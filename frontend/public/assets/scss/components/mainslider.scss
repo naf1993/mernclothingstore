@@ -1,70 +1,168 @@
+// .main-slider-wrapper {
+//   grid-column: center-start / center-end;
+//   background-color: white;
+//   margin: 5rem 0;
+//   padding-right: 3rem;
+ 
+//   font-family: "Lato", sans-serif;
+//   overflow: hidden;
+//   position: relative;
+//   border-radius: 10px;
+
+  
+//   .slide {
+//     display: none; // Hide all slides by default
+//     flex: 1; // Ensure the slide takes equal space in flex container
+//     opacity: 0;
+//     transition: opacity 1s ease-in;
+//     &.active {
+//       display: flex; // Show active slide
+//       opacity: 1;
+//        // Smooth transition for opacity
+//     }
+
+//     .image-container {
+//       flex: 1; // Take up equal space
+//       overflow: hidden; // Prevent overflow
+
+//       img {
+//         width: 100%; // Make the image responsive
+//         height: auto; // Maintain aspect ratio
+//         object-fit: cover; // Cover the container
+//         aspect-ratio: 20/14;
+//       }
+//     }
+
+//     .text-container {
+//       flex: 1; // Take up equal space
+//       display: flex; // Flexbox for text alignment
+//       flex-direction: column; // Stack text vertically
+//       align-items: center; // Center text
+//       gap: 1rem;
+//       justify-content: center; // Center text vertically
+//       margin: 2rem auto; // Optional margin
+
+//       .slider-heading {
+//         text-align: center; // Center text
+//       }
+
+//       .cpn-btn {
+//         width: 50%; // Adjust button width as needed
+//         margin: 0 auto;
+//         border: none;
+//         border-style: dotted;
+//         border-color: var(--dark-gold);
+//         background-color: white;
+
+//         padding: 1rem 0.5rem;
+//         border-width: 2px;
+//         cursor: pointer; // Make button look clickable
+//         transition: background-color 0.3s; // Smooth transition for hover
+
+//         &:hover {
+//           background-color: var(--dark-gold);
+//           border-color: white;
+//           color: white; // Change on hover
+//         }
+//       }
+//     }
+//   }
+// }
+
 .main-slider-wrapper {
   grid-column: center-start / center-end;
   background-color: white;
   margin: 5rem 0;
   padding-right: 3rem;
- 
   font-family: "Lato", sans-serif;
   overflow: hidden;
   position: relative;
   border-radius: 10px;
-
   
+  /* For small screens, allow the whole slider to take more space */
+  @media (max-width: 768px) {
+    padding-right: 0; /* Adjust padding on small screens */
+  }
+
   .slide {
-    display: none; // Hide all slides by default
-    flex: 1; // Ensure the slide takes equal space in flex container
+    display: none;
+    flex: 1;
     opacity: 0;
     transition: opacity 1s ease-in;
+    
     &.active {
-      display: flex; // Show active slide
+      display: flex;
       opacity: 1;
-       // Smooth transition for opacity
     }
 
     .image-container {
-      flex: 1; // Take up equal space
-      overflow: hidden; // Prevent overflow
+      flex: 1;
+      overflow: hidden;
 
       img {
-        width: 100%; // Make the image responsive
-        height: auto; // Maintain aspect ratio
-        object-fit: cover; // Cover the container
-        aspect-ratio: 20/14;
+        width: 100%; /* Ensure image takes full width of container */
+        height: 100%; /* Let image grow to fit container */
+        object-fit: cover; /* Ensure the image fully covers the container */
       }
     }
 
     .text-container {
-      flex: 1; // Take up equal space
-      display: flex; // Flexbox for text alignment
-      flex-direction: column; // Stack text vertically
-      align-items: center; // Center text
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 1rem;
-      justify-content: center; // Center text vertically
-      margin: 2rem auto; // Optional margin
-
+      justify-content: center;
+      margin: 2rem auto;
+      
       .slider-heading {
-        text-align: center; // Center text
+        text-align: center;
       }
 
       .cpn-btn {
-        width: 50%; // Adjust button width as needed
+        width: 50%;
         margin: 0 auto;
         border: none;
         border-style: dotted;
         border-color: var(--dark-gold);
         background-color: white;
-
         padding: 1rem 0.5rem;
         border-width: 2px;
-        cursor: pointer; // Make button look clickable
-        transition: background-color 0.3s; // Smooth transition for hover
+        cursor: pointer;
+        transition: background-color 0.3s;
 
         &:hover {
           background-color: var(--dark-gold);
           border-color: white;
-          color: white; // Change on hover
+          color: white;
         }
       }
+    }
+  }
+
+  /* Media query to adjust layout for small screens */
+  @media (max-width: 768px) {
+    .slide {
+      flex-direction: column; /* Stack the image and text vertically */
+    }
+
+    .image-container {
+      width: 100%; /* Take full width */
+      height: 250px; /* Set a specific height for small screens */
+    }
+
+    .text-container {
+      width: 90%; /* Reduce text container width */
+      padding: 0 1rem; /* Padding for small screens */
+    }
+
+    .slider-heading {
+      font-size: 1.5rem; /* Adjust heading font size */
+    }
+
+    .cpn-btn {
+      width: 80%; /* Button takes more space */
+      font-size: 1rem; /* Adjust button font size */
     }
   }
 }

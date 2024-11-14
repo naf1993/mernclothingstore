@@ -39,51 +39,64 @@ const sendOrderConfirmationEmail = async (order, email) => {
 };
 
 export const getPaymentIntent = catchAsync(async (req, res) => {
-  const { userId, products, address, paymentMethod, discountCode } = req.body;
-  console.log(req.body)
-
-  const user = await User.findById(userId);
-
+  const { products, address, paymentMethod, discountCode } = req.body;
   const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
 
-  const totalPrice = products.reduce((acc, item) => acc + item.total, 0) * 100;
+  // Ensure that the user is properly authenticated and exists
+  const user = await User.findById(req.user._id);
 
+
+  if (!user) {
+    return res.status(400).json({ message: 'User not found' });
+  }
+
+  const totalPrice = products.reduce((acc, item) => acc + item.total, 0) * 100; // Price in paise
+  const userId = user._id;
+
+  // Create the order in the database
   const order = await Order.create({
     orderId,
-    user: user._id,
+    user: userId,
     products,
     address,
     paymentMethod,
-    totalPrice: totalPrice / 100,
+    totalPrice: paymentMethod === "Credit Card" ? totalPrice / 100 : totalPrice,
     discountCode: discountCode || "",
   });
+
+
+
+  // Create the payment intent and pass both orderId and userId in metadata
   const paymentIntent = await stripe.paymentIntents.create({
-    amount: totalPrice, // amount in paise (INR)
+    amount: totalPrice,
     currency: "inr",
     metadata: {
-      orderId, // Store the order ID in metadata
-      userId, // Store the user ID in metadata
+      orderId: orderId,
+      userId: userId.toString(), // Ensure userId is passed as string
     },
   });
+
 
   return res.status(200).json({
     status: "success",
     data: {
-      orderId: order.orderId,
+      orderId: orderId,
       clientSecret: paymentIntent.client_secret,
+      order,
     },
   });
 });
 
+
+
 export const createCashOrder = catchAsync(async (req, res, next) => {
   const { userId, products, address, paymentMethod, discountCode } = req.body;
-  console.log(address)
-
-  const user = await User.findById(userId);
 
   const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
 
-  const totalPrice = products.reduce((acc, item) => acc + item.total, 0);
+  const user = await User.findById(userId);
+  let totalPrice = products.reduce((acc, item) => acc + item.total, 0);
+  
 
   const order = await Order.create({
     orderId,
@@ -106,18 +119,8 @@ export const createCashOrder = catchAsync(async (req, res, next) => {
       await product.save();
     }
   }
-  if (paymentMethod === "Cash on Delivery") {
-    return res.status(201).json({
-      status: "success",
-      data: {
-        order,
-        message: "Order created succesfully",
-      },
-    });
-  }
-
-  const userMail = userordered.email;
-  await sendOrderConfirmationEmail(order, userMail);
+  // const userMail = userordered.email;
+  // await sendOrderConfirmationEmail(order, userMail);
   const notification = {
     user: req.user._id,
     message: `New Order places : ${user.name}`,
@@ -163,6 +166,19 @@ export const bulkUpdateOrders = catchAsync(async (req, res, next) => {
       return res.status(400).json({ message: "Invalid action" });
   }
 });
+export const getUpdatedOrder = catchAsync(async(req,res,next)=>{
+  const { orderId } = req.query; 
+  const order = await Order.findOne({orderId:orderId})
+  if (!order) {
+    return next(new AppError("No order found", 400));
+  }
+  res.status(200).json({
+    status: "success",
+    data: {
+      order,
+    },
+  });
+})
 export const getSingleOrder = catchAsync(async (req, res, next) => {
   const order = await Order.findById(req.params.id)
     .populate("user")
@@ -313,7 +329,7 @@ export const deleteOrder = catchAsync(async (req, res, next) => {
 
 const getOrdersByUser = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-  const orders = await Order.find({ user: _id })
+  const orders = await Order.find({ user: _id }).sort('-createdAt')
     .populate("products")
     .populate("user products.productId")
     .exec();
