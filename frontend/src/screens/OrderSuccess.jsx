@@ -30,7 +30,7 @@ const OrderSuccess = () => {
               <strong>Order ID:</strong> <span>{orderId}</span>
             </div>
             <div>
-              <strong>Total Price:</strong> <span>${totalPrice}</span>
+              <strong>Total Price:</strong> <span>₹{totalPrice}</span>
             </div>
 
             {items && (
@@ -39,7 +39,7 @@ const OrderSuccess = () => {
                 <ul>
                   {items.map((item) => (
                     <li key={item.productId}>
-                      {item.name} - {item.count} x ${item.price}
+                      {item.name} - {item.count} x ₹{item.price}
                     </li>
                   ))}
                 </ul>

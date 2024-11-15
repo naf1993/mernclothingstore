@@ -38,6 +38,28 @@ const sendOrderConfirmationEmail = async (order, email) => {
   await transporter.sendMail(mailOptions);
 };
 
+export const checkIfFirstOrder = catchAsync(async (req, res) => {
+  const userId = req.user._id;
+  const orders = await Order.find({ user: userId });
+
+  if (orders.length > 0) {
+    return res.status(200).json({
+      status: "success",
+      data: {
+        isFirstOrder: false,
+      },
+    });
+  }
+  
+  // Only send the response if no orders are found
+  return res.status(200).json({
+    status: "success",
+    data: {
+      isFirstOrder: true,
+    },
+  });
+});
+
 export const getPaymentIntent = catchAsync(async (req, res) => {
   const { products, address, paymentMethod, discountCode } = req.body;
   const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
@@ -45,13 +67,13 @@ export const getPaymentIntent = catchAsync(async (req, res) => {
   // Ensure that the user is properly authenticated and exists
   const user = await User.findById(req.user._id);
 
-
   if (!user) {
-    return res.status(400).json({ message: 'User not found' });
+    return res.status(400).json({ message: "User not found" });
   }
 
   const totalPrice = products.reduce((acc, item) => acc + item.total, 0) * 100; // Price in paise
   const userId = user._id;
+  
 
   // Create the order in the database
   const order = await Order.create({
@@ -60,11 +82,10 @@ export const getPaymentIntent = catchAsync(async (req, res) => {
     products,
     address,
     paymentMethod,
-    totalPrice: paymentMethod === "Credit Card" ? totalPrice / 100 : totalPrice,
+    totalPrice: totalPrice / 100 ,
     discountCode: discountCode || "",
   });
-
-
+  
 
   // Create the payment intent and pass both orderId and userId in metadata
   const paymentIntent = await stripe.paymentIntents.create({
@@ -76,7 +97,6 @@ export const getPaymentIntent = catchAsync(async (req, res) => {
     },
   });
 
-
   return res.status(200).json({
     status: "success",
     data: {
@@ -87,8 +107,6 @@ export const getPaymentIntent = catchAsync(async (req, res) => {
   });
 });
 
-
-
 export const createCashOrder = catchAsync(async (req, res, next) => {
   const { userId, products, address, paymentMethod, discountCode } = req.body;
 
@@ -96,7 +114,6 @@ export const createCashOrder = catchAsync(async (req, res, next) => {
 
   const user = await User.findById(userId);
   let totalPrice = products.reduce((acc, item) => acc + item.total, 0);
-  
 
   const order = await Order.create({
     orderId,
@@ -107,20 +124,21 @@ export const createCashOrder = catchAsync(async (req, res, next) => {
     totalPrice,
     discountCode: discountCode || "",
   });
-  for (const item of products) {
-    const product = await Product.findById(item.product);
-    if (product) {
-      product.countInStock -= item.count;
-      if (product.countInStock < 5) {
-        return next(
-          new AppError(`Not enough stock for product ${product.name}`)
-        );
+  
+  for (const item of order.products) {
+    try {
+      const product = await Product.findById(item.productId); // Use item.productId
+      if (product) {
+        product.countInStock -= item.count; // Decrease stock by item count
+        await product.save(); // Save the product with updated stock
+        console.log(`Product stock updated for ${product.name}, new stock: ${product.countInStock}`);
+      } else {
+        console.log(`Product with ID ${item.productId} not found`);
       }
-      await product.save();
+    } catch (error) {
+      console.error(`Error updating stock for product ${item.productId}:`, error);
     }
   }
-  // const userMail = userordered.email;
-  // await sendOrderConfirmationEmail(order, userMail);
   const notification = {
     user: req.user._id,
     message: `New Order places : ${user.name}`,
@@ -166,9 +184,9 @@ export const bulkUpdateOrders = catchAsync(async (req, res, next) => {
       return res.status(400).json({ message: "Invalid action" });
   }
 });
-export const getUpdatedOrder = catchAsync(async(req,res,next)=>{
-  const { orderId } = req.query; 
-  const order = await Order.findOne({orderId:orderId})
+export const getUpdatedOrder = catchAsync(async (req, res, next) => {
+  const { orderId } = req.query;
+  const order = await Order.findOne({ orderId: orderId });
   if (!order) {
     return next(new AppError("No order found", 400));
   }
@@ -178,7 +196,7 @@ export const getUpdatedOrder = catchAsync(async(req,res,next)=>{
       order,
     },
   });
-})
+});
 export const getSingleOrder = catchAsync(async (req, res, next) => {
   const order = await Order.findById(req.params.id)
     .populate("user")
@@ -329,7 +347,8 @@ export const deleteOrder = catchAsync(async (req, res, next) => {
 
 const getOrdersByUser = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
-  const orders = await Order.find({ user: _id }).sort('-createdAt')
+  const orders = await Order.find({ user: _id })
+    .sort("-createdAt")
     .populate("products")
     .populate("user products.productId")
     .exec();

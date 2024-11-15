@@ -42,7 +42,7 @@ const MenuItems = ({items,depthLevel}) => {
         <button type="button" aria-haspopup="menu" className='dropdown-menu-item' aria-expanded={dropdown ? "true" : "false"} onClick={()=>setDropdown((prev)=>!prev)}>
           <span className='dropdown-icon'>{items.icon}</span>{items.title}{' '}
         </button>
-        <DropdownMenu  categoryId={items.categoryId} submenus={items.submenu} dropdown={dropdown} categoryId={items.id} />
+        <DropdownMenu  categoryId={items.categoryId} submenus={items.submenu} dropdown={dropdown}  />
       </>
     ) : (
       <Link className='menu-item' to={`/products/${items.category}/${items.url}`}>

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Coupon from "./couponModel.js";
-import {isValidPhoneNumber} from 'libphonenumber-js'
+import { isValidPhoneNumber } from 'libphonenumber-js';
 import { validate } from "uuid";
 
 const orderSchema = mongoose.Schema(
@@ -44,17 +44,17 @@ const orderSchema = mongoose.Schema(
         type: String,
         required: [true, "Please provide your name"],
       },
-      houseName:{
-        type:String,
+      houseName: {
+        type: String,
       },
-      contactNumber:{
+      contactNumber: {
         type: String,
         required: [true, "Please provide phone number"],
-        validate:{
-          validator:function(v){
-            return isValidPhoneNumber(v,'IN')
+        validate: {
+          validator: function (v) {
+            return isValidPhoneNumber(v, 'IN');
           },
-          message:props=>`${props.value} is not a valid phone number`
+          message: (props) => `${props.value} is not a valid phone number`
         }
       },
       streetName: {
@@ -150,7 +150,7 @@ const orderSchema = mongoose.Schema(
 // Pre-save hook for paymentStatus and orderStatus
 orderSchema.pre("save", async function (next) {
   if (this.isModified("paymentStatus")) {
-    if (this.paymentStatus === "Paid" && this.orderStatus != 'Delivered') {
+    if (this.paymentStatus === "Paid" && this.orderStatus !== 'Delivered') {
       this.orderStatus = "Processing";
     }
   }
@@ -160,17 +160,27 @@ orderSchema.pre("save", async function (next) {
     this.paymentStatus = 'Paid';
   }
 
-  // Handle discounts if applicable
+  // Handle the first order discount (20% discount for first-time orders)
+  const userId = this.user;
+  const existingOrders = await mongoose.model('Order').find({ user: userId });
+
+  if (existingOrders.length === 0) {
+    // Apply first-time order discount of 20%
+    this.discount += this.totalPrice * 0.20;  // 20% discount for the first order
+  }
+
+  // Handle discount code (if provided)
   if (this.discountCode && this.discountCode.trim() !== "") {
     const coupon = await Coupon.findOne({ code: this.discountCode });
     if (coupon && coupon.isActive) {
-      this.discount = (this.totalPrice * coupon.discount) / 100;
+      this.discount += (this.totalPrice * coupon.discount) / 100;
     } else {
-      this.discountCode = null;
-      this.discount = 0;
+      this.discountCode = null;  // Invalidate invalid coupon code
     }
-    this.finalPrice = this.totalPrice - this.discount + this.shippingFee;
   }
+
+  // Calculate the final price
+  this.finalPrice = this.totalPrice - this.discount + this.shippingFee;
 
   next();
 });

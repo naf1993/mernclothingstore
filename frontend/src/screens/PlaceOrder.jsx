@@ -180,7 +180,7 @@ const PlaceOrder = () => {
           navigate("/ordersuccess", {
             state: {
               orderId: orderId,
-              totalPrice: userOrder?.finalPrice,
+              totalPrice: finalPrice,
               items: userOrder?.products,
               shippingAddress: address,
             },
@@ -235,15 +235,15 @@ const PlaceOrder = () => {
           <h3>Order Summary</h3>
           <div>
             <span>Total Price:</span>
-            <span> ${subTotal.toFixed(2)}</span>
+            <span> ₹{subTotal.toFixed(2)}</span>
           </div>
           <div>
             <span>Shipping Charge:</span>
             {paymentMethod === "Cash on Delivery" && (
-              <span>${shippingFee}</span>
+              <span>₹{shippingFee}</span>
             )}
             {paymentMethod !== "Cash on Delivery" && (
-              <span>${shippingFee}</span>
+              <span>₹{shippingFee}</span>
             )}
           </div>
           <div>
@@ -253,7 +253,7 @@ const PlaceOrder = () => {
           </div>
           <div>
             <span>Final Price:</span>
-            <span> ${finalPrice.toFixed(2)}</span>
+            <span> ₹{finalPrice.toFixed(2)}</span>
           </div>
 
           <button

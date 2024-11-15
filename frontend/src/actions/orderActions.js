@@ -15,7 +15,7 @@ import {
   ORDER_UPDATE_SUCCESS,
   ORDERS_MY_FAIL,
   ORDERS_MY_REQUEST,
-  ORDERS_MY_SUCCESS,
+  ORDERS_MY_SUCCESS,CHECK_IF_FIRST_ORDER_FAIL,CHECK_IF_FIRST_ORDER_REQUEST,CHECK_IF_FIRST_ORDER_SUCCESS
 } from "../constants/orderConstants";
 
 export const validateCoupon = (couponCode) => async (dispatch, getState) => {
@@ -159,3 +159,32 @@ export const getMyOrderDetails = (id) => async (dispatch, getState) => {
     dispatch({ type: ORDER_DETAIL_FAIL, payload: error.response.data.message });
   }
 };
+
+
+export const checkIsFirstOrder = () => async (dispatch, getState) => {
+  try {
+    dispatch({ type: CHECK_IF_FIRST_ORDER_REQUEST });
+    const {
+      user: { token, isAuthenticated },
+    } = getState();
+
+    if (!isAuthenticated || !token) {
+      throw new Error("User not logged in");
+    }
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    const { data } =  await axios.get('/api/orders/checkIfFirstOrder', config);
+    
+    dispatch({ type: CHECK_IF_FIRST_ORDER_SUCCESS, payload: data.data.isFirstOrder });
+  } catch (error) {
+    dispatch({ type: CHECK_IF_FIRST_ORDER_FAIL, payload: error.response.data.message });
+    throw new Error(error.response ? error.response.data.message : error.message)
+  }
+};
+

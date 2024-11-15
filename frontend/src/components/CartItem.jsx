@@ -54,11 +54,11 @@ const CartItem = ({
       </div>
       <div className="cart-item__price">
         <span>Price:</span>
-        <h6>${price}</h6>
+        <h6>₹{price}</h6>
       </div>
       <div className="cart-item__price">
         <span>Total:</span>
-        <h6>${total}</h6>
+        <h6>₹{total}</h6>
       </div>
       <div className="cart-item__action">
         <button type='button' data-tooltip="Add to Favourites">

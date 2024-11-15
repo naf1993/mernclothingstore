@@ -107,38 +107,35 @@ app.post(
         const paymentIntentCreated = event.data.object;
         console.log("PaymentIntent was created", paymentIntentCreated);
 
-        // You can add custom logic here if needed, for example:
-        // - Store PaymentIntent details in your database
-        // - Trigger any action you want when a PaymentIntent is created
+       
         break;
 
       case "payment_intent.succeeded":
         const paymentIntent = event.data.object;
 
         const orderId = paymentIntent.metadata.orderId;
-        const userId = paymentIntent.metadata.userId; // Assuming you stored orderId in metadata when creating PaymentIntent
-
-        // Check if metadata contains both orderId and userId
+        const userId = paymentIntent.metadata.userId; 
         if (!orderId || !userId) {
           console.log("Error: orderId or userId is missing in metadata");
-          return; // Exit the webhook handler if metadata is incomplete
+          return; 
         }
 
-        // Fetch the user from the database
+       
         const user = await User.findOne({ _id: userId });
         if (!user) {
           console.log(`User with ID ${userId} not found`);
           return; // Exit if user not found
         }
 
-        // Find the order using orderId
+      
         const order = await Order.findOne({ orderId: orderId });
         if (!order) {
           console.log(`Order with ID ${orderId} not found`);
           return; // Exit if order not found
         }
 
-        console.log("Order found:", order);
+        console.log("Order found:");
+        console.log('this is final price',order.finalPrice)
 
         // Update the payment status to 'paid'
         try {
@@ -146,59 +143,26 @@ app.post(
             { orderId: orderId },
             { $set: { paymentStatus: "Paid", orderStatus: "Processing" } }
           );
-          console.log("product updated");
-          if (updateResult.modifiedCount === 0) {
-            console.log(
-              "No order updated. It might already have the correct payment status."
-            );
-          } else {
-            console.log("Order updated with payment status: paid");
-          }
+         
         } catch (error) {
           console.error("Error updating the order payment status:", error);
         }
         for (const item of order.products) {
-          const product = await Product.findById(item.product);
-          if (product) {
-            product.countInStock -= item.count;
-            await product.save();
+          try {
+            const product = await Product.findById(item.productId); // Use item.productId
+            if (product) {
+              product.countInStock -= item.count; // Decrease stock by item count
+              await product.save(); // Save the product with updated stock
+              console.log(`Product stock updated for ${product.name}, new stock: ${product.countInStock}`);
+            } else {
+              console.log(`Product with ID ${item.productId} not found`);
+            }
+          } catch (error) {
+            console.error(`Error updating stock for product ${item.productId}:`, error);
           }
         }
-        console.log("TWILIO_ACCOUNT_SID:", process.env.TWILIO_ACCOUNT_SID);
-        console.log("TWILIO_AUTH_TOKEN:", process.env.TWILIO_AUTH_TOKEN);
-        console.log("TWILIO_PHONE_NUMBER:", process.env.TWILIO_PHONE_NUMBER);
-        try {
-          const smsMessage = `Your order ${orderId} has been placed..Thankyou for your purchase`;
-          await twilioClient.messages.create({
-            body: smsMessage,
-            from: process.env.TWILIO_PHONE_NUMBER,
-            to: order.address.contactNumber,
-          });
-          console.log("sms sent");
-        } catch (smsError) {
-          console.error("Error sendign sms", smsError);
-        }
-
-        // try {
-        //   const emailMessage = {
-        //     to: user.email,  // Customer's email
-        //     from: process.env.SENDGRID_SENDER_EMAIL,  // Your SendGrid sender email
-        //     subject: `Order Confirmation - ${orderId}`,
-        //     html: `
-        //       <h1>Your Order has been Confirmed!</h1>
-        //       <p>Order ID: ${orderId}</p>
-        //       <p>Thank you for your purchase. We are processing your order now.</p>
-        //     `,
-        //   };
-        //   await sgMail.send(emailMessage);
-        //   console.log('Email sent successfully!');
-        // } catch (emailError) {
-        //   console.error('Error sending email:', emailError);
-        // }
-
         break;
-
-      case "payment_intent.payment_failed":
+       case "payment_intent.payment_failed":
         const paymentFailedIntent = event.data.object;
         console.log("PaymentIntent failed", paymentFailedIntent);
 

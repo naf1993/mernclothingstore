@@ -68,7 +68,7 @@ const Product = ({ product }) => {
           <div className="product-card__detail">
             <div>
               <h3 className="product-card__detail-name">{product.name}</h3>
-              <p className="product-card__detail-price">${product.price}</p>
+              <p className="product-card__detail-price">₹{product.price}</p>
             </div>
             <StarRating rating={product.ratingsAverage} />
           </div>

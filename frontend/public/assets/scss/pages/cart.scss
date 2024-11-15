@@ -191,6 +191,32 @@
         text-transform: uppercase;
         font-family: inherit;
       }
+      .coupon-code-wrapper{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        input{
+          padding:0.5rem 0.4rem;
+          border:none;
+          background-color: var(--color-grey-light-1);
+          border-radius: 4px;
+        }
+        button{
+          background-color: var(--light-gold);
+          color:white;
+          border:none;
+          padding:0.5rem 0.3rem;
+          font-size: 0.7rem;
+          font-weight: bold;
+          font-family: inherit;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          border-radius: 4px;
+          &:last-child{
+            background-color: var(--green-3);
+          }
+        }
+      }
       div {
         display: flex;
         align-items: center;

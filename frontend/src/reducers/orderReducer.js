@@ -1,6 +1,6 @@
 import { ORDER_CREATE_SUCCESS, ORDER_DETAIL_FAIL, ORDER_DETAIL_REQUEST, ORDER_DETAIL_SUCCESS } from "../constants/orderConstants";
 import { ORDER_CREATE_FAIL } from "../constants/orderConstants";
-import { ORDER_CREATE_REQUEST,ORDER_UPDATE_FAIL,ORDER_UPDATE_REQUEST,ORDER_UPDATE_SUCCESS } from "../constants/orderConstants";
+import { ORDER_CREATE_REQUEST,ORDER_UPDATE_FAIL,ORDER_UPDATE_REQUEST,ORDER_UPDATE_SUCCESS,CHECK_IF_FIRST_ORDER_FAIL,CHECK_IF_FIRST_ORDER_REQUEST,CHECK_IF_FIRST_ORDER_SUCCESS } from "../constants/orderConstants";
 import { COUPON_VALIDATE_FAIL,COUPON_VALIDATE_REQUEST,COUPON_VALIDATE_SUCCESS,ORDERS_MY_FAIL,ORDERS_MY_SUCCESS,ORDERS_MY_REQUEST } from "../constants/orderConstants";
 
 
@@ -10,6 +10,7 @@ const initialState = {
   loading: false,
   success:null,
   error: null,
+  isFirstOrder:false,
   coupon:{} //i get discount and code after validating coupon
 };
 
@@ -20,6 +21,7 @@ export const orderReducer = (state = initialState, action) => {
     case COUPON_VALIDATE_REQUEST:
     case ORDER_DETAIL_REQUEST:
     case ORDER_UPDATE_REQUEST:
+    case CHECK_IF_FIRST_ORDER_REQUEST:
       return { ...state, loading: true, error: null };
     case ORDER_CREATE_SUCCESS:
     case ORDER_DETAIL_SUCCESS:
@@ -29,11 +31,14 @@ export const orderReducer = (state = initialState, action) => {
       return {...state,loading:false,coupon:action.payload}
     case ORDERS_MY_SUCCESS:
       return {...state,loading:false,orders:action.payload}
+    case CHECK_IF_FIRST_ORDER_SUCCESS:
+      return {...state,loading:false,isFirstOrder:action.payload}
      case ORDER_CREATE_FAIL:
       case COUPON_VALIDATE_FAIL:
       case ORDERS_MY_FAIL:
       case ORDER_DETAIL_FAIL:
       case ORDER_UPDATE_FAIL:
+      case CHECK_IF_FIRST_ORDER_FAIL:
       return { ...state, loading: false, error: action.payload };
     default:
       return state;
