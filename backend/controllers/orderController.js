@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
-import Stripe from "stripe";
+dotenv.config();
+import stripeLib from "stripe";
 import puppeteer from "puppeteer";
 import fs from "fs";
 import path from "path";
@@ -11,15 +12,18 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import { v4 as uuidv4 } from "uuid";
 import nodemailer from "nodemailer";
-dotenv.config();
+
 import { fileURLToPath } from "url";
+import { sendToQueue } from "../services/rabbitMqService.js";
+
+const stripe = stripeLib(process.env.STRIPE_API_KEY);
+const endpointSecret = process.env.STRIPE_WEB_HOOK_SECRET;
 
 // Get the current filename and directory
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize Stripe
-const stripe = new Stripe(process.env.STRIPE_API_KEY);
+
 const sendOrderConfirmationEmail = async (order, email) => {
   const transporter = nodemailer.createTransport({
     service: "Gmail",
@@ -60,6 +64,79 @@ export const checkIfFirstOrder = catchAsync(async (req, res) => {
   });
 });
 
+export const webhookHandler = catchAsync(async (req, res, next) => {
+  // Get the Stripe signature and payload
+  const sig = req.headers["stripe-signature"];
+  const payload = req.body;
+
+  // Verify the webhook signature
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+   
+  } catch (err) {
+    console.error("Webhook signature verification failed:", err.message); // Log any signature verification error
+    return next(new AppError("Webhook signature verification failed", 400));
+  }
+
+  // Handle the event based on its type
+  switch (event.type) {
+    case "payment_intent.created":
+      const paymentIntentCreated = event.data.object;
+     
+      break;
+
+    case "payment_intent.succeeded":
+      const paymentIntent = event.data.object;
+      const orderId = paymentIntent.metadata.orderId;
+      const userId = paymentIntent.metadata.userId;
+
+      if (!orderId || !userId) {
+        return next(new AppError("No order or user found in metadata", 400));
+      }
+
+      // Find the user and order based on the metadata
+      const user = await User.findOne({ _id: userId });
+      if (!user) {
+        return next(new AppError(`User with ID ${userId} not found`, 400));
+      }
+
+      const order = await Order.findOne({ orderId: orderId });
+      if (!order) {
+        return next(new AppError(`Order with ID ${orderId} not found`, 400));
+      }
+
+      // Prepare order message to send to RabbitMQ
+      const orderMessage = {
+        user,order,
+        products: order.products,
+      };
+
+      console.log("Sending order message to RabbitMQ:", orderMessage);
+      await sendToQueue(orderMessage);  // Assuming sendToQueue is properly set up to handle this
+
+      break;
+
+    case "payment_intent.payment_failed":
+      const paymentFailedIntent = event.data.object;
+      console.log("PaymentIntent failed:", paymentFailedIntent);
+      const failedOrderId = paymentFailedIntent.metadata.orderId;
+
+      // Update the payment status to "failed" in the order database
+      await Order.updateOne(
+        { orderId: failedOrderId },
+        { $set: { paymentStatus: "failed" } }
+      );
+      break;
+
+    default:
+      console.log(`Unhandled event type: ${event.type}`);
+  }
+
+  // Respond to Stripe that the event has been successfully handled
+  res.status(200).send("Event received");
+});
+
 export const getPaymentIntent = catchAsync(async (req, res) => {
   const { products, address, paymentMethod, discountCode } = req.body;
   const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
@@ -97,6 +174,9 @@ export const getPaymentIntent = catchAsync(async (req, res) => {
     },
   });
 
+ 
+
+
   return res.status(200).json({
     status: "success",
     data: {
@@ -124,27 +204,14 @@ export const createCashOrder = catchAsync(async (req, res, next) => {
     totalPrice,
     discountCode: discountCode || "",
   });
-  
-  for (const item of order.products) {
-    try {
-      const product = await Product.findById(item.productId); // Use item.productId
-      if (product) {
-        product.countInStock -= item.count; // Decrease stock by item count
-        await product.save(); // Save the product with updated stock
-        console.log(`Product stock updated for ${product.name}, new stock: ${product.countInStock}`);
-      } else {
-        console.log(`Product with ID ${item.productId} not found`);
-      }
-    } catch (error) {
-      console.error(`Error updating stock for product ${item.productId}:`, error);
-    }
-  }
-  const notification = {
-    user: req.user._id,
-    message: `New Order places : ${user.name}`,
-    type: "order_places",
+
+  const orderMessage = {
+    user,order,
+    products: order.products,
   };
-  req.io.emit("notification", notification);
+
+  console.log("Sending order message to RabbitMQ:", orderMessage);
+  await sendToQueue(orderMessage); 
   res.status(201).json({
     status: "success",
     data: {

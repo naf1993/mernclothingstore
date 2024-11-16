@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import Coupon from "./couponModel.js";
 import { isValidPhoneNumber } from 'libphonenumber-js';
-import { validate } from "uuid";
 
 const orderSchema = mongoose.Schema(
   {
@@ -31,11 +30,11 @@ const orderSchema = mongoose.Schema(
         size: String,
         price: {
           type: Number,
-          required: [true, "An Product must have price"],
+          required: [true, "A product must have price"],
         },
         total: {
           type: Number,
-          required: [true, "An Product must have price"],
+          required: [true, "A product must have a total price"],
         },
       },
     ],
@@ -44,9 +43,7 @@ const orderSchema = mongoose.Schema(
         type: String,
         required: [true, "Please provide your name"],
       },
-      houseName: {
-        type: String,
-      },
+      houseName: String,
       contactNumber: {
         type: String,
         required: [true, "Please provide phone number"],
@@ -54,8 +51,8 @@ const orderSchema = mongoose.Schema(
           validator: function (v) {
             return isValidPhoneNumber(v, 'IN');
           },
-          message: (props) => `${props.value} is not a valid phone number`
-        }
+          message: (props) => `${props.value} is not a valid phone number`,
+        },
       },
       streetName: {
         type: String,
@@ -94,24 +91,7 @@ const orderSchema = mongoose.Schema(
         "Cancelled",
         "Delivered",
       ],
-      validate: {
-        validator: function (v) {
-          const paymentStatus = this.paymentStatus; // Access paymentStatus directly from this
-          
-          if (paymentStatus === "Failed") {
-            return v === "Cancelled";
-          }
-          if (paymentStatus === "Pending") {
-            return v === "Not Processed" || v === "Cancelled";
-          }
-          if (paymentStatus === "Paid") {
-            return v === "Processing" || v === "Cancelled" || v === 'Delivered' || 'Dispatched' || 'Not Processed';
-          }
-          return false;
-        },
-        message: (props) =>
-          `Invalid order status for payment status '${props.value}'. Current payment status: '${this.paymentStatus}'`,
-      },
+     
     },
     totalPrice: {
       type: Number,
@@ -121,9 +101,7 @@ const orderSchema = mongoose.Schema(
       type: Number,
       default: 0, // Default no discount
     },
-    discountCode: {
-      type: String,
-    },
+    discountCode: String,
     finalPrice: {
       type: Number,
     },
@@ -139,7 +117,6 @@ const orderSchema = mongoose.Schema(
     },
     deliveryEstimate: {
       type: Date,
-      required: false,
     },
   },
   {
@@ -150,23 +127,21 @@ const orderSchema = mongoose.Schema(
 // Pre-save hook for paymentStatus and orderStatus
 orderSchema.pre("save", async function (next) {
   if (this.isModified("paymentStatus")) {
-    if (this.paymentStatus === "Paid" && this.orderStatus !== 'Delivered') {
+    if (this.paymentStatus === "Paid" && this.orderStatus !== "Delivered") {
       this.orderStatus = "Processing";
     }
   }
-  
-  // If the payment method is COD and the order is delivered, automatically set the paymentStatus to Paid
-  if (this.paymentMethod === 'Cash on Delivery' && this.orderStatus === 'Delivered') {
-    this.paymentStatus = 'Paid';
+
+  if (this.paymentMethod === "Cash on Delivery" && this.orderStatus === "Delivered") {
+    this.paymentStatus = "Paid";
   }
 
   // Handle the first order discount (20% discount for first-time orders)
   const userId = this.user;
-  const existingOrders = await mongoose.model('Order').find({ user: userId });
+  const existingOrders = await mongoose.model("Order").find({ user: userId });
 
   if (existingOrders.length === 0) {
-    // Apply first-time order discount of 20%
-    this.discount += this.totalPrice * 0.20;  // 20% discount for the first order
+    this.discount += this.totalPrice * 0.20; // 20% discount for first-time orders
   }
 
   // Handle discount code (if provided)
@@ -175,7 +150,7 @@ orderSchema.pre("save", async function (next) {
     if (coupon && coupon.isActive) {
       this.discount += (this.totalPrice * coupon.discount) / 100;
     } else {
-      this.discountCode = null;  // Invalidate invalid coupon code
+      this.discountCode = null; // Invalidate invalid coupon code
     }
   }
 
@@ -184,6 +159,8 @@ orderSchema.pre("save", async function (next) {
 
   next();
 });
+
+orderSchema.index({ orderId: 1 });
 
 const Order = mongoose.model("Order", orderSchema);
 
