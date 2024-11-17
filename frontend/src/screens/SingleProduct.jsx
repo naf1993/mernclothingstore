@@ -232,7 +232,7 @@ const SingleProduct = () => {
         <Message severity="error" error={error} />
       ) : (
         product && (
-          <div className="product-detail-wrapper">
+          <div className="page-container">
             <div className="detail-wrapper">
               <div className="productdisplay-left">
                 {product.images?.length > 0 && (

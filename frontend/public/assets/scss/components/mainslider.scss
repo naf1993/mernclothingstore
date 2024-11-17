@@ -1,76 +1,7 @@
-// .main-slider-wrapper {
-//   grid-column: center-start / center-end;
-//   background-color: white;
-//   margin: 5rem 0;
-//   padding-right: 3rem;
- 
-//   font-family: "Lato", sans-serif;
-//   overflow: hidden;
-//   position: relative;
-//   border-radius: 10px;
 
-  
-//   .slide {
-//     display: none; // Hide all slides by default
-//     flex: 1; // Ensure the slide takes equal space in flex container
-//     opacity: 0;
-//     transition: opacity 1s ease-in;
-//     &.active {
-//       display: flex; // Show active slide
-//       opacity: 1;
-//        // Smooth transition for opacity
-//     }
-
-//     .image-container {
-//       flex: 1; // Take up equal space
-//       overflow: hidden; // Prevent overflow
-
-//       img {
-//         width: 100%; // Make the image responsive
-//         height: auto; // Maintain aspect ratio
-//         object-fit: cover; // Cover the container
-//         aspect-ratio: 20/14;
-//       }
-//     }
-
-//     .text-container {
-//       flex: 1; // Take up equal space
-//       display: flex; // Flexbox for text alignment
-//       flex-direction: column; // Stack text vertically
-//       align-items: center; // Center text
-//       gap: 1rem;
-//       justify-content: center; // Center text vertically
-//       margin: 2rem auto; // Optional margin
-
-//       .slider-heading {
-//         text-align: center; // Center text
-//       }
-
-//       .cpn-btn {
-//         width: 50%; // Adjust button width as needed
-//         margin: 0 auto;
-//         border: none;
-//         border-style: dotted;
-//         border-color: var(--dark-gold);
-//         background-color: white;
-
-//         padding: 1rem 0.5rem;
-//         border-width: 2px;
-//         cursor: pointer; // Make button look clickable
-//         transition: background-color 0.3s; // Smooth transition for hover
-
-//         &:hover {
-//           background-color: var(--dark-gold);
-//           border-color: white;
-//           color: white; // Change on hover
-//         }
-//       }
-//     }
-//   }
-// }
 
 .main-slider-wrapper {
-  grid-column: center-start / center-end;
+  
   background-color: white;
   margin: 5rem 0;
   padding-right: 3rem;

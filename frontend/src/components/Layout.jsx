@@ -8,7 +8,10 @@ const Layout = ({navItems}) => {
   return (
     <div className='wrapper'>
         <Navbar navItems={navItems}/>
+      
+       
         <Outlet/>
+      
         <Footer/>
 
     </div>

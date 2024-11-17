@@ -20,18 +20,17 @@ body {
   box-sizing: border-box;
 }
 
+
+
 .wrapper {
   background-color: rgb(245, 240, 240);
-  display: grid;
-  //grid-template-rows: repeat(3, min-content);
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Full viewport height */
 }
-a:link {
-  text-decoration: none;
-  color: inherit;
-}
+
 .announcement {
-  grid-column: 1/-1;
+  
   background-color: var(--color-blue-darkest);
   color: var(--color-grey-light-3);
   height: 2.8rem;
@@ -44,7 +43,7 @@ a:link {
   }
 }
 .page-container {
-  grid-column: 1/-1;
+  flex:1;
   margin-top: 2rem;
   display: grid;
   font-family: "Lato", sans-serif;
@@ -82,5 +81,18 @@ a:link {
         [col-start] minmax(min-content, 14rem) [col-end]
       )
       [center-end] minmax(2rem, 1fr) [full-end];
+  }
+}
+.home-wrapper{
+ 
+  grid-column: full-start/full-end;
+  padding-left: 4rem;
+  padding-right: 4rem;
+  display: flex;
+  flex-direction: column;
+  @media only screen and (max-width: $bp-smallest) {
+    grid-column: full-start/full-end;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }

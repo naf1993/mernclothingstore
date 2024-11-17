@@ -1,15 +1,4 @@
-.place-order-container {
-  grid-column: 1/-1;
-  margin-top: 2rem;
-  display: grid;
-  font-family: "Lato", sans-serif;
 
-  grid-template-columns:
-    [full-start] minmax(13rem, 1fr) [center-start] repeat(
-      8,
-      [col-start] minmax(min-content, 14rem) [col-end]
-    )
-    [center-end] minmax(13rem, 1fr) [full-end];
   .place-order-wrapper {
     margin-top: 2rem;
     grid-column: center-start/center-end;
@@ -304,4 +293,4 @@
       }
     }
   }
-}
+

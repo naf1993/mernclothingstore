@@ -1,16 +1,9 @@
-.favourites-container {
-  grid-column: 1/-1;
-  margin-top: 2rem;
-  display: grid;
-  grid-template-columns:
-    [full-start] minmax(13rem, 1fr) [center-start] repeat(
-      8,
-      [col-start] minmax(min-content, 14rem) [col-end]
-    )
-    [center-end] minmax(13rem, 1fr) [full-end];
+
     .favourites-products {
       margin-top: 2rem;
-        grid-column: center-start / center-end;
+      grid-column: full-start/full-end;
+      padding-left: 4rem;
+      padding-right: 4rem;
         display: flex; // Use flexbox for layout
         flex-wrap: wrap; // Allow wrapping
         justify-content: flex-start; // Align items to the left
@@ -58,4 +51,4 @@
 //       margin: 2rem auto;
 //     }
 //   }
-}
+

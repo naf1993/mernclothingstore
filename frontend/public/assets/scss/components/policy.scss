@@ -1,17 +1,15 @@
 .policy-wrapper{
-    grid-column: center-start / center-end;
+    
     
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
   grid-gap:1rem;
   @media only screen and (max-width:$bp-small) {
    display: none;
     
 }
 
-//   .item:not(:last-child){
-    
-//   }
+
   .item{
    padding:1.2rem 2rem;
     background-color:white;

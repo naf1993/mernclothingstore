@@ -19,7 +19,9 @@ const Home = () => {
 
   const newProducts =
     Array.isArray(products) && products.length > 0
-      ? products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10)
+      ? products
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 10)
       : [];
   const featuredProducts =
     Array.isArray(products) && products.length > 0
@@ -27,26 +29,26 @@ const Home = () => {
       : [];
 
   return (
-    <div className="home">
-      <MainSlider />
-      <Policy />
-      {loading && <Loader />}
-      {error && <Message error={error} />}
-      {products && products.length > 0 && (
-        <MultiCarousel items={newProducts} heading="Explore New Collection" />
-      )}
-      
-      <HomeCategories />
-      {loading && <Loader />}
-      {error && <Message error={error} />}
-      {products && products.length > 0 && (
-        <MultiCarousel items={featuredProducts} heading="Top Selling" />
-      )}
+    <div className="page-container">
+      <div className="home-wrapper">
+        <MainSlider />
+        <Policy />
+        {loading && <Loader />}
+        {error && <Message error={error} />}
+        {products && products.length > 0 && (
+          <MultiCarousel items={newProducts} heading="Explore New Collection" />
+        )}
 
-      
+        <HomeCategories />
+        {loading && <Loader />}
+        {error && <Message error={error} />}
+        {products && products.length > 0 && (
+          <MultiCarousel items={featuredProducts} heading="Top Selling" />
+        )}
 
-      <Review />
-      <NewsLetterSubscription />
+        <Review />
+        <NewsLetterSubscription />
+      </div>
     </div>
   );
 };

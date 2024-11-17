@@ -229,8 +229,8 @@ const ProductList = ({ categories }) => {
   }, []);
 
   return (
-    <div className="products-list-wrapper">
-      <div className="wrapper">
+    <div className="page-container">
+      <div className="products-wrapper">
         <div className="left">
           <div className="filter-1">
             <h6 className="filter-name">Filter By Category</h6>

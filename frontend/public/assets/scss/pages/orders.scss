@@ -7,16 +7,18 @@ $accordion-header-padding: 15px;
 
 .orders-wrapper {
   margin-top: 2rem;
-  grid-column: center-start/center-end;
-  padding: 2rem 3rem;
+  grid-column: full-start/full-end;
+      padding-left: 4rem;
+      padding-right: 4rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
   font-family: "Lato", sans-serif;
 
   @media only screen and (max-width: $bp-smallest) {
-    grid-column: full-start/full-end;
-    padding:1rem;
+   
+    padding-left: 1rem;
+      padding-right: 1rem;
   }
 
   h3 {

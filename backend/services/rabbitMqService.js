@@ -54,50 +54,52 @@ const consumeQueue = async () => {
 
 const processOrder = async (receivedOrder) => {
   try {
-    // Extract the order details from the 'order' field
     const order = receivedOrder.order;
 
-    console.log("this is payment method", order.paymentMethod);
-    console.log("this is payment status", order.paymentStatus);
-    console.log("this is order status", order.orderStatus);
-    // Check if the payment method is "Cash on Delivery"
+
     const statusUpdate =
       order.paymentMethod === "Cash on Delivery"
         ? { paymentStatus: "Pending", orderStatus: "Processing" }
         : { paymentStatus: "Paid", orderStatus: "Processing" };
 
-    // Update the order with the new payment status and order status
     const updatedOrder = await Order.findOneAndUpdate(
-      { orderId: order.orderId }, // Use orderId from the 'order' object
+      { orderId: order.orderId },
       { $set: statusUpdate },
       { new: true, upsert: false, runValidators: true }
     );
 
-    // If no order is found with the given orderId, log an error
     if (!updatedOrder) {
-      console.log(`Failed to update order with ID: ${order.orderId}`);
+      console.error(`Failed to update order with ID: ${order.orderId}`);
+      
+    } else {
+      console.log(`Order with ID ${order.orderId} updated successfully.`);
+      console.log('this is updated order')
+      console.log(updatedOrder)
     }
 
-    // Process the products in the received order
     for (const item of receivedOrder.products) {
+      console.log(`Processing product with ID: ${item.productId}`);
       const product = await Product.findById(item.productId);
       if (product) {
         product.countInStock -= item.count;
-        await product.save(); // Ensure product stock is updated
+        await product.save();
+        console.log(`Product with ID ${item.productId} updated successfully.`);
+      } else {
+        console.error(`Product with ID ${item.productId} not found.`);
       }
     }
 
-    // Send a notification to the user
     const notification = new Notification({
-      user: order.user, // Ensure you're using the 'user' from the 'order' object
+      user: order.user,
       message: `${receivedOrder.user.name} placed an order`,
       type: "user_ordered",
     });
     await notification.save();
+    console.log("Notification created successfully.");
   } catch (error) {
     console.error("Error processing order:", error);
-    // Retry logic or better error handling can be added here if necessary
   }
 };
+
 
 export { sendToQueue, consumeQueue };

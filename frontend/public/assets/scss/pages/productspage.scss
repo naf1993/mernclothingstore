@@ -118,19 +118,9 @@
   opacity: 0;
   transition: all 0.3s ease-out;
 }
-.products-list-wrapper {
-  grid-column: 1/-1;
-  margin-top: 2rem;
-  display: grid;
 
-  grid-template-columns:
-    [full-start] minmax(5rem, 1fr) [center-start] repeat(
-      8,
-      [col-start] minmax(min-content, 14rem) [col-end]
-    )
-    [center-end] minmax(5rem, 1fr) [full-end];
 
-  .wrapper {
+  .products-wrapper {
     grid-column: center-start/center-end;
 
     display: grid;
@@ -303,135 +293,5 @@
     }
   
   }
-}
 
-// .products-list-wrapper{
-//     grid-column:1/-1;
-//     margin-top:2rem;
-//     display: grid;
-//     background-color: rgb(192, 192, 8);
-//     grid-template-columns: [full-start] minmax(7rem, 1fr) [center-start] repeat(
-//         8,
-//         [col-start] minmax(min-content, 14rem) [col-end]
-//       )
-//       [center-end] minmax(7rem, 1fr) [full-end];
-//       @media only screen and (max-width: $bp-medium) {
-//         margin-top: 2rem;
-//         grid-template-columns:
-//           [full-start] minmax(4rem, 1fr) [center-start] repeat(
-//             8,
-//             [col-start] minmax(min-content, 14rem) [col-end]
-//           )
-//           [center-end] minmax(4rem, 1fr) [full-end];
-//       }
-//       @media only screen and (max-width: $bp-smallest) {
-//         margin-top: 2rem;
-//         grid-template-columns:
-//           [full-start] minmax(3rem, 1fr) [center-start] repeat(
-//             8,
-//             [col-start] minmax(min-content, 14rem) [col-end]
-//           )
-//           [center-end] minmax(3rem, 1fr) [full-end];
-//       }
-//       @media only screen and (max-width: 300px) {
-//         margin-top: 1rem;
-//         grid-template-columns:
-//           [full-start] minmax(2rem, 1fr) [center-start] repeat(
-//             8,
-//             [col-start] minmax(min-content, 14rem) [col-end]
-//           )
-//           [center-end] minmax(2rem, 1fr) [full-end];
-//       }
-//       .wrapper{
-//         grid-column: center-start/center-end;
 
-//         display: grid;
-//         grid-template-columns: .2fr 1fr;
-
-//         margin: 2rem 0;
-//         .filter-wrapper{
-//          display: flex;
-//          flex-direction: column;
-
-//           .category-nav{
-//           font-size: 1.3rem;
-//           list-style: none;
-//           margin-top: .4rem;
-//           .category-item{
-//             position: relative;
-//             margin-left: -18px !important;
-
-//             &:not(:last-child){
-//               margin-bottom: .2rem;
-//             }
-//             .dropdown-menu-item {
-//               background: none;
-//               border: none;
-//               color: var(--color-grey-dark-3);
-//               padding: .3rem 0;
-//               font-size: 1.2rem;
-//               font-weight: 300;
-//               letter-spacing: 0.1rem;
-//               font-family: "Lato", sans-serif;
-//               &::before{
-//                 position: absolute;
-//                 display: block;
-//                 content: 'hello';
-//                 font-size: 0.7em;
-//                 color: #fff;
-//                 top: 13px;
-//                 right: 10px;
-
-//               }
-
-//             }
-
-//             .category-link{
-
-//               color:var(--color-grey-dark-3);
-//               text-decoration: none;
-
-//               display: block;
-//               padding-top: 0.5rem;
-//               padding-bottom: 0.5rem;
-//               display: flex;
-//               align-items: center;
-//               justify-content: space-between;
-//             }
-//           }
-//           .dropdown{
-//             display: none;
-//           }
-//           .show{
-//             list-style-type: none;
-//             display: flex;
-//             flex-direction: column;
-//             padding-left: 0 !important;
-//             position: absolute;
-
-//           }
-//           .menu-items-dropdown{
-
-//             display: flex;
-//             align-items: center;
-//             justify-content: flex-start;
-//             padding:.5rem 0;
-//           }
-//           .menu-items-dropdown-item {
-//             text-decoration: none;
-//             color: inherit;
-//             font-size: 1.2rem;
-//             font-weight: 300;
-//             letter-spacing: 0.1rem;
-//             font-family: "Lato", sans-serif;
-//           }
-//           }
-
-//         .products-and-sort_wrapper{
-//             display: flex;
-//             flex-direction: column;
-//         }
-
-//     }
-//       }
-// }

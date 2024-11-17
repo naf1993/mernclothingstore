@@ -1,16 +1,4 @@
-.product-detail-wrapper {
-  grid-column: 1/-1;
-  margin-top: 2rem;
-  display: grid;
-  @media only screen and (max-width: $bp-smallest) {
-  }
 
-  grid-template-columns:
-    [full-start] minmax(13rem, 1fr) [center-start] repeat(
-      8,
-      [col-start] minmax(min-content, 14rem) [col-end]
-    )
-    [center-end] minmax(13rem, 1fr) [full-end];
 
   .detail-wrapper {
     grid-column: center-start/center-end;
@@ -434,4 +422,4 @@
       }
     }
   }
-}
+

@@ -36,7 +36,7 @@ const Cart = () => {
   const { isAuthenticated } = user;
   const [isQuantityUpdated, setIsQuantityUpdated] = useState(false);
   const { isFirstOrder } = useSelector((state) => state.order);
-  const [finalPrice, setFinalPrice] = useState(Number(subTotal));
+  const [finalPrice, setFinalPrice] = useState(subTotal ? subTotal : 0); 
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -63,6 +63,10 @@ const Cart = () => {
     dispatch(checkIsFirstOrder());
   }, [dispatch]);
 
+  useEffect(() => {
+    setFinalPrice(subTotal); // Update final price when subTotal changes
+  }, [subTotal]);
+
   const handleQuantityChange = (productId, color, size, action) => {
     dispatch(updateCartQuantity(productId, color, size, action))
       .then(() => {
@@ -76,11 +80,15 @@ const Cart = () => {
   };
 
   const handleValidateCoupon = () => {
+    if (!subTotal) {
+      toast.error("Invalid cart amount");
+      return;
+    }
+
     dispatch(validateCoupon(selectedCoupon.code))
       .then(() => {
         toast.success("Coupon Applied");
-        let priceAfterCoupon =
-          subTotal - (subTotal * selectedCoupon.discount) / 100;
+        let priceAfterCoupon = subTotal - (subTotal * selectedCoupon.discount) / 100;
         if (isFirstOrder) {
           priceAfterCoupon = priceAfterCoupon - (priceAfterCoupon * 20) / 100;
         }
@@ -135,7 +143,7 @@ const Cart = () => {
   };
 
   return (
-    <div className="cart-container">
+    <div className="page-container">
       <div className="heading">
         <Headings>YOUR CART</Headings>
       </div>

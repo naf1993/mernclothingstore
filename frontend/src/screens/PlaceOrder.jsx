@@ -194,7 +194,7 @@ const PlaceOrder = () => {
   };
 
   return (
-    <div className="place-order-container">
+    <div className="page-container">
       <div className="place-order-wrapper">
         <div className="place-order-wrapper__left">
           <h3>Shipping Info</h3>

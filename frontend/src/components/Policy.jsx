@@ -32,9 +32,7 @@ const Policy = () => {
                 <p className='text-policy'>
                     World Wide Shippping
                 </p>
-                <Link to="/products" className="site-title">
-        Site Name
-      </Link>
+               
             </div>
         </div>
         <div className='item'>
@@ -45,10 +43,7 @@ const Policy = () => {
                 <p className='text-policy'>24x7 Service</p>
             </div>
         </div>
-        {/* <BsDoorOpen />
-        <SlRefresh />
-        <SlPlane />
-        <AiOutlineCustomerService /> */}
+      
     </div>
   )
 }

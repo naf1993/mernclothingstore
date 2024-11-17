@@ -16,7 +16,7 @@ const Favourites = () => {
 
   return (
     <>
-      <div className="favourites-container">
+    <div className="page-container">
       <div className="heading">
         <Headings>Favourites</Headings>
       </div>
