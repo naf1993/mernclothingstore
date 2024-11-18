@@ -27,22 +27,20 @@ const Footer = () => {
             <div className="footer-section links">
               <h3>Quick Links</h3>
               <ul>
-                <li>
-                  <Link to='/shop'>Shop</Link>
-                </li>
+               
                 <li>
                 <Link to='/contact'>Contact us</Link>
                 </li>
                 
                 <li>
-                <Link to='/policy'>Return Policy</Link>
+                <Link to='/returnpolicy'>Return Policy</Link>
                 </li>
               </ul>
             </div>
 
             <div className="footer-section contact">
               <h3>Contact Us</h3>
-              <p>Email: support@example.com</p>
+              <p>Email: modestclothing@gmail.com</p>
               <p>Phone: +1 (234) 567-890</p>
             </div>
 
@@ -50,7 +48,7 @@ const Footer = () => {
           </div>
           <div className="footer-bottom">
             <p>
-              &copy; {new Date().getFullYear()} Modesta. All rights
+              &copy; {new Date().getFullYear()} ModestClothing. All rights
               reserved.
             </p>
           </div>

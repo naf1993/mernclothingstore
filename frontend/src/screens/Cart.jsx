@@ -36,7 +36,7 @@ const Cart = () => {
   const { isAuthenticated } = user;
   const [isQuantityUpdated, setIsQuantityUpdated] = useState(false);
   const { isFirstOrder } = useSelector((state) => state.order);
-  const [finalPrice, setFinalPrice] = useState(subTotal ? subTotal : 0); 
+  const [finalPrice, setFinalPrice] = useState(subTotal ? subTotal : 0);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -88,7 +88,8 @@ const Cart = () => {
     dispatch(validateCoupon(selectedCoupon.code))
       .then(() => {
         toast.success("Coupon Applied");
-        let priceAfterCoupon = subTotal - (subTotal * selectedCoupon.discount) / 100;
+        let priceAfterCoupon =
+          subTotal - (subTotal * selectedCoupon.discount) / 100;
         if (isFirstOrder) {
           priceAfterCoupon = priceAfterCoupon - (priceAfterCoupon * 20) / 100;
         }
@@ -98,8 +99,6 @@ const Cart = () => {
         toast.error("Failed to apply coupon", err.message);
       });
   };
-
-
 
   const handleRemoveItem = async (productId, color, size) => {
     dispatch(removeFromCart(productId, color, size))
@@ -144,105 +143,103 @@ const Cart = () => {
 
   return (
     <div className="page-container">
-      <div className="heading">
-        <Headings>YOUR CART</Headings>
-      </div>
       <div className="cart-wrapper">
-        {cartItems && cartItems.length === 0 && (
-          <EmptyMessage message="Your Cart is empty" />
-        )}
-        <div className="left">
-          {loading && <Loader />}
-
-          {error && <Message error={error} />}
-          {cartItems &&
-            cartItems.length > 0 &&
-            cartItems?.map((item, index) => (
-              <CartItem
-                key={index}
-                productId={item.productId}
-                color={item.color}
-                total={item.total}
-                price={item.price}
-                count={item.count}
-                size={item.size || ""}
-                productName={item.name}
-                productImg={item.image}
-                removeItem={handleRemoveItem}
-                addQuantity={(productId, color, size) =>
-                  handleQuantityChange(productId, color, size, "add")
-                }
-                subQuantity={(productId, color, size) =>
-                  handleQuantityChange(productId, color, size, "subtract")
-                }
-              />
-            ))}
-        </div>
+        {loading && <Loader />}
+        {error && <Message error={error} />}
         {cartItems && cartItems.length > 0 && (
-          <div className="right">
-            <h2>Cart Summary</h2>
-            <div className="coupon-code-wrapper">
-             
-              <input className="coupon-code"
-                type="text"
-                id="couponCode"
-                value={couponCode}
-                onChange={(e) => setCouponCode(e.target.value)}
-                placeholder="Enter Coupon Code"
-              />
-               <button onClick={handlePasteCoupon}>Paste Code</button>
-               <button onClick={handleApplyCoupon}>Apply Coupon</button>
+          <>
+            <div className="left">
+              {cartItems?.map((item, index) => (
+                <CartItem
+                  key={index}
+                  productId={item.productId}
+                  color={item.color}
+                  total={item.total}
+                  price={item.price}
+                  count={item.count}
+                  size={item.size || ""}
+                  productName={item.name}
+                  productImg={item.image}
+                  removeItem={handleRemoveItem}
+                  addQuantity={(productId, color, size) =>
+                    handleQuantityChange(productId, color, size, "add")
+                  }
+                  subQuantity={(productId, color, size) =>
+                    handleQuantityChange(productId, color, size, "subtract")
+                  }
+                />
+              ))}
             </div>
-
-           
-            <div>
-              <span>Total Items In Cart</span>
-              <span>{cartItems.reduce((acc, it) => acc + it.count, 0)}</span>
-            </div>
-            <div>
-              <span>Amount</span>
-              <span> ₹{subTotal.toFixed(2)}</span>
-            </div>
-            <div>
-              <span>Any Coupon Applied</span>
-              <span> {selectedCoupon ? selectedCoupon.code : "NIL"}</span>
-            </div>
-            <div>
-              <span>Final Price</span>₹{finalPrice}
-            </div>
-
-            <button className="right_coupon_btn-checkout" onClick={handleClick}>
-              Continue To Checkout
-            </button>
-
-            <div className="right_coupon">
-              <div>
-                {coupons?.map((coupon) => (
-                  <button
-                    onClick={() => {
-                      setSelectedCoupon({
-                        code: coupon.code,
-                        discount: coupon.discount,
-                      });
-                    }}
-                    className="right_coupon_item"
-                    key={coupon._id}
-                  >
-                    {coupon.code}
-                  </button>
-                ))}
+            <div className="right">
+              <h2>Cart Summary</h2>
+              <div className="coupon-code-wrapper">
+                <input
+                  className="coupon-code"
+                  type="text"
+                  id="couponCode"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value)}
+                  placeholder="Enter Coupon Code"
+                />
+                <button onClick={handlePasteCoupon}>Paste Code</button>
+                <button onClick={handleApplyCoupon}>Apply Coupon</button>
               </div>
 
-              {selectedCoupon && (
-                <button
-                  onClick={handleValidateCoupon}
-                  className="right_coupon_btn"
-                >
-                  Apply Coupon
-                </button>
-              )}
+              <div>
+                <span>Total Items In Cart</span>
+                <span>{cartItems.reduce((acc, it) => acc + it.count, 0)}</span>
+              </div>
+              <div>
+                <span>Amount</span>
+                <span> ₹{subTotal.toFixed(2)}</span>
+              </div>
+              <div>
+                <span>Any Coupon Applied</span>
+                <span> {selectedCoupon ? selectedCoupon.code : "NIL"}</span>
+              </div>
+              <div>
+                <span>Final Price</span>₹{finalPrice}
+              </div>
+
+              <button
+                className="right_coupon_btn-checkout"
+                onClick={handleClick}
+              >
+                Continue To Checkout
+              </button>
+
+              <div className="right_coupon">
+                <div>
+                  {coupons?.map((coupon) => (
+                    <button
+                      onClick={() => {
+                        setSelectedCoupon({
+                          code: coupon.code,
+                          discount: coupon.discount,
+                        });
+                      }}
+                      className="right_coupon_item"
+                      key={coupon._id}
+                    >
+                      {coupon.code}
+                    </button>
+                  ))}
+                </div>
+
+                {selectedCoupon && (
+                  <button
+                    onClick={handleValidateCoupon}
+                    className="right_coupon_btn"
+                  >
+                    Apply Coupon
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          </>
+        )}
+        {cartItems && cartItems.length === 0 && (
+          <EmptyMessage message="Your Cart is empty..." />
         )}
       </div>
     </div>

@@ -12,6 +12,10 @@ import axios from "axios";
 import Protected from "./components/Protected";
 import {Toaster} from 'react-hot-toast'
 import ProductsCategory from "./screens/ProductsCategory";
+import About from "./screens/About";
+import ReturnPolicy from "./screens/ReturnPolicy";
+import Contact from "./screens/Contact";
+import AccountPage from "./screens/AccountPage";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
@@ -87,6 +91,11 @@ const App = () => {
             <Route path="placeorder" element={<Protected><PlaceOrder/></Protected>}/>
             <Route path='orders' element={<Protected><OrdersPage/></Protected>}/>
             <Route path='ordersuccess' element={<Protected><OrderSucess/></Protected>}/>
+            <Route path='about' element={<About/>}/>
+            <Route path='returnpolicy' element={<ReturnPolicy/>}/>
+            <Route path='contact' element={<Contact/>}/>
+            <Route path='account' element={<Protected><AccountPage/></Protected>}/>
+
             
             
           </Route>

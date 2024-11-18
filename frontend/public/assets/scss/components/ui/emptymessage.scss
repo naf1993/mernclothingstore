@@ -1,18 +1,18 @@
 .empty-message {
-    background-color: #f8d7da;
-    border: 1px solid #f5c6cb;
-    color: #721c24;
-    padding: 1rem;
-    border-radius: 8px;
-    font-family: 'Arial', sans-serif;
-    font-size: 1rem;
+  grid-column: 1/span 2;
+   
     text-align: center;
     max-width: 100%;
     margin: 1rem auto;
+    font-family: inherit;
   
-    p {
+    h4 {
       margin: 0;
-      font-weight: bold;
+      font-weight: 400;
+      font-size: 1rem;
+      
+      font-family: inherit;
+      color: var(--color-grey-dark-3);
     }
   
     &.no-data {

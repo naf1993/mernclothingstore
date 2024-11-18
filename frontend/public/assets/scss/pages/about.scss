@@ -1,0 +1,31 @@
+.about-wrapper {
+    margin-top: 2rem;
+    grid-column: full-start/full-end;
+    padding-left: 6rem;
+    padding-right: 6rem;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Lato',sans-serif;
+    gap: 1rem;
+    @media only screen and (max-width: $bp-smallest) {
+      grid-column: full-start/full-end;
+      padding-left: 1rem;
+      padding-right: 1rem;
+     
+    }
+    h1{
+        font-size: 1.5rem;
+        font-weight: 400;
+        font-family: inherit;
+    }
+    h2{
+        font-size: 1.3rem;
+        font-weight: 400;
+        font-family: inherit;
+    }
+    p{
+        letter-spacing: 0.2px;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+}

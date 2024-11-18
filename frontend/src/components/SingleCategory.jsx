@@ -6,9 +6,9 @@ const SingleCategory = ({ item, index }) => {
     <div className={`item-${index + 1}`}>
       <div className={`text-main-${index + 1}`}>
         <h1 className={`banner-text-${index + 1}`}>{item.name}</h1>
-        {/* <Link to={`/products/category/${item.id}`}>
+        <Link to={`/products/category/${item.id}`}>
           <button className={`banner-btn-${index + 1}`}>SHOP</button>
-        </Link> */}
+        </Link>
       </div>
       <figure className={`image-container-${index + 1}`}>
         <img

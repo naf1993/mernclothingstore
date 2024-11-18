@@ -88,7 +88,7 @@ const Navbar = ({ navItems }) => {
         },
         {
           title: "My Account",
-          url: "/myaccount",
+          url: "/account",
         },
         {
           title: "Log out",
