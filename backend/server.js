@@ -34,7 +34,7 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Update this for production
+    origin: "https://themodeststore-bh1fk5v1r-nafitha-mohammeds-projects.vercel.app/", // Update this for production
     methods: ["GET", "POST"],
   },
   transports: ["websocket", "polling"],

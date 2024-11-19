@@ -49,6 +49,7 @@ export const sendErrorProd = (err, res) => {
     // 1) Log error
     console.error('ERROR 💥', err);
     console.log(err.message)
+    console.error(err.stack);
 
     // 2) Send generic message
     res.status(500).json({
