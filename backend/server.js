@@ -87,8 +87,14 @@ app.use("/api/coupon", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-app.get("/", function (req, res) {
-  res.render("home");
+app.get("/", async (req, res) => {
+  try {
+    // Your logic here (e.g., fetching data from DB)
+    res.send("Hello, world!");
+  } catch (err) {
+    console.error("Error occurred:", err); // Log the full error to the console
+    res.status(500).json({ status: "error", message: err.message || "Something went wrong!" });
+  }
 });
 
 app.all("*", (req, res, next) => {
