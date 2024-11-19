@@ -11,11 +11,11 @@ import App from "./App";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-    <GoogleOAuthProvider clientId="1058309738065-oo5qnjd3808k3i8tqeg8in7cb26qhab3.apps.googleusercontent.com">
-  <Provider store={store}>
-    <PersistGate persistor={persistor}>
-      <App />
-    </PersistGate>
-  </Provider>
+  <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+    <Provider store={store}>
+      <PersistGate persistor={persistor}>
+        <App />
+      </PersistGate>
+    </Provider>
   </GoogleOAuthProvider>
 );

@@ -1,0 +1,20 @@
+{
+    "version": 2,
+    "builds": [
+      {
+        "src": "ecommerce-dashboard-admin/package.json",
+        "use": "@vercel/static-build",
+        "config": {
+          "distDir": "ecommerce-dashboard-admin/build"
+        }
+      }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/ecommerce-dashboard-admin/build/$1"
+      }
+    ],
+     "buildCommand": "npm install --legacy-peer-deps && npm run build"
+  }
+  
