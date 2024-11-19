@@ -9,7 +9,8 @@ import { Server } from "socket.io";
 import stripeLib from "stripe"; 
 import AppError from "./utils/appError.js"; 
 import globalErrorHandler from "./controllers/errorController.js"; 
-import helmet from "helmet"; 
+import helmet from "helmet";
+import Product from './models/productModel.js' 
 import { googleStrategy } from "./services/googleStrategy.js"; 
 import productRoutes from "./routes/productRoutes.js"; 
 import reviewRoutes from "./routes/reviewRoutes.js"; 
@@ -86,7 +87,9 @@ cloudinary.config({
 // Routes
 app.get("/", async (req, res) => {
   try {
-    res.send("Hello, world!");
+    const products = await Product.find({})
+
+    res.send(products);
   } catch (err) {
     console.error("Error occurred:", err);  // Log the full error to the console
     res.status(500).json({ status: "error", message: err.message || "Something went wrong!" });
