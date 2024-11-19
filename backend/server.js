@@ -68,7 +68,15 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
-
+app.get("/", async (req, res) => {
+  try {
+    // Your logic here (e.g., fetching data from DB)
+    res.send("Hello, world!");
+  } catch (err) {
+    console.error("Error occurred:", err); // Log the full error to the console
+    res.status(500).json({ status: "error", message: err.message || "Something went wrong!" });
+  }
+});
 
 // Routes
 app.post('/api/orders/webhook', bodyParser.raw({ type: 'application/json' }), webhookHandler);
@@ -87,15 +95,7 @@ app.use("/api/coupon", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-app.get("/", async (req, res) => {
-  try {
-    // Your logic here (e.g., fetching data from DB)
-    res.send("Hello, world!");
-  } catch (err) {
-    console.error("Error occurred:", err); // Log the full error to the console
-    res.status(500).json({ status: "error", message: err.message || "Something went wrong!" });
-  }
-});
+
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Cannot find ${req.originalUrl}`, 404));
