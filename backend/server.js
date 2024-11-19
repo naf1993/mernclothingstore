@@ -1,48 +1,53 @@
-import * as dotenv from "dotenv";
+import * as dotenv from "dotenv"; 
 dotenv.config();
-import express from "express";
-import http from "node:http";
-import cors from "cors";
-import morgan from "morgan";
-import passport from "passport";
-import { Server } from "socket.io";
-import stripeLib from "stripe";
-import AppError from "./utils/appError.js";
-import globalErrorHandler from "./controllers/errorController.js";
-import helmet from "helmet";
-import { googleStrategy } from "./services/googleStrategy.js";
-import productRoutes from "./routes/productRoutes.js";
-import reviewRoutes from "./routes/reviewRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import orderRoutes from "./routes/orderRoutes.js";
-import categoryRoutes from "./routes/categoryRoutes.js";
-import subCategoryRoutes from "./routes/subCategoryRoutes.js";
-import bodyParser from 'body-parser';
-import couponRoutes from "./routes/couponRoutes.js";
-import cartRoutes from "./routes/cartRoutes.js";
-import authRoutes from "./routes/authRoutes.js";
-import notificationRoutes from "./routes/notificationRoutes.js";
-import { fileURLToPath } from "url";
-import colors from "colors";
-import connectDB from "./config/db.js";
-import { webhookHandler } from "./controllers/orderController.js";
+import express from "express"; 
+import http from "node:http"; 
+import cors from "cors"; 
+import morgan from "morgan"; 
+import passport from "passport"; 
+import { Server } from "socket.io"; 
+import stripeLib from "stripe"; 
+import AppError from "./utils/appError.js"; 
+import globalErrorHandler from "./controllers/errorController.js"; 
+import helmet from "helmet"; 
+import { googleStrategy } from "./services/googleStrategy.js"; 
+import productRoutes from "./routes/productRoutes.js"; 
+import reviewRoutes from "./routes/reviewRoutes.js"; 
+import userRoutes from "./routes/userRoutes.js"; 
+import orderRoutes from "./routes/orderRoutes.js"; 
+import categoryRoutes from "./routes/categoryRoutes.js"; 
+import subCategoryRoutes from "./routes/subCategoryRoutes.js"; 
+import bodyParser from "body-parser"; 
+import couponRoutes from "./routes/couponRoutes.js"; 
+import cartRoutes from "./routes/cartRoutes.js"; 
+import authRoutes from "./routes/authRoutes.js"; 
+import notificationRoutes from "./routes/notificationRoutes.js"; 
+import { fileURLToPath } from "url"; 
+import colors from "colors"; 
+import connectDB from "./config/db.js"; 
+import { webhookHandler } from "./controllers/orderController.js"; 
 import { v2 as cloudinary } from "cloudinary";
 
+// Database connection
 connectDB();
 
+// Initialize Express app
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://themodeststore-bh1fk5v1r-nafitha-mohammeds-projects.vercel.app/", // Update this for production
-    methods: ["GET", "POST"],
+    origin: process.env.NODE_ENV === "development" 
+      ? "*"  // Allow all origins in development
+      : process.env.FRONTEND_URL,  // Vercel app URL for production
+    methods: ["GET", "POST", "PUT", "DELETE"],  // Add other methods if necessary
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow additional headers
   },
-  transports: ["websocket", "polling"],
+  transports: ["websocket", "polling"], 
 });
 
 io.on("connection", (socket) => {
   console.log("New client connected");
-
+  
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
@@ -52,11 +57,21 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware
-app.use(cors());
+// Middleware Setup
+const corsOptions = {
+  origin: process.env.NODE_ENV === "development" 
+    ? "*"  // Allow all origins in development
+    : process.env.FRONTEND_URL, // Vercel production URL
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 app.use(passport.initialize());
 passport.use(googleStrategy);
 app.use(helmet());
+
+// Logging (only in development mode)
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
@@ -68,22 +83,27 @@ cloudinary.config({
   api_secret: process.env.API_SECRET,
 });
 
+// Routes
 app.get("/", async (req, res) => {
   try {
-    // Your logic here (e.g., fetching data from DB)
     res.send("Hello, world!");
   } catch (err) {
-    console.error("Error occurred:", err); // Log the full error to the console
+    console.error("Error occurred:", err);  // Log the full error to the console
     res.status(500).json({ status: "error", message: err.message || "Something went wrong!" });
   }
 });
 
-// Routes
+// Stripe webhook handler
 app.post('/api/orders/webhook', bodyParser.raw({ type: 'application/json' }), webhookHandler);
 
+// Static file serving
 app.use("/public", express.static("public"));
+
+// Middleware for request body parsing
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true }));
+
+// Application Routes
 app.use("/", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
@@ -95,18 +115,16 @@ app.use("/api/coupon", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-
-
+// Handling unknown routes
 app.all("*", (req, res, next) => {
   next(new AppError(`Cannot find ${req.originalUrl}`, 404));
 });
 
+// Global Error Handler
 app.use(globalErrorHandler);
 
-// Start the server
+// Server setup and start
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(
-    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
-  );
+  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold);
 });
