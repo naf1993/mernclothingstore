@@ -12,7 +12,7 @@ const SingleCategory = ({ item, index }) => {
       </div>
       <figure className={`image-container-${index + 1}`}>
         <img
-          src={`./public/categories/${item.categoryImage}`}
+          src={`/categories/${item.categoryImage}`}
           alt="hijab"
           className={`image-${index + 1}`}
         />

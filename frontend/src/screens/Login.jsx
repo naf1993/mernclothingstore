@@ -18,6 +18,8 @@ const Login = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const { isAuthenticated,error,isLoading } = user;
+  
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -30,7 +32,7 @@ const Login = () => {
     dispatch(loginUserWithEmail(email, password));
   };
   const googleLogin = () => {
-    window.open("http://localhost:5000/auth/google", "_self");
+    window.open(`${apiUrl}/auth/google`, "_self");
   };
   return (
     <div className="login-container">

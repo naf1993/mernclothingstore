@@ -18,6 +18,8 @@ import {
   ORDERS_MY_SUCCESS,CHECK_IF_FIRST_ORDER_FAIL,CHECK_IF_FIRST_ORDER_REQUEST,CHECK_IF_FIRST_ORDER_SUCCESS
 } from "../constants/orderConstants";
 
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 export const validateCoupon = (couponCode) => async (dispatch, getState) => {
   try {
     dispatch({ type: COUPON_VALIDATE_REQUEST });
@@ -36,8 +38,7 @@ export const validateCoupon = (couponCode) => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.post(
-      "/api/coupon/validateCoupon",
+    const { data } = await axios.post(`${apiUrl}/api/coupon/validateCoupon`,
       { couponCode },
       config
     );
@@ -69,7 +70,7 @@ export const createNewOrder = (orderData) => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.post("/api/orders", orderData, config);
+    const { data } = await axios.post(`${apiUrl}/api/orders`, orderData, config);
     console.log(data.data.order);
     toast.success("New Order Placed");
 
@@ -98,7 +99,7 @@ export const getUpdatedOrder = (orderId) => async (dispatch, getState) => {
       },
     };
 
-    const { data } =  await axios.get(`/api/orders/updatedOrder?orderId=${orderId}`, config);
+    const { data } =  await axios.get(`${apiUrl}/api/orders/updatedOrder?orderId=${orderId}`, config);
     
     dispatch({ type: ORDER_UPDATE_SUCCESS, payload: data.data.order });
   } catch (error) {
@@ -126,7 +127,7 @@ export const getMyOrder = () => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.get("/api/orders/getMyOrders", config);
+    const { data } = await axios.get(`${apiUrl}/api/orders/getMyOrders`, config);
 
     dispatch({ type: ORDERS_MY_SUCCESS, payload: data.data.orders });
   } catch (error) {
@@ -152,7 +153,7 @@ export const getMyOrderDetails = (id) => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.get(`/api/orders/${id}`, config);
+    const { data } = await axios.get(`${apiUrl}/api/orders/${id}`, config);
 
     dispatch({ type: ORDER_DETAIL_SUCCESS, payload: data.data.order });
   } catch (error) {
@@ -179,7 +180,7 @@ export const checkIsFirstOrder = () => async (dispatch, getState) => {
       },
     };
 
-    const { data } =  await axios.get('/api/orders/checkIfFirstOrder', config);
+    const { data } =  await axios.get(`${apiUrl}/api/orders/checkIfFirstOrder`, config);
     
     dispatch({ type: CHECK_IF_FIRST_ORDER_SUCCESS, payload: data.data.isFirstOrder });
   } catch (error) {

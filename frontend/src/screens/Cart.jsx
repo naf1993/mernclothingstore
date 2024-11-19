@@ -24,6 +24,8 @@ const Cart = () => {
     code: "",
     discount: 0,
   });
+  
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const user = useSelector((state) => state.user);
   const {
@@ -48,7 +50,7 @@ const Cart = () => {
   useEffect(() => {
     const fetchCoupons = async () => {
       try {
-        const { data } = await axios.get("http://localhost:5000/api/coupon");
+        const { data } = await axios.get(`${apiUrl}/api/coupon`);
         console.log(data.data.coupons);
         setCoupons(data.data.coupons);
       } catch (error) {

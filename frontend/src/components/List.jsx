@@ -21,13 +21,15 @@ const List = ({
   // });
 
   const price = "price";
+  
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const getAllProductsByCategory = async () => {
     try {
       setLoading(true);
 
       const { data } = await axios.get(
-        `http://localhost:5000/api/products?Category=${catId}`
+        `${apiUrl}/api/products?Category=${catId}`
       );
       setProducts(data.data.products);
       setLoading(false);
@@ -92,7 +94,7 @@ const List = ({
 
     try {
       setLoading(true);
-      const { data } = await axios.get(`http://localhost:5000/api/products?`, {
+      const { data } = await axios.get(`${apiUrl}/api/products?`, {
         params,
         paramsSerializer: {
           indexes: false,

@@ -27,7 +27,7 @@ const Favourites = lazy(() => import("./screens/Favourites"));
 const Cart = lazy(() => import("./screens/Cart"));
 const ProductList = lazy(() => import("./screens/ProductList"));
 const SingleProduct = lazy(() => import("./screens/SingleProduct"));
-const SearchScreen = lazy(() => import("./screens/SearchScreen"));
+
 const PlaceOrder = lazy(()=>import('./screens/PlaceOrder'))
 const OrdersPage = lazy(()=>import('./screens/OrdersPage'))
 
@@ -39,12 +39,14 @@ const App = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const { token, appLoaded, isLoading, isAuthenticated } = user;
+  
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   useEffect(() => {
     const fetchCategoriesAndUser = async () => {
       try {
         // Fetch categories
-        const { data } = await axios.get("http://localhost:5000/api/categories");
+        const { data } = await axios.get(`${apiUrl}/api/categories`);
         setNavItems(data.data.categories);
 
         // Check for JWT cookie and log in user
@@ -85,7 +87,7 @@ const App = () => {
             <Route path="products/:category/:id" element={<ProductList />} />
             <Route path="products/:categoryId/:subcategoryId" element={<ProductsCategory />} />
             <Route path="products/:id" element={<SingleProduct/>} />
-            <Route path="search" element={<SearchScreen />} />
+           
             <Route path="favourites" element={<Protected><Favourites/></Protected>}/>
             <Route path="cart" element={<Cart />} />
             <Route path="placeorder" element={<Protected><PlaceOrder/></Protected>}/>

@@ -104,6 +104,8 @@ const ProductList = ({ categories }) => {
   const [rating, setRating] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [isActive, setActive] = useState(false);
+  
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
  
 
   const [checkedRadio, setCheckedRadio] = useState({
@@ -202,7 +204,7 @@ const ProductList = ({ categories }) => {
   useEffect(() => {
     async function fetchSubCategories() {
       const { data } = await axios.get(
-        `http://localhost:5000/api/categories/${category}`
+        `${apiUrl}/api/categories/${category}`
       );
 
       setCategoryName(data.data.category.name);
@@ -220,7 +222,7 @@ const ProductList = ({ categories }) => {
   useEffect(() => {
     async function fetchColors() {
       const { data } = await axios.get(
-        "http://localhost:5000/api/products/allcolors"
+        `${apiUrl}/api/products/allcolors`
       );
 
       setColors(data.data.uniqueColors);

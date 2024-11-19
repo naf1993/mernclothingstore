@@ -38,6 +38,8 @@ const PlaceOrder = () => {
     error: orderError,
     success: orderSuccess,
   } = useSelector((state) => state.order);
+  
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const [shippingFee, setShippingFee] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
@@ -98,7 +100,7 @@ const PlaceOrder = () => {
           };
 
           const { data } = await axios.post(
-            "http://localhost:5000/api/orders/create-payment-intent",
+            `${apiUrl}/api/orders/create-payment-intent`,
             {
               products: cartItems,
               address,

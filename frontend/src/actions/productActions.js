@@ -20,10 +20,12 @@ import {
 import { toast } from "react-hot-toast";
 import axios from "axios";
 
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 export const getCategories = () => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_CATEGORY_REQUEST });
-    const { data } = await axios.get("/api/categories");
+    const { data } = await axios.get(`${apiUrl}/api/categories`);
     dispatch({ type: PRODUCT_CATEGORY_SUCCESS, payload: data.data.categories });
   } catch (error) {
     dispatch({
@@ -36,7 +38,7 @@ export const getCategories = () => async (dispatch) => {
 export const getColors = () => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_COLORS_REQUEST });
-    const { data } = await axios.get("/api/products/allcolors");
+    const { data } = await axios.get(`${apiUrl}/api/products/allcolors`);
     dispatch({ type: PRODUCT_COLORS_SUCCESS, payload: data.data.uniqueColors });
   } catch (error) {
     dispatch({
@@ -52,7 +54,7 @@ export const getRelatedProducts =
       dispatch({ type: RELATED_PRODUCTS_REQUEST });
 
       const { data } = await axios.get(
-        `/api/products/relatedproducts/${productId}/${categoryId}`
+        `${apiUrl}/api/products/relatedproducts/${productId}/${categoryId}`
       );
       // console.log('related products',data?.data?.products)
       dispatch({
@@ -73,7 +75,7 @@ export const getRelatedProducts =
 export const listProducts = () => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST });
-    const { data } = await axios.get("/api/products");
+    const { data } = await axios.get(`${apiUrl}/api/products`);
 
     const allProducts = data.data.products;
     console.log(allProducts);
@@ -92,7 +94,7 @@ export const listProducts = () => async (dispatch) => {
 export const listProductDetails = (id) => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_DETAIL_REQUEST });
-    const { data } = await axios.get(`/api/products/${id}`);
+    const { data } = await axios.get(`${apiUrl}/api/products/${id}`);
 
     dispatch({
       type: PRODUCT_DETAIL_SUCCESS,
@@ -110,7 +112,7 @@ export const listProductDetails = (id) => async (dispatch) => {
 export const getSearchedProducts = (searchText) => async (dispatch) => {
   try {
     dispatch({ type: GET_SEARCH_PRODUCTS_REQUEST });
-    const { data } = await axios.get("/api/products/search", {
+    const { data } = await axios.get(`${apiUrl}/api/products/search`, {
       params: { query: searchText },
     });
 

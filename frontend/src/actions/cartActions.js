@@ -15,6 +15,8 @@ import {
 } from "../constants/cartConstants";
 import toast from "react-hot-toast";
 
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 const processCartData = (cartData) => {
 
  
@@ -59,7 +61,7 @@ export const addToCart =
       };
 
       const { data } = await axios.post(
-        "/api/cart",
+        `${apiUrl}/api/cart`,
         { productId, count, color, size },
         config
       );
@@ -96,8 +98,7 @@ export const removeFromCart =
         },
       };
 
-      const { data } = await axios.post(
-        `/api/cart/deleteitem`,
+      const { data } = await axios.post(`${apiUrl}/api/cart/deleteitem`,
         { productId, color, size },
         config
       );
@@ -135,7 +136,7 @@ export const getMyCart = () => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.get("/api/cart", config);
+    const { data } = await axios.get( `${apiUrl}/api/cart`, config);
     const { products, subTotal } = processCartData(data.data.cart);
     dispatch({ type: GET_MY_CART_SUCCESS, payload: {products,subTotal} });
   } catch (error) {
@@ -166,7 +167,7 @@ export const updateCartQuantity = (productId, color, size, action) => async (dis
       },
     };
 
-    const { data } = await axios.patch("/api/cart/updateqty",{productId, color, size, action}, config);
+    const { data } = await axios.patch(`${apiUrl}/api/cart/updateqty`,{productId, color, size, action}, config);
     console.log(data)
     const { products, subTotal } = processCartData(data.data.cart);
     dispatch({ type: UPDATE_CART_QTY_SUCCESS, payload: {products,subTotal} });
@@ -199,7 +200,7 @@ export const clearMyCart = () => async (dispatch, getState) => {
       },
     };
 
-    await axios.delete("/api/cart", config);
+    await axios.delete( `${apiUrl}/api/cart`, config);
     dispatch({ type: CLEAR_MY_CART_SUCCESS });
   } catch (error) {
     dispatch({

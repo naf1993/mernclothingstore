@@ -8,6 +8,8 @@ import {
   REVIEW_CREATE_FAIL,
 } from "../constants/productConstants";
 
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 export const checkEligibleForReview =
   (productId) => async (dispatch, getState) => {
     try {
@@ -27,7 +29,7 @@ export const checkEligibleForReview =
         },
       };
 
-      const { data } = await axios.get(`/api/reviews/${productId}`, config);
+      const { data } = await axios.get(`${apiUrl}/api/reviews/${productId}`, config);
 
       dispatch({ type: REVIEW_ELIGIBLE_SUCCESS, payload: data.data.eligible });
     } catch (error) {
@@ -58,7 +60,7 @@ export const createNewReview =
       };
 
       const { data } = await axios.post(
-        `/api/reviews`,
+        `${apiUrl}/api/reviews`,
         { productId, review, rating },
         config
       );

@@ -23,11 +23,14 @@ import {
   USER_REMOVE_FAVOURITE_SUCCESS,USER_SUCCESS,USER_GET_FAVOURITES_FAIL,USER_GET_FAVOURITES_REQUEST,USER_GET_FAVOURITES_SUCCESS
 } from "../constants/userConstant";
 import toast from 'react-hot-toast';
+
+const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 export const loadUser = () => async (dispatch, getState) => {
   dispatch({ type: USER_LOADING });
   try {
     const options = attachTokenToHeaders(getState);
-    const { data } = await axios.get("/api/users/me", options);
+    const { data } = await axios.get(`${apiUrl}/api/users/me`, options);
 
     dispatch({
       type: USER_SUCCESS,
@@ -58,7 +61,7 @@ export const loginUserWithEmail =
         },
       };
       const { data } = await axios.post(
-        "/api/users/login",
+        `${apiUrl}/api/users/login`,
         { email, password },
         config
       );
@@ -84,7 +87,7 @@ export const loginUserWithEmail =
         },
       };
       const { data } = await axios.post(
-        "/api/users/register",
+        `${apiUrl}/api/users/register`,
         { name,email, password },
         config
       );
@@ -116,7 +119,7 @@ export const loginUserWithOauth = (token) => async (dispatch, getState) => {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
    
-    const { data }  = await axios.get("/api/users/me", config);
+    const { data }  = await axios.get(`${apiUrl}/api/users/me`, config);
     dispatch({
       type: LOGIN_WITH_OAUTH_SUCCESS,
       payload: { token: token, user: data.data.user },
@@ -135,7 +138,7 @@ export const logOutUser = () => async (dispatch, getState) => {
   const provider = user.provider;
   if (provider !== "google") {
     try {
-      await axios.get("/auth/logout/email");
+      await axios.get(`${apiUrl}/auth/logout/email`);
       dispatch({
         type: LOGOUT_SUCCESS,
       });
@@ -192,7 +195,7 @@ export const getFavourites = () => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.get(`/api/users/getFavourites`, config);
+    const { data } = await axios.get(`${apiUrl}/api/users/getFavourites`, config);
     
     dispatch({ type: USER_GET_FAVOURITES_SUCCESS, payload: data.data.favourites });
     
@@ -222,7 +225,7 @@ export const addToFavourites = (productId) => async (dispatch, getState) => {
       },
     };
 
-    const { data } = await axios.post(`/api/users/addtofavourites`, { productId }, config);
+    const { data } = await axios.post(`${apiUrl}/api/users/addtofavourites`, { productId }, config);
     console.log(data);
     dispatch({ type: USER_ADD_FAVOURITES_SUCCESS, payload: data.data.favourites });
     console.log('action success');
@@ -253,7 +256,7 @@ export const removeFromFavourites = (productId) => async (dispatch, getState) =>
     };
 
     console.log('product to be deleted from favs', productId);
-    const { data } = await axios.delete(`/api/users/removefromfavourites/${productId}`, config);
+    const { data } = await axios.delete(`${apiUrl}/api/users/removefromfavourites/${productId}`, config);
     console.log('Before removal:', getState().user.favourites);
 
     // Make sure this payload has the updated list of favourites

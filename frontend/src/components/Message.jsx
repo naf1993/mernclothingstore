@@ -11,8 +11,5 @@ const Message = ({variant,error}) => {
   )
 }
 
-Message.defaultProps = {
-    variant:'info'
-}
 
 export default Message
