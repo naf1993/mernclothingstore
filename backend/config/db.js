@@ -9,7 +9,6 @@ const connectDB = async () => {
       socketTimeoutMS: 60000, // 1 minute
       connectTimeoutMS: 60000, // 1 minute
       serverSelectionTimeoutMS: 60000, // 1 minute
-      bufferCommands: false,
     });
     console.log(`Mongodb connected: ${conn.connection.host}`);
   } catch (error) {
