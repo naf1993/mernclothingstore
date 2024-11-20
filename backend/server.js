@@ -33,13 +33,14 @@ import { v2 as cloudinary } from "cloudinary";
 connectDB();
 
 // Initialize Express app
+const allowedUrl = ['http://localhost:49206',process.env.FRONTEND_URL]
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === "development" 
       ? "*"  // Allow all origins in development
-      : process.env.FRONTEND_URL,  // Vercel app URL for production
+      : allowedUrl,  // Vercel app URL for production
     methods: ["GET", "POST", "PUT", "DELETE"],  // Add other methods if necessary
     allowedHeaders: ["Content-Type", "Authorization"], // Allow additional headers
   },
