@@ -40,7 +40,7 @@ const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === "development" 
       ? "*"  // Allow all origins in development
-      : 'http://localhost:49206/',  // Vercel app URL for production
+      : 'http://localhost:50671/',  // Vercel app URL for production
     methods: ["GET", "POST", "PUT", "DELETE"],  // Add other methods if necessary
     allowedHeaders: ["Content-Type", "Authorization"], // Allow additional headers
   },
