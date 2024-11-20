@@ -85,16 +85,7 @@ cloudinary.config({
 });
 
 // Routes
-app.get("/", async (req, res) => {
-  try {
-    const products = await Product.find({})
 
-    res.send(products);
-  } catch (err) {
-    console.error("Error occurred:", err);  // Log the full error to the console
-    res.status(500).json({ status: "error", message: err.message || "Something went wrong!" });
-  }
-});
 
 // Stripe webhook handler
 app.post('/api/orders/webhook', bodyParser.raw({ type: 'application/json' }), webhookHandler);
