@@ -63,7 +63,7 @@ app.use((req, res, next) => {
 const corsOptions = {
   origin: process.env.NODE_ENV === "development" 
     ? "*"  // Allow all origins in development
-    : process.env.FRONTEND_URL, // Vercel production URL
+    : 'http://localhost:50671/', // Vercel production URL
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
