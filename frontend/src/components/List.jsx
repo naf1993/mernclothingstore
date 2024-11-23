@@ -3,6 +3,7 @@ import axios from "axios";
 import Loader from "./Loader";
 import ProductCard from "./ProductCard";
 import Message from './Message'
+import { apiUrl } from "../actions/apiUrl";
 const List = ({
   catId,
   minPrice,
@@ -22,7 +23,7 @@ const List = ({
 
   const price = "price";
   
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 
   const getAllProductsByCategory = async () => {
     try {

@@ -16,6 +16,7 @@ import About from "./screens/About";
 import ReturnPolicy from "./screens/ReturnPolicy";
 import Contact from "./screens/Contact";
 import AccountPage from "./screens/AccountPage";
+import ProductList1 from "./screens/ProductList1";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
@@ -40,7 +41,7 @@ const App = () => {
   const user = useSelector((state) => state.user);
   const { token, appLoaded, isLoading, isAuthenticated } = user;
   
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const apiUrl = 'http://localhost:5000';
 
   useEffect(() => {
     const fetchCategoriesAndUser = async () => {
@@ -84,7 +85,7 @@ const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
-            <Route path="products/:category/:id" element={<ProductList />} />
+            <Route path="products/:category/:id" element={<ProductList1 />} />
             <Route path="products/:categoryId/:subcategoryId" element={<ProductsCategory />} />
             <Route path="products/:id" element={<SingleProduct/>} />
            

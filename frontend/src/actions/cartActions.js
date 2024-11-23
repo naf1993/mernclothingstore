@@ -14,8 +14,8 @@ import {
   CLEAR_MY_CART_FAIL
 } from "../constants/cartConstants";
 import toast from "react-hot-toast";
+import { apiUrl } from "./apiUrl";
 
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const processCartData = (cartData) => {
 

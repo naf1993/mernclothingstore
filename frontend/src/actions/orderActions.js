@@ -18,7 +18,7 @@ import {
   ORDERS_MY_SUCCESS,CHECK_IF_FIRST_ORDER_FAIL,CHECK_IF_FIRST_ORDER_REQUEST,CHECK_IF_FIRST_ORDER_SUCCESS
 } from "../constants/orderConstants";
 
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { apiUrl } from "./apiUrl";
 
 export const validateCoupon = (couponCode) => async (dispatch, getState) => {
   try {

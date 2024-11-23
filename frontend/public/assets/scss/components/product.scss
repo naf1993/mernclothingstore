@@ -1,3 +1,6 @@
+a.link{
+  text-decoration: none;
+}
 .product-card {
   //max-width: 300px;
 
@@ -75,6 +78,8 @@
   }
 
   &__detail {
+    background-color: whitesmoke;
+    text-decoration: none;
     grid-column: 1/-1;
     padding: 0.8rem 2rem;
     @media only screen and (max-width: $bp-smallest) {
@@ -89,6 +94,7 @@
     }
 
     &-name {
+      text-decoration: none;
       color: #333333;
       font-size: 15px;
       align-self: flex-start;
@@ -98,6 +104,7 @@
       }
     }
     &-price {
+      text-decoration: none;
       color: var(--color-primary-dark);
       font-size: 1.2rem;
       align-self: flex-start;

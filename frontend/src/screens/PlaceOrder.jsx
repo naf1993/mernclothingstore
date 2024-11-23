@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import axios from "axios";
+import { apiUrl } from "../actions/apiUrl";
 
 const PlaceOrder = () => {
   const dispatch = useDispatch();
@@ -39,7 +40,6 @@ const PlaceOrder = () => {
     success: orderSuccess,
   } = useSelector((state) => state.order);
   
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
   const [shippingFee, setShippingFee] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");

@@ -24,7 +24,7 @@ import {
 } from "../constants/userConstant";
 import toast from 'react-hot-toast';
 
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { apiUrl } from "./apiUrl";
 
 export const loadUser = () => async (dispatch, getState) => {
   dispatch({ type: USER_LOADING });

@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import useViewport from "../useViewport";
-import axios from "axios";
 import Rating from "../components/Rating";
 import { AiOutlineCaretDown } from "react-icons/ai";
 import { AiOutlineClose } from "react-icons/ai";
-import { useSearchParams } from "react-router-dom";
 import RadioButton from "../components/ui/RadioButton";
-import CheckBoxButton from "../components/ui/CheckBoxButton";
-import ColorButton from "../components/ui/ColorButton";
 import List from "../components/List";
-import { useRef } from "react";
-import CheckBox from "../components/ui/CheckBox";
+import { getSubCategories, listProducts } from "../actions/productActions";
+import { useSelector,useDispatch } from "react-redux";
 
 const prices = [
   {
@@ -81,21 +76,13 @@ const sortMenu = [
   },
 ];
 
-const ProductList = ({ categories }) => {
+const ProductList = () => {
+  const dispatch = useDispatch()
   const [checkList, setCheckList] = useState([]);
   const [arr, setArr] = useState([]);
   const [shwArr, setShwAr] = useState([]);
-  let [searchParams, setSearchParams] = useSearchParams();
-  let term = searchParams.get("category");
-  //  const sp = new URLSearchParams(search)
-  //  const category = sp.get('category') || 'all'
   const location = useLocation();
-  const category = location.pathname.split("/")[3];
-  const { width } = useViewport();
-  const breakpoint = 500;
-  const [categoryName, setCategoryName] = useState("");
-  const [subCategories, setSubCategories] = useState([]);
-
+  const categoryId = location.pathname.split("/")[3];
   const [sortFeatures, setSortFeatures] = useState("");
   const [selectedSort, setSelectedSort] = useState("");
   const [colors, setColors] = useState([]);
@@ -104,9 +91,46 @@ const ProductList = ({ categories }) => {
   const [rating, setRating] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [isActive, setActive] = useState(false);
-  
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
- 
+
+  const {
+    products,
+    loading: loadingProducts,
+    error: errorProducts,
+  } = useSelector((state) => state.product);
+  const [filteredProducts, setFiltererProducts] = useState(products);
+
+  const {
+    loading,
+    error,
+    subcategories: subcats,
+  } = useSelector((state) => state.product);
+
+  useEffect(() => {
+    if (categoryId) {
+      dispatch(getSubCategories(categoryId));
+      dispatch(listProducts(categoryId));
+    }
+  }, [categoryId, dispatch]);
+
+  useEffect(() => {
+    if (subcats) {
+      const result = subcats.map((item) => ({
+        id: item.id,
+        name: item.name,
+        checked: false,
+      }));
+      setCheckList(result);
+    }
+  }, [subcats]);
+  useEffect(() => {
+    if (products) {
+      let uniqueColors = new Set();
+      products.forEach((product) =>
+        product.colors.forEach((color) => uniqueColors.add(color))
+      );
+      setColors([...uniqueColors]);
+    }
+  }, [products]);
 
   const [checkedRadio, setCheckedRadio] = useState({
     isChecked: "",
@@ -137,7 +161,6 @@ const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     }
   };
 
-
   const resetClick = () => {
     for (const item of checkList) {
       item.checked = false;
@@ -159,13 +182,8 @@ const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     setCheckList([...checkList]);
     const newShwAr = shwArr.filter((item) => item.id !== subcat);
     setShwAr(newShwAr);
-    const newArr = arr.filter((item)=>item != subcat)
-    setArr(newArr)
-  };
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
-  const handleChange = (e) => {
-    setSelectedCategory(e.target.value);
+    const newArr = arr.filter((item) => item != subcat);
+    setArr(newArr);
   };
 
   const handleColor = (color) => {
@@ -178,7 +196,6 @@ const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     setMinPrice(myArray[0]);
     setMaxPrice(myArray[1]);
   };
-
 
   const handleCloseRadio = () => {
     setCheckedRadio({ isChecked: "" });
@@ -200,35 +217,6 @@ const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
     setSortFeatures("");
     setActive(false);
   };
-
-  useEffect(() => {
-    async function fetchSubCategories() {
-      const { data } = await axios.get(
-        `${apiUrl}/api/categories/${category}`
-      );
-
-      setCategoryName(data.data.category.name);
-      setSubCategories(data.data.category.subcategories);
-      const result = data.data.category.subcategories.map((item) => ({
-        id: item.id,
-        name: item.name,
-        checked: false,
-      }));
-      setCheckList(result);
-    }
-    fetchSubCategories();
-  }, []);
-
-  useEffect(() => {
-    async function fetchColors() {
-      const { data } = await axios.get(
-        `${apiUrl}/api/products/allcolors`
-      );
-
-      setColors(data.data.uniqueColors);
-    }
-    fetchColors();
-  }, []);
 
   return (
     <div className="page-container">
@@ -420,7 +408,7 @@ const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
           </div>
           <div className="products-wrapper">
             <List
-              catId={category}
+              catId={categoryId}
               minPrice={minPrice}
               maxPrice={maxPrice}
               sort={selectedSort}

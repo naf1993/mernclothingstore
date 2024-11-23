@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { checkIsFirstOrder, validateCoupon } from "../actions/orderActions";
 import EmptyMessage from "../components/EmptyMessage";
+import { apiUrl } from "../actions/apiUrl";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Cart = () => {
     discount: 0,
   });
   
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 
   const user = useSelector((state) => state.user);
   const {

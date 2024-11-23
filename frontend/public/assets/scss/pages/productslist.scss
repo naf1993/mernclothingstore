@@ -1,0 +1,430 @@
+/* Custom select styling */
+
+.custom-select {
+  appearance: none; /* Hide the default arrow */
+  -webkit-appearance: none; /* Hide the default arrow in Safari */
+  -moz-appearance: none; /* Hide the default arrow in Firefox */
+  position: relative;
+
+  width: 100%;
+  text-align: center;
+
+  padding: 1rem 2rem;
+  background-color: transparent;
+  border: 1px solid var(--color-grey-light-1);
+  cursor: pointer;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--color-grey-dark-3);
+  text-transform: uppercase;
+}
+
+/* Custom arrow */
+.custom-select::after {
+  content: "▼"; /* Downward arrow symbol */
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  color: #666;
+  pointer-events: none; /* Prevent clicks on the arrow */
+}
+
+@media only screen and (max-width: $bp-smallest) {
+  .custom-select::after {
+    content: ""; /* Remove custom arrow on smaller screens */
+  }
+}
+
+/* Remove border when an option is selected */
+.custom-select:focus,
+.custom-select:valid {
+  border: none; /* No border when focused or option is selected */
+  outline: none;
+}
+
+/* On hover, change the background color instead of border */
+.custom-select:hover {
+  background-color: #f0f0f0; /* Light grey background on hover */
+}
+
+/* On focus (when the select is clicked), add a subtle shadow */
+.custom-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.5); /* Optional: Blue focus shadow */
+}
+
+/* Dropdown options */
+.custom-select option {
+  padding: 1rem 2rem;
+  background-color: #fff;
+  color: #333;
+  font-size: 1rem;
+}
+
+.custom-select option:hover {
+  background-color: var(
+    --color-grey-light-1
+  ); /* Light grey background on hover */
+}
+/* Optional: Add a wrapper with overflow for better control */
+
+.checkbox-wrapper1 label {
+  position: relative;
+  cursor: pointer;
+  font-size: 1.2rem;
+  font-family: "Lato", sans-serif;
+  font-weight: 300;
+  color: var(--color-grey-dark-3);
+  display: flex;
+  align-items: center;
+}
+.checkbox-wrapper1 input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.9em;
+  height: 1.9em;
+  border-radius: 0.25em;
+  margin-right: 0.5em;
+  border: 0.15em solid var(--color-grey-light-4);
+  outline: none;
+  cursor: pointer;
+  position: relative;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Apply color and visual styles when checkbox is checked */
+.checkbox-wrapper1 input[type="checkbox"]:checked {
+  background-color: #007bff; /* Blue background */
+  border-color: #007bff; /* Blue border */
+}
+
+/* Custom checkmark for checkbox when checked */
+.checkbox-wrapper1 input[type="checkbox"]:checked::before {
+  content: "\2714"; /* Checkmark symbol */
+  font-size: 1.36em;
+  color: #fff; /* White checkmark */
+  position: absolute;
+  top: -2px;
+  left: 3px;
+}
+
+/* Disabled state styling */
+.checkbox-wrapper1 input[type="checkbox"]:disabled {
+  border-color: #c0c0c0;
+  background-color: #c0c0c0;
+}
+
+.checkbox-wrapper1 input[type="checkbox"]:disabled + span {
+  color: #c0c0c0;
+}
+
+.checkbox-wrapper1 input[type="checkbox"]:focus {
+  box-shadow: 0 0 10px var(--color-grey-light-1);
+}
+
+/* Radio Button Styles */
+.radio {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.3rem;
+  position: relative;
+}
+
+.inputR {
+  display: none; /* Hide the actual radio input */
+}
+
+/* Label styles for the custom radio button */
+.labelR {
+  font-size: 1.1rem;
+  position: relative;
+  padding-left: 2.2rem; /* Space for the custom radio button */
+  font-family: "Lato", sans-serif;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  @media only screen and (max-width: $bp-smallest) {
+    font-size: 1.3rem;
+  }
+}
+
+/* Custom radio button (outer circle) */
+.rButton {
+  height: 1.5rem;
+  width: 1.5rem;
+  border: 1.5px solid var(--color-grey-dark-2);
+  border-radius: 50%;
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  top: 0.1rem;
+  background-color: white;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* When the radio button is checked, change its background */
+.inputR:checked ~ .labelR .rButton {
+  background-color: #007bff; /* Blue background */
+  border-color: #007bff; /* Blue border */
+}
+
+/* Inner circle of the radio button when checked */
+.rButton::after {
+  content: "";
+  display: block;
+  height: 1.1rem;
+  width: 1.1rem;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  opacity: 0; /* Initially hidden */
+  transition: opacity 0.2s;
+}
+
+/* Make the inner circle visible when checked */
+.inputR:checked ~ .labelR .rButton::after {
+  opacity: 1;
+}
+
+/* Hover effect for the custom radio button */
+.rButton:hover {
+  border-color: #0056b3; /* Darker border color on hover */
+}
+
+.products-list-wrapper {
+  margin-top: 2rem;
+  grid-column: full-start/full-end;
+  padding-left: 4rem;
+  padding-right: 4rem;
+  display: grid;
+  grid-template-columns: 0.3fr 1fr;
+  font-family: "lato", sans-serif;
+  gap: 2rem;
+
+  @media only screen and (max-width: $bp-smallest) {
+    grid-column: full-start/full-end;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    grid-template-columns: 1fr;
+  }
+
+  .left {
+    //background-color: white;
+
+    display: flex;
+    margin-top: 3rem;
+    padding: 1rem 2rem;
+    flex-direction: column;
+    gap: 2rem;
+
+    @media only screen and (max-width: $bp-smallest) {
+      display: none;
+    }
+
+    .filter-1,
+    .filter-2,
+    .filter-3,
+    .filter-4 {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .filter-name {
+        font-size: 1rem;
+        font-family: inherit;
+        font-weight: bold;
+      }
+
+      .buttons-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-right: 3rem;
+
+        button {
+          width: 1.5rem;
+          height: 1.5rem;
+          border: none;
+          border-radius: 50%;
+        }
+      }
+      .rating-filter {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+    }
+  }
+
+  .right {
+    //background-color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    .first {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+
+      @media only screen and (max-width: $bp-smallest) {
+        display: none;
+      }
+
+      .select-wrapper {
+        align-self: flex-end;
+      }
+    }
+    .products-list {
+      margin-top: 2rem;
+      display: grid; /* Use grid layout */
+      grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+      gap: 1rem;
+
+      @media only screen and (max-width: $bp-smallest) {
+        gap: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+        margin-top: 2rem;
+        margin-bottom: 10rem;
+      }
+    }
+    .mobile-filters-wrapper {
+      display: none;
+      @media only screen and (max-width: $bp-smallest) {
+        display: flex;
+        flex-direction: column;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: $bp-smallest) {
+  .mobile-filters {
+    display: flex;
+    align-items: center;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 20px;
+    width: 100%;
+    z-index: 9999;
+    background-color: white;
+  }
+
+  .filter-sort-button {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 1rem 2rem;
+    background-color: transparent;
+    border: 1px solid var(--color-grey-light-1);
+    cursor: pointer;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--color-grey-dark-3);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .filter-menu,
+  .sort-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 5rem 3rem; /* Ensure it is initially visible for transition */
+    position: fixed;
+    bottom: -100%; /* Starts off-screen */
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: white;
+    z-index: 10000;
+    transition: bottom 0.4s ease; /* Add transition */
+    .filter-action {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 1rem;
+      button {
+        padding: 1rem 2rem;
+        border: none;
+        transition: background-color 0.3s ease;
+
+        &:first-child {
+          background-color: var(--light-gold);
+          color: white;
+          &:hover {
+            background-color: var(--dark-gold);
+          }
+        }
+        &:last-child {
+          background-color: var(--color-grey-light-1);
+          color: var(--color-grey-dark-3);
+          &:hover {
+            background-color: var(--color-grey-light-4);
+          }
+        }
+      }
+    }
+    .filter-close-btn {
+      align-self: flex-end;
+      border: none;
+      background-color: transparent;
+      svg {
+        color: var(--color-grey-dark-3);
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+    .filter-1,
+    .filter-2,
+    .filter-3,
+    .filter-4 {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+
+      .filter-name {
+        font-size: 1.2rem;
+        font-family: inherit;
+        font-weight: 500;
+      }
+
+      .buttons-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.9rem;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        padding-right: 5rem;
+
+        button {
+          width: 1.8rem;
+          height: 1.8rem;
+          border: none;
+          border-radius: 50%;
+        }
+      }
+      .rating-filter {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+      }
+    }
+  }
+  .filter-menu.active,
+  .sort-menu.active {
+    bottom: 0; /* Move into view */
+  }
+}

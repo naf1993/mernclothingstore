@@ -6,7 +6,7 @@ import Loader from "../components/Loader";
 import Message from "../components/Message";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-
+import { apiUrl } from "../actions/apiUrl";
 import { FcGoogle } from "react-icons/fc";
 const image1 = require("../img/loginimage.jpg");
 
@@ -19,7 +19,7 @@ const Login = () => {
   const user = useSelector((state) => state.user);
   const { isAuthenticated,error,isLoading } = user;
   
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
 
   useEffect(() => {
     if (isAuthenticated) {

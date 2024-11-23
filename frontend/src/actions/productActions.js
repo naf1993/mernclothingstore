@@ -1,26 +1,31 @@
-import {
-  PRODUCT_CATEGORY_REQUEST,
-  PRODUCT_CATEGORY_SUCCESS,
-  PRODUCT_LIST_SUCCESS,
-  PRODUCT_CATEGORY_FAIL,
-} from "../constants/productConstants";
 import { PRODUCT_LIST_FAIL } from "../constants/productConstants";
 import { PRODUCT_LIST_REQUEST } from "../constants/productConstants";
 import { PRODUCT_DETAIL_REQUEST } from "../constants/productConstants";
 import { PRODUCT_DETAIL_SUCCESS } from "../constants/productConstants";
 import { PRODUCT_DETAIL_FAIL } from "../constants/productConstants";
 import {
+  PRODUCT_CATEGORY_REQUEST,
+  PRODUCT_CATEGORY_SUCCESS,
+  PRODUCT_LIST_SUCCESS,
+  PRODUCT_CATEGORY_FAIL,
   PRODUCT_COLORS_SUCCESS,
   PRODUCT_COLORS_REQUEST,
   PRODUCT_COLORS_REJECT,
   RELATED_PRODUCTS_FAIL,
   RELATED_PRODUCTS_REQUEST,
-  RELATED_PRODUCTS_SUCCESS,GET_SEARCH_PRODUCTS_FAIL,GET_SEARCH_PRODUCTS_REQUEST,GET_SEARCH_PRODUCTS_SUCCESS,CLEAR_SEARCHED_PRODUCTS
+  GET_SUBCATEGORIES_FAIL,
+  GET_SUBCATEGORIES_SUCCESS,
+  GET_SUBCATEGORIES_REQUEST,
+  RELATED_PRODUCTS_SUCCESS,
+  GET_SEARCH_PRODUCTS_FAIL,
+  GET_SEARCH_PRODUCTS_REQUEST,
+  GET_SEARCH_PRODUCTS_SUCCESS,
+  CLEAR_SEARCHED_PRODUCTS,
 } from "../constants/productConstants";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { apiUrl } from "./apiUrl";
 
 export const getCategories = () => async (dispatch) => {
   try {
@@ -72,10 +77,12 @@ export const getRelatedProducts =
     }
   };
 
-export const listProducts = () => async (dispatch) => {
+export const listProducts = (categoryId) => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST });
-    const { data } = await axios.get(`${apiUrl}/api/products`);
+    const { data } = await axios.get(
+      `${apiUrl}/api/products?Category=${categoryId}`
+    );
 
     const allProducts = data.data.products;
     console.log(allProducts);
@@ -132,4 +139,21 @@ export const clearSearchedProducts = () => {
   return {
     type: CLEAR_SEARCHED_PRODUCTS,
   };
+};
+
+export const getSubCategories = (categoryId) => async (dispatch) => {
+  try {
+    dispatch({ type: GET_SUBCATEGORIES_REQUEST });
+    const { data } = await axios.get(`${apiUrl}/api/categories/${categoryId}`);
+
+    dispatch({
+      type: GET_SUBCATEGORIES_SUCCESS,
+      payload: data.data.category.subcategories,
+    });
+  } catch (error) {
+    dispatch({
+      type: GET_SUBCATEGORIES_FAIL,
+      payload: error.response.data.message,
+    });
+  }
 };

@@ -7,8 +7,7 @@ import {
   REVIEW_ELIGIBLE_SUCCESS,
   REVIEW_CREATE_FAIL,
 } from "../constants/productConstants";
-
-const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+import { apiUrl } from "./apiUrl";
 
 export const checkEligibleForReview =
   (productId) => async (dispatch, getState) => {
