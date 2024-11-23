@@ -10,13 +10,14 @@ import Cookies from "js-cookie";
 import { loginUserWithOauth, loadUser } from "./actions/userActions";
 import axios from "axios";
 import Protected from "./components/Protected";
-import {Toaster} from 'react-hot-toast'
+import { Toaster } from "react-hot-toast";
 import ProductsCategory from "./screens/ProductsCategory";
 import About from "./screens/About";
 import ReturnPolicy from "./screens/ReturnPolicy";
 import Contact from "./screens/Contact";
 import AccountPage from "./screens/AccountPage";
 import ProductList1 from "./screens/ProductList1";
+import { apiUrl } from "./actions/apiUrl";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
@@ -26,13 +27,12 @@ const Login = lazy(() => import("./screens/Login"));
 const Register = lazy(() => import("./screens/Register"));
 const Favourites = lazy(() => import("./screens/Favourites"));
 const Cart = lazy(() => import("./screens/Cart"));
-const ProductList = lazy(() => import("./screens/ProductList"));
 const SingleProduct = lazy(() => import("./screens/SingleProduct"));
 
-const PlaceOrder = lazy(()=>import('./screens/PlaceOrder'))
-const OrdersPage = lazy(()=>import('./screens/OrdersPage'))
+const PlaceOrder = lazy(() => import("./screens/PlaceOrder"));
+const OrdersPage = lazy(() => import("./screens/OrdersPage"));
 
-const OrderSucess = lazy(()=>import('./screens/OrderSuccess'))
+const OrderSucess = lazy(() => import("./screens/OrderSuccess"));
 
 const App = () => {
   const [loading, setLoading] = useState(true);
@@ -40,8 +40,6 @@ const App = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const { token, appLoaded, isLoading, isAuthenticated } = user;
-  
-const apiUrl = 'http://localhost:5000';
 
   useEffect(() => {
     const fetchCategoriesAndUser = async () => {
@@ -76,37 +74,75 @@ const apiUrl = 'http://localhost:5000';
 
   return (
     <>
-     <Router>
-      <Elements stripe={stripePromise}>
-      <ScrollToTop />
-      <Suspense fallback={<LoadingFullScreen />}>
-        <Routes>
-          <Route path="/" element={<Layout navItems={navItems} />}>
-            <Route index element={<Home />} />
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
-            <Route path="products/:category/:id" element={<ProductList1 />} />
-            <Route path="products/:categoryId/:subcategoryId" element={<ProductsCategory />} />
-            <Route path="products/:id" element={<SingleProduct/>} />
-           
-            <Route path="favourites" element={<Protected><Favourites/></Protected>}/>
-            <Route path="cart" element={<Cart />} />
-            <Route path="placeorder" element={<Protected><PlaceOrder/></Protected>}/>
-            <Route path='orders' element={<Protected><OrdersPage/></Protected>}/>
-            <Route path='ordersuccess' element={<Protected><OrderSucess/></Protected>}/>
-            <Route path='about' element={<About/>}/>
-            <Route path='returnpolicy' element={<ReturnPolicy/>}/>
-            <Route path='contact' element={<Contact/>}/>
-            <Route path='account' element={<Protected><AccountPage/></Protected>}/>
+      <Router>
+        <Elements stripe={stripePromise}>
+          <ScrollToTop />
+          <Suspense fallback={<LoadingFullScreen />}>
+            <Routes>
+              <Route path="/" element={<Layout navItems={navItems} />}>
+                <Route index element={<Home />} />
+                <Route path="login" element={<Login />} />
+                <Route path="register" element={<Register />} />
+                <Route
+                  path="products/:category/:id"
+                  element={<ProductList1 />}
+                />
+                <Route
+                  path="products/:categoryId/:subcategoryId"
+                  element={<ProductsCategory />}
+                />
+                <Route path="products/:id" element={<SingleProduct />} />
 
-            
-            
-          </Route>
-        </Routes>
-      </Suspense>
-      </Elements>
-    </Router>
-    <Toaster
+                <Route
+                  path="favourites"
+                  element={
+                    <Protected>
+                      <Favourites />
+                    </Protected>
+                  }
+                />
+                <Route path="cart" element={<Cart />} />
+                <Route
+                  path="placeorder"
+                  element={
+                    <Protected>
+                      <PlaceOrder />
+                    </Protected>
+                  }
+                />
+                <Route
+                  path="orders"
+                  element={
+                    <Protected>
+                      <OrdersPage />
+                    </Protected>
+                  }
+                />
+                <Route
+                  path="ordersuccess"
+                  element={
+                    <Protected>
+                      <OrderSucess />
+                    </Protected>
+                  }
+                />
+                <Route path="about" element={<About />} />
+                <Route path="returnpolicy" element={<ReturnPolicy />} />
+                <Route path="contact" element={<Contact />} />
+                <Route
+                  path="account"
+                  element={
+                    <Protected>
+                      <AccountPage />
+                    </Protected>
+                  }
+                />
+              </Route>
+            </Routes>
+          </Suspense>
+        </Elements>
+      </Router>
+      <Toaster
         position="bottom-right"
         gutter={12}
         containerStyle={{ margin: "8px" }}
@@ -127,7 +163,6 @@ const apiUrl = 'http://localhost:5000';
         }}
       />
     </>
-   
   );
 };
 
