@@ -80,9 +80,12 @@ export const getRelatedProducts =
 export const listProducts = (categoryId) => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_LIST_REQUEST });
-    const { data } = await axios.get(
-      `${apiUrl}/api/products?Category=${categoryId}`
-    );
+    const endpoint = categoryId
+      ? `${apiUrl}/api/products?Category=${categoryId}`
+      : `${apiUrl}/api/products`;
+
+    // Fetch products from API
+    const { data } = await axios.get(endpoint);
 
     const allProducts = data.data.products;
     console.log(allProducts);

@@ -79,10 +79,11 @@ const App = () => {
           <ScrollToTop />
           <Suspense fallback={<LoadingFullScreen />}>
             <Routes>
+              <Route path="login" element={<Login />} />
+              <Route path="register" element={<Register />} />
               <Route path="/" element={<Layout navItems={navItems} />}>
                 <Route index element={<Home />} />
-                <Route path="login" element={<Login />} />
-                <Route path="register" element={<Register />} />
+
                 <Route
                   path="products/:category/:id"
                   element={<ProductList1 />}

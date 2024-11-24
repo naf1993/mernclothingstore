@@ -40,7 +40,7 @@ const Register = () => {
   }
   return (
    <div className='login-container'>
-   <div className='wrapper'>
+   <div className='wrapper-login'>
    
     <div className="image-container">
       <figure className='image-figure'>
@@ -87,7 +87,7 @@ const Register = () => {
        
          
           <div className='register'>
-          <span>Already have account? <Link to='/login'>Login</Link></span>
+          <span>Already have account? <Link className='login-link' to='/login'>Login</Link></span>
         </div>
     </div>
    </div>

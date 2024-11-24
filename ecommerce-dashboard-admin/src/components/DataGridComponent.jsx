@@ -139,6 +139,7 @@ const DataGridComponent = ({ type, refresh }) => {
       dispatch(getAllOrders());
     }
   }, [dispatch, type, refresh]);
+  console.log(items[1]?.profilePhoto)
   const [filteredProducts, setFilteredProducts] = useState(items);
   const [noResults, setNoResults] = useState(false);
   const handleFilterChange = (filteredProducts) => {
@@ -506,6 +507,26 @@ const DataGridComponent = ({ type, refresh }) => {
           Payment Status (e.g., Paid, Pending, Failed)
           Order Status (e.g., Processing, Dispatched, Delivered, Cancelled)
           Actions (View, Edit, Delete) */
+          {
+            field: "profilePhoto",
+            headerName: "Profile Photo",
+            width: 80,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+              <Box
+                component="img"
+                sx={{
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                  borderRadius: "50%",
+                }}
+                src={params.row.profilePhoto || "/placeholder-image.png"} // Fallback image
+                alt="user image"
+              />
+            ),
+          },
           {
             field: "orderId",
             headerName: "Order ID",

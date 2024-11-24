@@ -36,7 +36,7 @@ const Login = () => {
   };
   return (
     <div className="login-container">
-      <div className="wrapper">
+      <div className="wrapper-login">
         <div className="image-container">
           <figure className="image-figure">
             <img src={image1} className="login-img" alt="hijab" />{" "}
@@ -76,17 +76,7 @@ const Login = () => {
             <button type="submit" className="login-btn">
               Sign In
             </button>
-            <span
-              className="or"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: ".2rem 0",
-              }}
-            >
-              or
-            </span>
+           
            
           </form>
           <button
@@ -106,7 +96,7 @@ const Login = () => {
           </Link>
           <div className="register">
             <span>
-              Dont have an account? <Link to="/register">Register here</Link>
+              Dont have an account? <Link className="register-link" to="/register">Register here</Link>
             </span>
           </div>
         </div>
