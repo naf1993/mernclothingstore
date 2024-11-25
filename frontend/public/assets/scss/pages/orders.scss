@@ -156,16 +156,34 @@ $accordion-header-padding: 15px;
           justify-content: space-between;
           margin-bottom: 1rem;
 
-          .item-details {
-            p {
-              margin: 0.5rem 0;
-              color: var(--color-grey-dark-1);
-            }
-          }
+          // .item-details {
+          //   p {
+          //     margin: 0.5rem 0;
+          //     color: var(--color-grey-dark-1);
+          //   }
+          // }
         }
       }
     }
+    
   }
+}
+.item-details{
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+}
+.return-btn,.cancel-btn{
+  border:none;
+  padding:0.5rem 1rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  font-family: inherit;
+  font-weight: 400;
+}
+.return-btn{
+  background-color: var(--light-gold);
+  color:white;
 }
 
 // Mobile responsiveness

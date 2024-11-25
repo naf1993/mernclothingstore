@@ -7,6 +7,7 @@
 }
 
 html {
+  height: 100%;
   font-size: 70%;
   font-weight: 300;
   color: var(--color-grey-dark-3);
@@ -17,6 +18,7 @@ html {
 }
 
 body {
+  height: 100%;
   box-sizing: border-box;
 }
 
@@ -63,6 +65,7 @@ body {
   }
   @media only screen and (max-width: $bp-smallest) {
     margin-top: 2rem;
+    margin-bottom: 10rem;
     grid-template-columns:
       [full-start] minmax(3rem, 1fr) [center-start] repeat(
         8,

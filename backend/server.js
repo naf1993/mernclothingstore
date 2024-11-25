@@ -41,7 +41,7 @@ const io = new Server(server, {
     origin: process.env.NODE_ENV === "development" 
       ? "*"  // Allow all origins in development
       : process.env.FRONTEND_URL,  // Vercel app URL for production
-    methods: ["GET", "POST", "PUT", "DELETE"],  // Add other methods if necessary
+    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],  // Add other methods if necessary
     allowedHeaders: ["Content-Type", "Authorization"], // Allow additional headers
   },
   transports: ["websocket", "polling"], 
@@ -64,7 +64,7 @@ const corsOptions = {
   origin: process.env.NODE_ENV === "development" 
     ? "*"  // Allow all origins in development
     : process.env.FRONTEND_URL, // Vercel production URL
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 

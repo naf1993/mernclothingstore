@@ -24,6 +24,48 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
+
+const sendAdminNotification = async (order) => {
+  try {
+    // Create a transporter object using SMTP transport
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // You can use any service provider, or SMTP server
+      auth: {
+        user: 'your-email@gmail.com', // Admin's email (use environment variables in production)
+        pass: 'your-email-password',  // Email password or use App-specific password (for Gmail)
+      },
+    });
+
+    // Prepare the email message
+    const mailOptions = {
+      from: 'your-email@gmail.com',
+      to: 'admin-email@example.com', 
+      subject: `Refund Needed: Order ${order.orderId}`,
+      html: `
+        <h1>Refund Required for Order #${order.orderId}</h1>
+        <p>A customer has requested a return. The refund amount of <strong>₹${order.refundAmount}</strong> needs to be processed via bank transfer.</p>
+        <h3>Order Details:</h3>
+        <ul>
+          <li><strong>Customer Name:</strong> ${order.user.name}</li>
+          <li><strong>Order ID:</strong> ${order.orderId}</li>
+          <li><strong>Payment Method:</strong> ${order.paymentMethod}</li>
+          <li><strong>Refund Amount:</strong> ₹${order.refundAmount}</li>
+        </ul>
+        <p>Please initiate the refund and update the status in the system once completed.</p>
+      `,
+    };
+    
+
+    // Send the email
+    await transporter.sendMail(mailOptions);
+
+    console.log('Admin notification sent successfully');
+  } catch (error) {
+    console.error('Error sending admin notification:', error);
+  }
+};
+
+
 const sendOrderConfirmationEmail = async (order, email) => {
   const transporter = nodemailer.createTransport({
     service: "Gmail",
@@ -54,7 +96,7 @@ export const checkIfFirstOrder = catchAsync(async (req, res) => {
       },
     });
   }
-  
+
   // Only send the response if no orders are found
   return res.status(200).json({
     status: "success",
@@ -73,7 +115,6 @@ export const webhookHandler = catchAsync(async (req, res, next) => {
   let event;
   try {
     event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
-   
   } catch (err) {
     console.error("Webhook signature verification failed:", err.message); // Log any signature verification error
     return next(new AppError("Webhook signature verification failed", 400));
@@ -83,7 +124,7 @@ export const webhookHandler = catchAsync(async (req, res, next) => {
   switch (event.type) {
     case "payment_intent.created":
       const paymentIntentCreated = event.data.object;
-     
+
       break;
 
     case "payment_intent.succeeded":
@@ -106,14 +147,25 @@ export const webhookHandler = catchAsync(async (req, res, next) => {
         return next(new AppError(`Order with ID ${orderId} not found`, 400));
       }
 
+       // Capture the charge ID from the paymentIntent object
+       const stripeChargeId = paymentIntent.charges.data[0].id; // This is the actual charge ID created by Stripe
+      
+       // Update the order with the charge ID and payment status
+       order.stripeChargeId = stripeChargeId;  // Store the stripe charge ID in the order
+       order.paymentStatus = 'Paid';  // Update the payment status to 'Paid'
+       
+       // Save the order with the updated payment status and charge ID
+       await order.save();
+
       // Prepare order message to send to RabbitMQ
       const orderMessage = {
-        user,order,
+        user,
+        order,
         products: order.products,
       };
 
       console.log("Sending order message to RabbitMQ:", orderMessage);
-      await sendToQueue(orderMessage);  // Assuming sendToQueue is properly set up to handle this
+      await sendToQueue(orderMessage); // Assuming sendToQueue is properly set up to handle this
 
       break;
 
@@ -150,7 +202,6 @@ export const getPaymentIntent = catchAsync(async (req, res) => {
 
   const totalPrice = products.reduce((acc, item) => acc + item.total, 0) * 100; // Price in paise
   const userId = user._id;
-  
 
   // Create the order in the database
   const order = await Order.create({
@@ -159,10 +210,9 @@ export const getPaymentIntent = catchAsync(async (req, res) => {
     products,
     address,
     paymentMethod,
-    totalPrice: totalPrice / 100 ,
+    totalPrice: totalPrice / 100,
     discountCode: discountCode || "",
   });
-  
 
   // Create the payment intent and pass both orderId and userId in metadata
   const paymentIntent = await stripe.paymentIntents.create({
@@ -173,9 +223,6 @@ export const getPaymentIntent = catchAsync(async (req, res) => {
       userId: userId.toString(), // Ensure userId is passed as string
     },
   });
-
- 
-
 
   return res.status(200).json({
     status: "success",
@@ -206,12 +253,13 @@ export const createCashOrder = catchAsync(async (req, res, next) => {
   });
 
   const orderMessage = {
-    user,order,
+    user,
+    order,
     products: order.products,
   };
 
   console.log("Sending order message to RabbitMQ:", orderMessage);
-  await sendToQueue(orderMessage); 
+  await sendToQueue(orderMessage);
   res.status(201).json({
     status: "success",
     data: {
@@ -250,6 +298,98 @@ export const bulkUpdateOrders = catchAsync(async (req, res, next) => {
     default:
       return res.status(400).json({ message: "Invalid action" });
   }
+});
+
+export const returnProduct = catchAsync(async (req, res) => {
+  const { orderId } = req.params;
+  
+  const { productIds,reason } = req.body; //productIDS IS ARRAY OF PRODUCTS NEED TO BE REFUNDED //CALCULATE REFUND AMOUNT
+
+  const order = await Order.findOne({ orderId });
+  if (!order) {
+    return next(new AppError("No order found", 404));
+  }
+  if (order.returnStatus === "Returned") {
+    return next(new AppError("Product already returned", 400));
+  }
+  const today = new Date();
+  const deliveredDate = new Date(order.deliveredDate);
+  const diffTime = Math.abs(today - deliveredDate);
+  const diffinDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  if (diffinDays > 7) {
+    return next(
+      new AppError(
+        "Return period has expired. You can return the product only within 7 days of delivery.",
+        400
+      )
+    );
+  }
+  (order.returnStatus = "Returned"), (order.orderStatus = "Returned");
+
+  let refundAmount = 0;
+  const returnedProducts = order.products.filter((product) =>
+    productIds.includes(product.productId)
+  );
+
+  returnedProducts.forEach((product) => {
+    refundAmount += product.total;
+  });
+  order.refundAmount = refundAmount;
+
+  if (order.paymentMethod === "Cash on Delivery") {
+    order.refundStatus = 'Processing'
+    await order.save()
+    await sendAdminNotification(order)
+  } else if (order.paymentStatus === "Credit Card") {
+    const refund = await stripe.refunds.create({
+      charge: order.stripeChargeId,
+      amount: refundAmount * 100,
+    });
+    order.paymentStatus = "Refunded";
+  }
+  res.status(200).json({
+    message: "Return request processed successfully. Refund will be initiated.",
+    refundAmount, // Include the calculated refund amount in the response
+    orderId: order.orderId,
+  });
+});
+
+export const cancelOrder = catchAsync(async (req, res) => {
+  const { orderId } = req.params;
+  const order = await Order.findOne({ orderId });
+  if (!order) {
+    return next(new AppError("No order found", 404));
+  }
+  if (order.orderStatus === "Shipped" || order.orderStatus === "Delivered") {
+    return next(new AppError("No order found", 400));
+  }
+  const today = new Date();
+  const deliveredDate = new Date(order.deliveredDate);
+  const diffTime = Math.abs(today - deliveredDate);
+  const diffinDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  if (order.orderStatus === "Delivered" && diffinDays > 7) {
+    return next(
+      new AppError(
+        "Cancellation period has expired. You can cancel the order only within 7 days of delivery.",
+        400
+      )
+    );
+  }
+
+  order.orderStatus = "Cancelled";
+  if (order.paymentMethod === "Cash on Delivery") {
+    order.paymentStatus = "Cancelled";
+  } else if (order.paymentMethod === "Credit Card") {
+    const refund = await stripe.refunds.create({
+      charge: order.stripeChargeId,
+    });
+    (order.paymentStatus = "Refunded"), (order.refundAmount = order.totalPrice);
+  }
+  await order.save();
+
+  res.status(200).json({
+    message: "Order Cancelled",
+  });
 });
 export const getUpdatedOrder = catchAsync(async (req, res, next) => {
   const { orderId } = req.query;

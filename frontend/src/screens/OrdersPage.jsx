@@ -41,7 +41,13 @@ const OrdersPage = () => {
       ease: "power2.out",
     });
   };
-
+const handleReturn = (productId,orderId) => {
+  console.log(productId)
+  console.log(orderId)
+}
+const handleCancel = (orderId)=>{
+  console.log(orderId)
+}
   //const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
   return (
     <div className="page-container">
@@ -139,8 +145,9 @@ const OrdersPage = () => {
                       <div className="item-details">
                         <p>{item.productId.name}</p>
                         <p>Qty: {item.count}</p>
-                        <p>Price: ₹{item.price}</p>
-                        <p>Total: {item.total}</p>
+                        <p>Total: ₹{item.total}</p>
+                        {order.paymentStatus === 'Paid' && order.orderStatus === 'Delivered' && (<button className="return-btn" onClick={()=>handleReturn(item._id,order.orderId)}>Return Product</button>)}
+                        
                       </div>
                     </div>
                   ))}
@@ -166,6 +173,8 @@ const OrdersPage = () => {
                 <div className="payment-method">
                   <h3>Payment Method</h3>
                   <p>{order.paymentMethod}</p>
+                  {order.paymentStatus === 'Paid' && order.orderStatus === 'Delivered' && (<button className="cancel-btn" onClick={()=>handleCancel(order.orderId)}>Cancel Order</button>)}
+                 
                 </div>
               </div>
             </div>
