@@ -18,6 +18,7 @@ import Contact from "./screens/Contact";
 import AccountPage from "./screens/AccountPage";
 import ProductList1 from "./screens/ProductList1";
 import { apiUrl } from "./actions/apiUrl";
+import UpdateProfile from "./screens/UpdateProfile";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
@@ -135,6 +136,14 @@ const App = () => {
                   element={
                     <Protected>
                       <AccountPage />
+                    </Protected>
+                  }
+                />
+                 <Route
+                  path="updateProfile"
+                  element={
+                    <Protected>
+                      <UpdateProfile />
                     </Protected>
                   }
                 />

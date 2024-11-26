@@ -107,12 +107,44 @@ body {
   font-family: "Lato", sans-serif;
   gap: 1rem;
   @media only screen and (max-width: $bp-smallest) {
+    display: flex;
+   
+    
     grid-column: full-start/full-end;
     padding-left: 1rem;
     padding-right: 1rem;
   }
+  .user-actions{
+    
+    display: flex;
+    align-items: center;
+    gap:1rem;
+    @media only screen and (max-width: $bp-smallest) {
+      margin: 0 auto;
+    }
+   
+  .btn-user-actions{
+    border:none;
+    background-color:var(--light-gold);
+    color:white;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    &:hover{
+      background-color: var(--dark-gold);
+    }
+    @media only screen and (max-width: $bp-smallest) {
+      padding:1rem 1.5rem;
+    }
+   &:last-child{
+    background-color:var(--color-grey-dark-3);
+    &:hover{
+      background-color: var(--color-grey-light-1);
+    }
+   } 
+  }
+  }
 
-  h1 {
+  h1,h2 {
     font-size: 1.5rem;
     font-weight: 400;
     font-family: inherit;
@@ -120,6 +152,19 @@ body {
     color: var(--color-grey-dark-3);
     text-align: center;
     letter-spacing: 0.8px;
+  }
+  .account-heading{
+    text-align: center;
+  }
+  .account-email{
+    text-align: center;
+  }
+  p{
+    font-size: 1.2rem;
+    font-family: inherit;
+    font-weight: 400;
+    color:var(--color-grey-dark-3);
+    letter-spacing: 0.2px;
   }
 
   .form-group {
@@ -132,6 +177,10 @@ body {
       font-family: inherit;
       text-transform: uppercase;
       font-weight: 400;
+      color:var(--color-grey-dark-3);
+      @media only screen and (max-width: $bp-smallest) {
+       font-size: 1rem;
+      }
     }
     input {
       width: 100%;
@@ -139,6 +188,9 @@ body {
       border: none;
       border-radius: 4px;
       color: var(--color-grey-dark-3);
+      @media only screen and (max-width: $bp-smallest) {
+        padding: 0.7rem 0.9rem;
+      }
     }
     textarea {
       padding: 0.5rem 0.7rem;
@@ -157,5 +209,10 @@ body {
     border-radius: 4px;
     background-color: var(--color-pink-light);
     color: white;
+    @media only screen and (max-width: $bp-smallest) {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+    }
+    
   }
 }

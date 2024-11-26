@@ -1,32 +1,48 @@
 import React from "react";
-import { AiOutlineHome, AiOutlineUser } from "react-icons/ai";
+import { AiOutlineHeart, AiOutlineHome, AiOutlineUser } from "react-icons/ai";
+import { BsCart } from "react-icons/bs";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const FooterContentSmallScreen = () => {
   const navigate = useNavigate(); // Initialize the navigate function
   const location = useLocation();
-  const handleHomeClick = () => {
-    navigate("/"); // Navigate to the home page
-  };
-
-  const handleUserClick = () => {
-    navigate("/account"); // Navigate to the user account page
-  };
+  const user = useSelector((state) => state.user);
+  const { isAuthenticated } = user;
 
   const isHome = location.pathname === "/";
   const isUser = location.pathname === "/account";
+  const isCart = location.pathname === "/cart";
+  const isFav = location.pathname === "/favourites";
 
   return (
     <div className="footer-container-sm">
       <button
         className={`footer-container-smbtn ${isHome ? "active" : ""}`}
-        onClick={handleHomeClick}
+        onClick={() => navigate("/")}
       >
         <AiOutlineHome />
       </button>
+      {isAuthenticated && (
+        <>
+          <button
+            className={`footer-container-smbtn ${isCart ? "active" : ""}`}
+            onClick={() => navigate("/cart")}
+          >
+            <BsCart />
+          </button>
+          <button
+            className={`footer-container-smbtn ${isFav ? "active" : ""}`}
+            onClick={() => navigate("/favourites")}
+          >
+            <AiOutlineHeart />
+          </button>
+        </>
+      )}
+
       <button
         className={`footer-container-smbtn ${isUser ? "active" : ""}`}
-        onClick={handleUserClick}
+        onClick={() => navigate("/account")}
       >
         <AiOutlineUser />
       </button>
