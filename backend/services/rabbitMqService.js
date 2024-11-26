@@ -3,7 +3,7 @@ import User from "../models/userModel.js";
 import Product from "../models/productModel.js";
 import Order from "../models/orderModel.js"; // Fixed model import for Order
 import Notification from "../models/notificationModel.js";
-
+import { sendEmail } from "../utils/email.js";
 // Function to send messages to RabbitMQ
 const sendToQueue = async (message) => {
   try {
@@ -96,6 +96,12 @@ const processOrder = async (receivedOrder) => {
     });
     await notification.save();
     console.log("Notification created successfully.");
+   const userEmail = 'haffis02@gmail.com'
+    const subject = 'Order Confirmation';
+    const textContent = `Your order #${order.orderId} has been confirmed. The total amount is ₹${totalAmount}.`;
+    const htmlContent = `<strong>Order Confirmation</strong><br>Your order #${order.orderId} has been confirmed.<br>The total amount is ₹${totalAmount}.`;
+  
+    await sendEmail({ userEmail, subject, textContent, htmlContent });
   } catch (error) {
     console.error("Error processing order:", error);
   }

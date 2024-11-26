@@ -15,6 +15,7 @@ import nodemailer from "nodemailer";
 
 import { fileURLToPath } from "url";
 import { sendToQueue } from "../services/rabbitMqService.js";
+import { sendEmail } from "../utils/email.js";
 
 const stripe = stripeLib(process.env.STRIPE_API_KEY);
 const endpointSecret = process.env.STRIPE_WEB_HOOK_SECRET;
@@ -379,13 +380,20 @@ export const cancelOrder = catchAsync(async (req, res) => {
   order.orderStatus = "Cancelled";
   if (order.paymentMethod === "Cash on Delivery") {
     order.paymentStatus = "Cancelled";
+    await order.save()
   } else if (order.paymentMethod === "Credit Card") {
     const refund = await stripe.refunds.create({
       charge: order.stripeChargeId,
     });
     (order.paymentStatus = "Refunded"), (order.refundAmount = order.totalPrice);
+    await order.save();
+    let userEmail = 'haffis02@gmail.com'
+    let subject = 'Payment Refunded'
+    let textContent = `Your payment of  ₹${refundAmount} has been refunded.`
+    let htmlContent = `<strong>Payment Refunded</strong><br>Your payment of ₹${refundAmount} has been refunded.`;
+    await sendEmail({userEmail,subject,textContent,htmlContent})
   }
-  await order.save();
+  
 
   res.status(200).json({
     message: "Order Cancelled",

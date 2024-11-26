@@ -8,8 +8,7 @@ import { promisify } from "util";
 import sendEmail from "../utils/email.js";
 import crypto from "crypto";
 
-
-const secretOrKey = process.env.JWT_SECRET
+const secretOrKey = process.env.JWT_SECRET;
 
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -51,13 +50,13 @@ const register = catchAsync(async (req, res, next) => {
     throw new Error("User already exists");
   }
   const user = await User.create({
-    provider:'email',
+    provider: "email",
     name,
     email,
     password,
     isAdmin,
   });
-  const token = user.generateJWT()
+  const token = user.generateJWT();
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
@@ -73,13 +72,16 @@ const register = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: "success",
-    token:token,
+    token: token,
     data: {
       user,
     },
   });
-
- 
+  const userEmail = "haffis02@gmail.com";
+  const subject = "Registration Confirmation";
+  const textContent = `Dear ${user.name},\n\nYour registration was successful. Welcome aboard!`;
+  const htmlContent = `<strong>Registration Confirmation</strong><br>Dear ${user.name},<br>Your registration was successful. Welcome aboard!`;
+  await sendEmail({ userEmail, subject, textContent, htmlContent });
 });
 
 // const googleLogin = catchAsync(async (req, res, next) => {
@@ -114,7 +116,7 @@ const login = catchAsync(async (req, res, next) => {
   if (!user || !(await user.confirmPasswordInDb(password, user.password))) {
     return next(new AppError("Incorrect email or password", 401));
   }
-  const token = user.generateJWT()
+  const token = user.generateJWT();
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
@@ -130,7 +132,7 @@ const login = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    token:token,
+    token: token,
     data: {
       user,
     },
@@ -185,7 +187,6 @@ const protect = catchAsync(async (req, res, next) => {
 
 const restrictToUser = (req, res, next) => {
   if (req.user && !req.user.isAdmin) {
-  
     next();
   } else {
     return next(new AppError("Normal users only", 401));
@@ -297,5 +298,4 @@ export {
   forgotPassword,
   updatePassword,
   resetPassword,
- 
 };
