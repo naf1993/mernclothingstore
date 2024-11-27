@@ -5,11 +5,13 @@ import StarRating from "./StarRating";
 import { Link, useNavigate } from "react-router-dom";
 import { addToFavourites, removeFromFavourites } from "../actions/userActions";
 import toast from "react-hot-toast";
+import axios from "axios";
+import { apiUrl } from "../actions/apiUrl";
 
 const Product = ({ product }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated, favourites } = useSelector((state) => state.user);
+  const { isAuthenticated, favourites,token } = useSelector((state) => state.user);
 
   const isProductFav =
     favourites?.some((fav) => fav._id === product.id) || false;
@@ -29,16 +31,52 @@ const Product = ({ product }) => {
         toast.success("Removed from favourites");
       } else {
         await dispatch(addToFavourites(id));
+        handleView(id,'favourites')
         toast.success("Added to favourites");
       }
     } catch (err) {
       toast.error(err.message);
     }
   };
+  const handleView = async (productId,interactionType='') => {
+    try {
+      // Get sessionId from sessionStorage (if any)
+      const sessionId = sessionStorage.getItem('sessionId');
+      
+      // Prepare the request data
+      const data = { 
+        productId, 
+        interactionType
+      };
+  
+      if (!token && sessionId) {
+        // For anonymous users, if sessionId exists, include it in the request body
+        data.sessionId = sessionId;
+      }
+  
+      // Add the Authorization header if the user is authenticated
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+  
+      // Send request with credentials (cookies)
+      await axios.post(`${apiUrl}/api/users/addinteraction`, data, {
+        headers,
+        withCredentials: true, // Ensure cookies are sent
+      });
+  
+      toast.success("Interaction added");
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  
+  
 
   return (
     <Link to={`/products/${product.id}`}>
-      <div>
+      <div onClick={() => handleView(product.id,'view')}>
         <div className="product-card">
           <img
             src={product.images[0]}

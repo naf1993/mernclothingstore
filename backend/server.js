@@ -31,6 +31,7 @@ import connectDB from "./config/db.js";
 import { webhookHandler } from "./controllers/orderController.js"; 
 import { v2 as cloudinary } from "cloudinary";
 
+
 // Database connection
 connectDB();
 
@@ -41,10 +42,11 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: process.env.NODE_ENV === "development" 
-      ? "*"  // Allow all origins in development
+      ? "http://localhost:3000"  // Allow all origins in development
       : process.env.FRONTEND_URL,  // Vercel app URL for production
-    methods: ["GET", "POST", "PUT", "DELETE","PATCH"],  // Add other methods if necessary
-    allowedHeaders: ["Content-Type", "Authorization"], // Allow additional headers
+      credentials: true,  // Allow credentials (cookies, Authorization headers)
+      methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'sessionId'],
   },
   transports: ["websocket", "polling"], 
 });
@@ -64,10 +66,12 @@ app.use((req, res, next) => {
 // Middleware Setup
 const corsOptions = {
   origin: process.env.NODE_ENV === "development" 
-    ? "*"  // Allow all origins in development
+    ? "http://localhost:3000"  // Allow all origins in development
     : process.env.FRONTEND_URL, // Vercel production URL
-  methods: ["GET", "POST", "PUT", "DELETE","PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,  // Allow credentials (cookies, Authorization headers)
+    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'sessionId'],
+  
 };
 
 app.use(cors(corsOptions));
@@ -88,8 +92,6 @@ cloudinary.config({
 });
 
 // Routes
-
-
 // Stripe webhook handler
 app.post('/api/orders/webhook', bodyParser.raw({ type: 'application/json' }), webhookHandler);
 
@@ -114,27 +116,7 @@ app.use("/api/coupon", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/notifications", notificationRoutes);
 // Route to log product interactions (view, click, etc.)
-app.post('/api/interactions', async (req, res) => {
-  try {
-    const { productId, interactionType } = req.body;
-    
-    // Create a new interaction document
-    const interaction = new Interaction({
-      userId: req.userId, // Set userId if logged in, or leave it null
-      sessionId: req.sessionId, // Set sessionId if anonymous
-      productId,
-      interactionType,
-    });
 
-    // Save the interaction in the database
-    await interaction.save();
-
-    res.status(201).json({ message: 'Interaction recorded successfully' });
-  } catch (error) {
-    console.error('Error recording interaction:', error);
-    res.status(500).json({ error: 'Failed to record interaction' });
-  }
-});
 
 // Get product recommendations (based on session interactions)
 app.get('/api/recommendations', async (req, res) => {

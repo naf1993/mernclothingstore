@@ -5,8 +5,7 @@ import multer from "multer";
 import sharp from "sharp";
 import Coupon from "../models/couponModel.js";
 import Cart from "../models/cartModels.js";
-import { logInteraction } from "./productController.js";
-
+import { Interaction } from "../models/productModel.js";
 
 const multerStorage = multer.memoryStorage();
 
@@ -106,7 +105,7 @@ const createUser = catchAsync(async (req, res, next) => {
 
 const getUserById = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.params.id);
-  console.log('this is logged in user',user)
+  console.log("this is logged in user", user);
   if (!user) {
     return next(new AppError("No User found with that ID", 404));
   }
@@ -164,6 +163,29 @@ const updateUserStatusByAdmin = catchAsync(async (req, res, next) => {
   });
 });
 
+// controllers/usercontroller.js
+export const addInteractions = catchAsync(async (req, res, next) => {
+  console.log("Request Body:", req.body);  // Debugging the request body
+
+  const { productId, interactionType } = req.body;
+  const { sessionId, userId } = req;
+
+  console.log("SessionId in Controller:", sessionId);
+  console.log("UserId in Controller:", userId);
+
+  const interaction = new Interaction({
+    userId: userId || null,  // Use userId if logged in
+    sessionId: sessionId || null,  // Use sessionId if anonymous
+    productId,
+    interactionType,
+  });
+
+  await interaction.save();
+
+  res.status(201).json({ message: "Interaction recorded successfully" });
+});
+
+
 export const addToFavourites = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
   const { productId } = req.body;
@@ -179,10 +201,10 @@ export const addToFavourites = catchAsync(async (req, res, next) => {
     await user.save();
   }
 
-  const updatedUser = await User.findById(_id).populate('favourites');
+  const updatedUser = await User.findById(_id).populate("favourites");
 
   console.log("Updated favourites after addition:", updatedUser.favourites); // Log updated favorites
-  logInteraction(user._id, productId, 'favourites')
+  await addInteractions(user._id, null, productId, "favourites"); // Pass userId and productId to addInteraction
 
   res.status(200).json({
     status: "success",
@@ -191,6 +213,8 @@ export const addToFavourites = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+
 
 export const removeFromFavourites = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
@@ -206,7 +230,7 @@ export const removeFromFavourites = catchAsync(async (req, res, next) => {
   );
   await user.save();
 
-  const updatedUser = await User.findById(_id).populate('favourites');
+  const updatedUser = await User.findById(_id).populate("favourites");
 
   console.log("Updated favourites after removal:", updatedUser.favourites); // Log updated favorites
 
@@ -218,12 +242,11 @@ export const removeFromFavourites = catchAsync(async (req, res, next) => {
   });
 });
 
-
 export const getFavourites = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
   console.log(_id);
 
-  const user = await User.findById(_id).populate('favourites');
+  const user = await User.findById(_id).populate("favourites");
   if (!user) {
     return next(new AppError("No User found with that ID", 404));
   }
