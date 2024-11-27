@@ -3,6 +3,7 @@ import Product from "../models/productModel.js";
 import User from "../models/userModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
+import { logInteraction } from "./productController.js";
 
 const setUserIds = (req, res, next) => {
   if (!req.body.user) req.body.user = req.user.id;
@@ -56,6 +57,8 @@ const addToCart = catchAsync(async (req, res, next) => {
 
     // Re-populate the cart to include the updated product details
     cart = await cart.populate("products.productId");
+
+    logInteraction(_id,productId,'add_to_cart')
 
     return res.status(200).json({
       status: "success",

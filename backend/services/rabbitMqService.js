@@ -98,10 +98,21 @@ const processOrder = async (receivedOrder) => {
     console.log("Notification created successfully.");
    const userEmail = 'haffis02@gmail.com'
     const subject = 'Order Confirmation';
-    const textContent = `Your order #${order.orderId} has been confirmed. The total amount is ₹${totalAmount}.`;
-    const htmlContent = `<strong>Order Confirmation</strong><br>Your order #${order.orderId} has been confirmed.<br>The total amount is ₹${totalAmount}.`;
-  
-    await sendEmail({ userEmail, subject, textContent, htmlContent });
+   const templateName = 'orderconfirm'
+   let productsArray = order.products.map((product) => {
+    return {
+      productName: product.productId.name,
+      quantity: product.count,
+    };
+  });
+   const replacements = {
+    username:order.user.name,
+    orderId:order.orderId,
+    products:productsArray,
+    totalPrice:order.finalPrice
+
+   }
+    await sendEmail({ userEmail, subject, templateName,replacements });
   } catch (error) {
     console.error("Error processing order:", error);
   }

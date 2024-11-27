@@ -5,8 +5,9 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import jwt from "jsonwebtoken";
 import { promisify } from "util";
-import sendEmail from "../utils/email.js";
+
 import crypto from "crypto";
+import { sendEmail } from "../utils/email.js";
 
 const secretOrKey = process.env.JWT_SECRET;
 
@@ -79,33 +80,15 @@ const register = catchAsync(async (req, res, next) => {
   });
   const userEmail = "haffis02@gmail.com";
   const subject = "Registration Confirmation";
-  const textContent = `Dear ${user.name},\n\nYour registration was successful. Welcome aboard!`;
-  const htmlContent = `<strong>Registration Confirmation</strong><br>Dear ${user.name},<br>Your registration was successful. Welcome aboard!`;
-  await sendEmail({ userEmail, subject, textContent, htmlContent });
+ const templateName = 'register'
+ const replacements = {
+  userName:user.name,
+  confirmationLink:"https://your-site.com/confirm?token=abc123"
+ }
+  await sendEmail({ userEmail, subject,templateName,replacements });
 });
 
-// const googleLogin = catchAsync(async (req, res, next) => {
-//   const { googleAccessToken } = req.body;
 
-//   axios
-//     .get("https://www.googleapis.com/oauth2/v3/userinfo", {
-//       headers: {
-//         Authorization: `Bearer ${googleAccessToken}`,
-//       },
-//     })
-//     .then(async (response) => {
-//       const email = response.data.email;
-//       console.log(response)
-
-//       const existingUser = await User.findOne({ email });
-
-//       if (!existingUser) {
-//         return next(new AppError("User dont exist", 401));
-//       }
-
-//       createSendToken(existingUser, 200, res);
-//     });
-// });
 
 const login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;

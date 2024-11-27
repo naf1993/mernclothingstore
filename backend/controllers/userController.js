@@ -5,16 +5,9 @@ import multer from "multer";
 import sharp from "sharp";
 import Coupon from "../models/couponModel.js";
 import Cart from "../models/cartModels.js";
+import { logInteraction } from "./productController.js";
 
-// const multerStorage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, 'public/img/users');
-//   },
-//   filename: (req, file, cb) => {
-//     const ext = file.mimetype.split('/')[1];
-//     cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
-//   }
-// });
+
 const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
@@ -189,6 +182,7 @@ export const addToFavourites = catchAsync(async (req, res, next) => {
   const updatedUser = await User.findById(_id).populate('favourites');
 
   console.log("Updated favourites after addition:", updatedUser.favourites); // Log updated favorites
+  logInteraction(user._id, productId, 'favourites')
 
   res.status(200).json({
     status: "success",

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Cancellation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #333333;
+      text-align: center;
+    }
+    p {
+      font-size: 16px;
+      color: #555555;
+    }
+    .footer {
+      font-size: 12px;
+      color: #999999;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Your Order has been Cancelled</h1>
+    <p>Dear {{userName}},</p>
+    <p>We regret to inform you that your order with Order ID: <strong>{{orderId}}</strong> has been cancelled.</p>
+    <p>If this was a mistake, please contact our customer service team for assistance.</p>
+    <p>Thank you for understanding.</p>
+    <div class="footer">
+      <p>&copy; 2024 Our E-Commerce Store. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

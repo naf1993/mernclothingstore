@@ -5,6 +5,43 @@ import SubCategory from "./subCategory.js";
 import validator from "validator";
 
 
+// Create the interaction schema
+const interactionSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', // Reference to the User model
+      required: false, // Make userId optional for anonymous users
+    },
+    sessionId: {
+      type: String,
+      required: false, // Make sessionId optional for logged-in users
+    },
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product', // Reference to the Product model
+      required: true,
+    },
+    interactionType: {
+      type: String,
+      enum: ['view', 'purchase', 'add_to_cart', 'favourites'], // Can be extended with more interaction types
+      required: true,
+    },
+    timestamp: {
+      type: Date,
+      default: Date.now, // Set current timestamp by default
+    },
+  },
+  { timestamps: true } // Automatically adds createdAt and updatedAt fields
+);
+
+// Create the model from the schema
+export const Interaction = mongoose.model('Interaction', interactionSchema);
+
+
+
+
+
 
 const productSchema = new mongoose.Schema(
   {

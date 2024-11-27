@@ -5,7 +5,9 @@ import http from "node:http";
 import cors from "cors"; 
 import morgan from "morgan"; 
 import passport from "passport"; 
+import cookieParser from "cookie-parser";
 import { Server } from "socket.io"; 
+import { sessionMiddleware } from "./middleware/sessionMiddleware.js";
 import stripeLib from "stripe"; 
 import AppError from "./utils/appError.js"; 
 import globalErrorHandler from "./controllers/errorController.js"; 
@@ -96,6 +98,8 @@ app.use("/public", express.static("public"));
 
 // Middleware for request body parsing
 app.use(express.json({ limit: "10kb" }));
+app.use(cookieParser())
+app.use(sessionMiddleware)
 app.use(express.urlencoded({ extended: true }));
 
 // Application Routes
@@ -109,7 +113,44 @@ app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/notifications", notificationRoutes);
+// Route to log product interactions (view, click, etc.)
+app.post('/api/interactions', async (req, res) => {
+  try {
+    const { productId, interactionType } = req.body;
+    
+    // Create a new interaction document
+    const interaction = new Interaction({
+      userId: req.userId, // Set userId if logged in, or leave it null
+      sessionId: req.sessionId, // Set sessionId if anonymous
+      productId,
+      interactionType,
+    });
 
+    // Save the interaction in the database
+    await interaction.save();
+
+    res.status(201).json({ message: 'Interaction recorded successfully' });
+  } catch (error) {
+    console.error('Error recording interaction:', error);
+    res.status(500).json({ error: 'Failed to record interaction' });
+  }
+});
+
+// Get product recommendations (based on session interactions)
+app.get('/api/recommendations', async (req, res) => {
+  const sessionId = req.cookies.sessionId; // Get session ID from cookie
+
+  // Fetch interactions for the session
+  const interactions = await Interaction.aggregate([
+    { $match: { sessionId } },
+    { $group: { _id: '$productId', count: { $sum: 1 } } },
+    { $sort: { count: -1 } },
+    { $limit: 10 } // Top 10 products based on interaction frequency
+  ]);
+
+  // Return recommended products
+  res.json(interactions);
+});
 // Handling unknown routes
 app.all("*", (req, res, next) => {
   next(new AppError(`Cannot find ${req.originalUrl}`, 404));
