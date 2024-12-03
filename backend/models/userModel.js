@@ -6,6 +6,31 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import validator from "validator";
 import jwt from 'jsonwebtoken'
+
+
+const UserRecommendationSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  recommendations: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true,
+      },
+      score: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
+});
+
+export const UserRecommendation = mongoose.model("UserRecommendation", UserRecommendationSchema);
+
 const userSchema = new mongoose.Schema(
   {
     provider:{

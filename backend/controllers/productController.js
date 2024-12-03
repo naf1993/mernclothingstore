@@ -9,9 +9,11 @@ import multer from "multer";
 import sharp from "sharp";
 import Category from "../models/categoryModel.js";
 import SubCategory from "../models/subCategory.js";
+import { Interaction } from "../models/productModel.js";
 import cloudinary from "cloudinary";
 import { uploadFiles, deleteFiles } from "../utils/cloudinary.js";
 import { dataUri } from "../utils/datauri.js";
+import { recommendTopProducts } from "../services/predictRecommendation.js";
 
 const storage = multer.memoryStorage(); // Store files in memory to process with Sharp
 const fileFilter = (req, file, cb) => {
@@ -120,6 +122,14 @@ const createProduct = catchAsync(async (req, res, next) => {
   });
 });
 
+export const getAllInteractions = catchAsync(async(req,res,next)=>{
+  const interactions = await Interaction.find()
+  if(!interactions){
+    return next(new AppError('No Interactions',400))
+  }
+  res.status(200).json({message:'interactions recieved',length:interactions.length,interactions})
+})
+
 const getAllProducts = catchAsync(async (req, res, next) => {
   const features = new APIFeatures(
     Product.find().populate("Category").populate("SubCategory"),
@@ -141,6 +151,16 @@ const getAllProducts = catchAsync(async (req, res, next) => {
   });
 });
 
+export const getRecommendedProducts = async (req, res, next) => {
+  const userId = req.user._id;
+  try {
+    const topProducts = await recommendTopProducts(userId, 5);
+    res.status(200).json({ success: true, recommendations: topProducts });
+  } catch (error) {
+    console.error(error);
+    next(new Error(error.message));
+  } // Use next to pass the error to your error handler }
+};
 const getProductById = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id).populate(
     "reviews Category SubCategory"
@@ -450,9 +470,9 @@ export const productsSearchByName = catchAsync(async (req, res, next) => {
   // Search for products that match the query
   const products = await Product.find({
     name: { $regex: `^${query}`, $options: "i" },
-  }).populate('Category').limit(5);
-
- 
+  })
+    .populate("Category")
+    .limit(5);
 
   // Return the search results
   res.status(200).json({
@@ -509,6 +529,81 @@ export const topSellingProducts = catchAsync(async (req, res, next) => {
 
   res.status(200).json(topProducts);
 });
+
+export const getPopularItems = async () => {
+  const popularItems = await Interaction.aggregate([
+    {
+      $group: {
+        _id: "$productId",
+        views: {
+          $sum: { $cond: [{ $eq: ["$interactionType", "view"] }, 1, 0] },
+        },
+        purchases: {
+          $sum: { $cond: [{ $eq: ["$interactionType", "purchase"] }, 1, 0] },
+        },
+        addToCart: {
+          $sum: { $cond: [{ $eq: ["$interactionType", "add_to_cart"] }, 1, 0] },
+        },
+        favourites: {
+          $sum: { $cond: [{ $eq: ["$interactionType", "favourites"] }, 1, 0] },
+        },
+      },
+    },
+    {
+      $project: {
+        score: {
+          $add: [
+            "$views",
+            { $multiply: ["$purchases", 2] },
+            { $multiply: ["$addToCart", 1.5] },
+            { $multiply: ["$favourites", 1.2] },
+          ],
+        },
+      },
+    },
+    { $sort: { score: -1 } },
+    { $limit: 10 },
+  ]);
+  return popularItems.map((item) => item._id);
+};
+
+export const getProductAttributes = async (productId) => {
+  const product = await Product.findById(productId);
+  return {
+    Category: product.Category,
+    brand: product.brand
+    // Add other relevant attributes
+  };
+};
+
+export const recommendSimilarItems = async (productId) => {
+  const productAttributes = await getProductAttributes(productId);
+  const similarItems = await Product.find({
+    Category: productAttributes.Category,
+    brand: productAttributes.brand,
+    _id: { $ne: productId } // Exclude the current product
+  }).limit(10); // Get top 10 similar items
+
+  return similarItems;
+};
+
+
+
+
+export const recommendedProductsForNewUser = async () => {
+  // Get top popular items
+  const popularItems = await getPopularItems();
+
+  // Get attributes of top popular item to recommend similar items
+  const similarItems = await recommendSimilarItems(popularItems[0]);
+
+  // Combine results, ensuring no duplicates
+  const recommendations = [
+    ...new Set([...popularItems, ...similarItems.map((item) => item._id)]),
+  ];
+
+  return recommendations.slice(0,10);
+};
 
 export {
   getProductsByCategory,

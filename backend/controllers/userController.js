@@ -1,3 +1,5 @@
+import * as dotenv from "dotenv";
+dotenv.config();
 import User from "../models/userModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
@@ -6,6 +8,10 @@ import sharp from "sharp";
 import Coupon from "../models/couponModel.js";
 import Cart from "../models/cartModels.js";
 import { Interaction } from "../models/productModel.js";
+import jwt from "jsonwebtoken";
+import { promisify } from "util";
+
+const secretOrKey = process.env.JWT_SECRET;
 
 const multerStorage = multer.memoryStorage();
 
@@ -165,26 +171,67 @@ const updateUserStatusByAdmin = catchAsync(async (req, res, next) => {
 
 // controllers/usercontroller.js
 export const addInteractions = catchAsync(async (req, res, next) => {
-  console.log("Request Body:", req.body);  // Debugging the request body
+  console.log("Request Body:", req.body); // Debugging the request body
 
   const { productId, interactionType } = req.body;
-  const { sessionId, userId } = req;
+  let sessionId;
+  let token;
+  let userId;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+
+    if (!token) {
+      return next(
+        new AppError("You are not logged in..Please login to continue", 401)
+      );
+    }
+    //verify token
+    const decoded = await promisify(jwt.verify)(token, secretOrKey);
+    //check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return next(
+        new AppError("The user belonging to this token doesnot exist", 401)
+      );
+    }
+    //check if user changed password after token was issued
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next(
+        new AppError("User recently changed password..Please login again", 401)
+      );
+    }
+    //grant access to protected route
+    req.user = currentUser;
+    userId = req.user._id;
+  } else {
+    sessionId = req.sessionId;
+  }
+
+  if (!token) {
+    return next(
+      new AppError("You are not logged in..Please login to continue", 401)
+    );
+  }
 
   console.log("SessionId in Controller:", sessionId);
   console.log("UserId in Controller:", userId);
 
   const interaction = new Interaction({
-    userId: userId || null,  // Use userId if logged in
-    sessionId: sessionId || null,  // Use sessionId if anonymous
+    userId: userId || null, // Use userId if logged in
+    sessionId: sessionId || null, // Use sessionId if anonymous
     productId,
     interactionType,
   });
 
   await interaction.save();
 
-  res.status(201).json({ message: "Interaction recorded successfully" });
+  res
+    .status(201)
+    .json({ message: "Interaction recorded successfully", interaction });
 });
-
 
 export const addToFavourites = catchAsync(async (req, res, next) => {
   const { _id } = req.user;
@@ -213,8 +260,6 @@ export const addToFavourites = catchAsync(async (req, res, next) => {
     },
   });
 });
-
-
 
 export const removeFromFavourites = catchAsync(async (req, res, next) => {
   const { _id } = req.user;

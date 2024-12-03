@@ -24,23 +24,21 @@ const endpointSecret = process.env.STRIPE_WEB_HOOK_SECRET;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-
-
 const sendAdminNotification = async (order) => {
   try {
     // Create a transporter object using SMTP transport
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // You can use any service provider, or SMTP server
+      service: "gmail", // You can use any service provider, or SMTP server
       auth: {
-        user: 'your-email@gmail.com', // Admin's email (use environment variables in production)
-        pass: 'your-email-password',  // Email password or use App-specific password (for Gmail)
+        user: "your-email@gmail.com", // Admin's email (use environment variables in production)
+        pass: "your-email-password", // Email password or use App-specific password (for Gmail)
       },
     });
 
     // Prepare the email message
     const mailOptions = {
-      from: 'your-email@gmail.com',
-      to: 'admin-email@example.com', 
+      from: "your-email@gmail.com",
+      to: "admin-email@example.com",
       subject: `Refund Needed: Order ${order.orderId}`,
       html: `
         <h1>Refund Required for Order #${order.orderId}</h1>
@@ -55,34 +53,35 @@ const sendAdminNotification = async (order) => {
         <p>Please initiate the refund and update the status in the system once completed.</p>
       `,
     };
-    
 
     // Send the email
     await transporter.sendMail(mailOptions);
 
-    console.log('Admin notification sent successfully');
+    console.log("Admin notification sent successfully");
   } catch (error) {
-    console.error('Error sending admin notification:', error);
+    console.error("Error sending admin notification:", error);
   }
 };
 
+export const sendEmailAdmin = async ({ userEmail, subject, templateName, replacements }) => {
+  try {
+    // Get the HTML content by loading the appropriate template
+    const htmlContent = getTemplate(templateName, replacements);
 
-const sendOrderConfirmationEmail = async (order, email) => {
-  const transporter = nodemailer.createTransport({
-    service: "Gmail",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
-    },
-  });
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to: email,
-    subject: "Order Confirmation",
-    text: `Your order ${order.orderId} has been placed succesfully`,
-    html: `<h1>Order Confirmation</h1><p>Your order ${order.orderId} has been placed successfully!</p>`,
-  };
-  await transporter.sendMail(mailOptions);
+    const msg = {
+      to: userEmail,
+      from: process.env.SENDGRID_USER_EMAIL,  // Your verified SendGrid sender email
+      subject: subject,
+      text: replacements.textContent || 'Your order details are provided below.',  // Fallback text content if not provided
+      html: htmlContent,
+    };
+
+    // Send the email via SendGrid
+    await sgMail.send(msg);
+    console.log(`Email sent to ${userEmail} successfully`);
+  } catch (error) {
+    console.error('Error sending email:', error.response.body);
+  }
 };
 
 export const checkIfFirstOrder = catchAsync(async (req, res) => {
@@ -148,15 +147,15 @@ export const webhookHandler = catchAsync(async (req, res, next) => {
         return next(new AppError(`Order with ID ${orderId} not found`, 400));
       }
 
-       // Capture the charge ID from the paymentIntent object
-       const stripeChargeId = paymentIntent.charges.data[0].id; // This is the actual charge ID created by Stripe
-      
-       // Update the order with the charge ID and payment status
-       order.stripeChargeId = stripeChargeId;  // Store the stripe charge ID in the order
-       order.paymentStatus = 'Paid';  // Update the payment status to 'Paid'
-       
-       // Save the order with the updated payment status and charge ID
-       await order.save();
+      // Capture the charge ID from the paymentIntent object
+      const stripeChargeId = paymentIntent.charges.data[0].id; // This is the actual charge ID created by Stripe
+
+      // Update the order with the charge ID and payment status
+      order.stripeChargeId = stripeChargeId; // Store the stripe charge ID in the order
+      order.paymentStatus = "Paid"; // Update the payment status to 'Paid'
+
+      // Save the order with the updated payment status and charge ID
+      await order.save();
 
       // Prepare order message to send to RabbitMQ
       const orderMessage = {
@@ -303,8 +302,8 @@ export const bulkUpdateOrders = catchAsync(async (req, res, next) => {
 
 export const returnProduct = catchAsync(async (req, res) => {
   const { orderId } = req.params;
-  
-  const { productIds,reason } = req.body; //productIDS IS ARRAY OF PRODUCTS NEED TO BE REFUNDED //CALCULATE REFUND AMOUNT
+
+  const { productIds, reason } = req.body; //productIDS IS ARRAY OF PRODUCTS NEED TO BE REFUNDED //CALCULATE REFUND AMOUNT
 
   const order = await Order.findOne({ orderId });
   if (!order) {
@@ -337,16 +336,23 @@ export const returnProduct = catchAsync(async (req, res) => {
   });
   order.refundAmount = refundAmount;
 
+  let userEmail = "haffis02@gmail.com";
+  const subject = "Product Return";
+  const textContent = `Your return for order number #${orderId} is processing.`;
+  const htmlContent = `<strong>Product Return</strong><br>Your return for order number #${orderId} is processing.`;
+
   if (order.paymentMethod === "Cash on Delivery") {
-    order.refundStatus = 'Processing'
-    await order.save()
-    await sendAdminNotification(order)
+    order.refundStatus = "Processing";
+    await order.save();
+
+    await sendEmail({ userEmail, subject, textContent, htmlContent });
   } else if (order.paymentStatus === "Credit Card") {
     const refund = await stripe.refunds.create({
       charge: order.stripeChargeId,
       amount: refundAmount * 100,
     });
     order.paymentStatus = "Refunded";
+    await sendEmail({ userEmail, subject, textContent, htmlContent });
   }
   res.status(200).json({
     message: "Return request processed successfully. Refund will be initiated.",
@@ -380,20 +386,19 @@ export const cancelOrder = catchAsync(async (req, res) => {
   order.orderStatus = "Cancelled";
   if (order.paymentMethod === "Cash on Delivery") {
     order.paymentStatus = "Cancelled";
-    await order.save()
+    await order.save();
   } else if (order.paymentMethod === "Credit Card") {
     const refund = await stripe.refunds.create({
       charge: order.stripeChargeId,
     });
     (order.paymentStatus = "Refunded"), (order.refundAmount = order.totalPrice);
     await order.save();
-    let userEmail = 'haffis02@gmail.com'
-    let subject = 'Payment Refunded'
-    let textContent = `Your payment of  ₹${refundAmount} has been refunded.`
+    let userEmail = "haffis02@gmail.com";
+    let subject = "Payment Refunded";
+    let textContent = `Your payment of  ₹${refundAmount} has been refunded.`;
     let htmlContent = `<strong>Payment Refunded</strong><br>Your payment of ₹${refundAmount} has been refunded.`;
-    await sendEmail({userEmail,subject,textContent,htmlContent})
+    await sendEmail({ userEmail, subject, textContent, htmlContent });
   }
-  
 
   res.status(200).json({
     message: "Order Cancelled",

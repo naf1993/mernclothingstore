@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import Coupon from "./couponModel.js";
-import { isValidPhoneNumber } from 'libphonenumber-js';
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 const orderSchema = mongoose.Schema(
   {
@@ -49,7 +49,7 @@ const orderSchema = mongoose.Schema(
         required: [true, "Please provide phone number"],
         validate: {
           validator: function (v) {
-            return isValidPhoneNumber(v, 'IN');
+            return isValidPhoneNumber(v, "IN");
           },
           message: (props) => `${props.value} is not a valid phone number`,
         },
@@ -78,8 +78,13 @@ const orderSchema = mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ["Paid", "Pending", "Failed"],
+      enum: ["Paid", "Pending", "Failed", "Refunded"],
       default: "Pending",
+    },
+    refundStatus: {
+      type: String,
+      enum: ["Not Returned", "Returned", "Refunded"],
+      default: "Not Returned",
     },
     orderStatus: {
       type: String,
@@ -90,8 +95,12 @@ const orderSchema = mongoose.Schema(
         "Dispatched",
         "Cancelled",
         "Delivered",
+        "Returned",
       ],
-     
+    },
+    stripeChargeId: {
+      type: String,
+      required: false,
     },
     totalPrice: {
       type: Number,
@@ -111,9 +120,15 @@ const orderSchema = mongoose.Schema(
         return this.paymentMethod === "Cash on Delivery" ? 60 : 0;
       },
     },
+    deliveredDate: {
+      type: Date,
+    },
     saleDate: {
       type: Date,
       default: Date.now,
+    },
+    refundAmount: {
+      type: Number,
     },
     deliveryEstimate: {
       type: Date,
@@ -132,7 +147,10 @@ orderSchema.pre("save", async function (next) {
     }
   }
 
-  if (this.paymentMethod === "Cash on Delivery" && this.orderStatus === "Delivered") {
+  if (
+    this.paymentMethod === "Cash on Delivery" &&
+    this.orderStatus === "Delivered"
+  ) {
     this.paymentStatus = "Paid";
   }
 
@@ -141,7 +159,7 @@ orderSchema.pre("save", async function (next) {
   const existingOrders = await mongoose.model("Order").find({ user: userId });
 
   if (existingOrders.length === 0) {
-    this.discount += this.totalPrice * 0.20; // 20% discount for first-time orders
+    this.discount += this.totalPrice * 0.2; // 20% discount for first-time orders
   }
 
   // Handle discount code (if provided)
