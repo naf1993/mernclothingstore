@@ -1,0 +1,12 @@
+# Exclude development files
+node_modules/
+*.log
+*.env
+*.md
+
+# Exclude test and coverage files
+test/
+coverage/
+
+# Exclude local build artifacts (e.g., frontend build if you're doing a separate build for the frontend)
+frontend/build/

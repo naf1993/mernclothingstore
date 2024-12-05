@@ -16,7 +16,6 @@
   "dependencies": {
     "@faker-js/faker": "^9.0.3",
     "@sendgrid/mail": "^8.1.4",
-    "@syncfusion/ej2-react-grids": "^20.4.51",
     "@tensorflow/tfjs-node-gpu": "^4.22.0",
     "amqplib": "^0.10.4",
     "axios": "^1.5.0",
@@ -32,11 +31,8 @@
     "dotenv": "^16.0.3",
     "ejs": "^3.1.6",
     "express": "^4.18.2",
-    "express-mongo-sanitize": "^2.2.0",
-    "express-rate-limit": "^6.7.0",
     "express-session": "^1.17.3",
     "faker": "^6.6.6",
-    "helmet": "^6.0.1",
     "hpp": "^0.2.3",
     "jsonwebtoken": "^9.0.0",
     "libphonenumber-js": "^1.11.14",
@@ -45,7 +41,6 @@
     "multer": "^1.4.5-lts.1",
     "multer-storage-cloudinary": "^4.0.0",
     "node-fetch": "^2.6.1",
-    "nodemailer": "^6.8.0",
     "passport": "^0.4.0",
     "passport-google-oauth": "^2.0.0",
     "passport-google-oauth2": "^0.2.0",
@@ -60,8 +55,7 @@
     "twilio": "^5.3.5",
     "uniqid": "^5.4.0",
     "uuid": "^10.0.0",
-    "validator": "^13.7.0",
-    "xss-clean": "^0.1.1"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
