@@ -4,6 +4,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "engines": {
+    "node": "16.20.2",
+    "npm": "8.19.4"
+  },
   "scripts": {
     "start": "nodemon backend/server.js"
   },
