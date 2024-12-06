@@ -1,32 +1,32 @@
-import * as dotenv from "dotenv"; 
+import * as dotenv from "dotenv";
 dotenv.config();
-import express from "express"; 
-import http from "node:http"; 
-import cors from "cors"; 
-import morgan from "morgan"; 
-import passport from "passport"; 
+import express from "express";
+import http from "node:http";
+import cors from "cors";
+import morgan from "morgan";
+import passport from "passport";
 import cookieParser from "cookie-parser";
-import { Server } from "socket.io"; 
-import AppError from "./utils/appError.js"; 
-import globalErrorHandler from "./controllers/errorController.js"; 
+import { Server } from "socket.io";
+import AppError from "./utils/appError.js";
+import globalErrorHandler from "./controllers/errorController.js";
 
-import Product from './models/productModel.js' 
-import { googleStrategy } from "./services/googleStrategy.js"; 
-import productRoutes from "./routes/productRoutes.js"; 
-import reviewRoutes from "./routes/reviewRoutes.js"; 
-import userRoutes from "./routes/userRoutes.js"; 
-import orderRoutes from "./routes/orderRoutes.js"; 
-import categoryRoutes from "./routes/categoryRoutes.js"; 
-import subCategoryRoutes from "./routes/subCategoryRoutes.js"; 
-import bodyParser from "body-parser"; 
-import couponRoutes from "./routes/couponRoutes.js"; 
-import cartRoutes from "./routes/cartRoutes.js"; 
-import authRoutes from "./routes/authRoutes.js"; 
-import notificationRoutes from "./routes/notificationRoutes.js"; 
-import { fileURLToPath } from "url"; 
-import colors from "colors"; 
-import connectDB from "./config/db.js"; 
-import { webhookHandler } from "./controllers/orderController.js"; 
+import Product from "./models/productModel.js";
+import { googleStrategy } from "./services/googleStrategy.js";
+import productRoutes from "./routes/productRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import subCategoryRoutes from "./routes/subCategoryRoutes.js";
+import bodyParser from "body-parser";
+import couponRoutes from "./routes/couponRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import { fileURLToPath } from "url";
+import colors from "colors";
+import connectDB from "./config/db.js";
+import { webhookHandler } from "./controllers/orderController.js";
 import { v2 as cloudinary } from "cloudinary";
 //import * as tf from "@tensorflow/tfjs-node-gpu";
 //import trainRecommendationModel from "./services/trainRecommendationModel.js";
@@ -39,24 +39,28 @@ import { UserRecommendation } from "./models/userModel.js";
 // Database connection
 connectDB();
 
-
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.NODE_ENV === "development" 
-      ? "http://localhost:3000"  // Allow all origins in development
-      : process.env.FRONTEND_URL,  // Vercel app URL for production
-      credentials: true,  // Allow credentials (cookies, Authorization headers)
-      methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'sessionId'],
+    origin:
+      process.env.NODE_ENV === "development"
+        ? "http://localhost:3000" // Allow all origins in development
+        : [
+            process.env.FRONTEND_URL, // Vercel URL (production)
+            "https://modeststore.shop", // Custom domain (non-www)
+            "https://www.modeststore.shop", // Custom domain (www)
+          ], //,  // Vercel app URL for production
+    credentials: true, // Allow credentials (cookies, Authorization headers)
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "sessionId"],
   },
-  transports: ["websocket", "polling"], 
+  transports: ["websocket", "polling"],
 });
 
 io.on("connection", (socket) => {
   console.log("New client connected");
-  
+
   socket.on("disconnect", () => {
     console.log("Client disconnected");
   });
@@ -68,17 +72,17 @@ app.use((req, res, next) => {
 
 // Middleware Setup
 const corsOptions = {
-  origin: process.env.NODE_ENV === "development" 
-    ? "http://localhost:3000"  // Allow all origins in development
-    :  [
-      process.env.FRONTEND_URL, // Vercel URL (production)
-      "https://modeststore.shop",  // Custom domain (non-www)
-      "https://www.modeststore.shop", // Custom domain (www)
-    ], // Vercel production URL
-    credentials: true,  // Allow credentials (cookies, Authorization headers)
-    methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'sessionId'],
-  
+  origin:
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000" // Allow all origins in development
+      : [
+          process.env.FRONTEND_URL, // Vercel URL (production)
+          "https://modeststore.shop", // Custom domain (non-www)
+          "https://www.modeststore.shop", // Custom domain (www)
+        ], // Vercel production URL
+  credentials: true, // Allow credentials (cookies, Authorization headers)
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "sessionId"],
 };
 
 app.use(cors(corsOptions));
@@ -100,14 +104,18 @@ cloudinary.config({
 
 // Routes
 // Stripe webhook handler
-app.post('/api/orders/webhook', bodyParser.raw({ type: 'application/json' }), webhookHandler);
+app.post(
+  "/api/orders/webhook",
+  bodyParser.raw({ type: "application/json" }),
+  webhookHandler
+);
 
 // Static file serving
 app.use("/public", express.static("public"));
 
 // Middleware for request body parsing
 app.use(express.json({ limit: "10kb" }));
-app.use(cookieParser())
+app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -124,7 +132,6 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/notifications", notificationRoutes);
 // Route to log product interactions (view, click, etc.)
 
-
 // let recommendationModel = null;
 
 // // Model training endpoint
@@ -137,9 +144,6 @@ app.use("/api/notifications", notificationRoutes);
 //     res.status(500).send("Error training the model");
 //   }
 // });
-
-
-
 
 // const getProductIndex = (productId, products) => {
 //   // Check if productId is valid
@@ -236,34 +240,29 @@ app.use("/api/notifications", notificationRoutes);
 //   }
 // });
 
-
-
-
-
 // Get recommendations for a user from the cache
 app.get("/recommendations/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
 
-   
-    const cachedRecommendations = await UserRecommendation.findOne({ userId }).populate('recommendations.productId');
-    let recommendations = cachedRecommendations.recommendations
+    const cachedRecommendations = await UserRecommendation.findOne({
+      userId,
+    }).populate("recommendations.productId");
+    let recommendations = cachedRecommendations.recommendations;
 
     if (!cachedRecommendations) {
       return res.status(404).send("No recommendations found for this user");
     }
     res.status(200).json({
-      messsage:'Success',
-      recommendations:recommendations,
-      length:recommendations.length
+      messsage: "Success",
+      recommendations: recommendations,
+      length: recommendations.length,
     });
-    
   } catch (error) {
     console.error(error);
     res.status(500).send("Error fetching recommendations");
   }
 });
-
 
 // Handling unknown routes
 app.all("*", (req, res, next) => {
@@ -276,5 +275,7 @@ app.use(globalErrorHandler);
 // Server setup and start
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold);
+  console.log(
+    `Server running in ${process.env.NODE_ENV} mode on port ${PORT}`.yellow.bold
+  );
 });
