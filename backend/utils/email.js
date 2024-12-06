@@ -36,13 +36,20 @@ export const sendEmail = async ({ userEmail, subject, templateName, replacements
     // Get the HTML content by loading the appropriate template
     const htmlContent = getTemplate(templateName, replacements);
 
+    // const msg = {
+    //   to: userEmail,
+    //   from: process.env.FROM_ADDRESS,  // Your verified SendGrid sender email
+    //   subject: subject,
+    //   text:'hello',
+    //   // text: replacements.textContent || 'Your order details are provided below.',  // Fallback text content if not provided
+    //   html: htmlContent,
+    // };
+
     const msg = {
-      to: userEmail,
-      from: process.env.FROM_ADDRESS,  // Your verified SendGrid sender email
-      subject: subject,
-      text:'hello',
-      // text: replacements.textContent || 'Your order details are provided below.',  // Fallback text content if not provided
-      html: htmlContent,
+      to: 'nafithajas@gmail.com', // Change to your email
+      from: 'support@themodeststore.shop', // Must be a verified sender
+      subject: 'Test Email from SendGrid',
+      text: 'This is a test email to verify SendGrid setup.',
     };
     console.log(`this is to address ${msg.to}`)
     console.log(`this is from address ${msg.from}`)
