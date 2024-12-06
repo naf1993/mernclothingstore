@@ -109,6 +109,9 @@ app.post(
   webhookHandler
 );
 
+
+
+
 // Static file serving
 app.use("/public", express.static("public"));
 
@@ -117,6 +120,36 @@ app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
 
 app.use(express.urlencoded({ extended: true }));
+
+app.post('/sendgrid-webhook', (req, res) => {
+  const events = req.body; // SendGrid sends an array of events
+
+  // Loop through each event and handle them
+  events.forEach(event => {
+    switch (event.event) {
+      case 'delivered':
+        console.log(`Email to ${event.email} was delivered`);
+        break;
+      case 'bounce':
+        console.log(`Email to ${event.email} bounced`);
+        break;
+      case 'open':
+        console.log(`Email to ${event.email} was opened`);
+        break;
+      case 'click':
+        console.log(`Email to ${event.email} clicked a link`);
+        break;
+      case 'spamreport':
+        console.log(`Email to ${event.email} was marked as spam`);
+        break;
+      default:
+        console.log(`Received unknown event: ${event.event}`);
+    }
+  });
+
+  // Respond with status 200 to acknowledge receipt of the webhook
+  res.status(200).send('Event received');
+});
 
 // Application Routes
 app.use("/", authRoutes);

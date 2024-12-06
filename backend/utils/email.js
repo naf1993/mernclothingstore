@@ -38,11 +38,13 @@ export const sendEmail = async ({ userEmail, subject, templateName, replacements
 
     const msg = {
       to: userEmail,
-      from: 'nafithajas@gmail.com',  // Your verified SendGrid sender email
+      from: 'support@themodeststore.shop',  // Your verified SendGrid sender email
       subject: subject,
       text: replacements.textContent || 'Your order details are provided below.',  // Fallback text content if not provided
       html: htmlContent,
     };
+    console.log(`this is to address ${msg.to}`)
+    console.log(`this is from address ${msg.from}`)
 
     // Send the email via SendGrid
     await sgMail.send(msg);

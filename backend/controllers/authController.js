@@ -86,6 +86,7 @@ const register = catchAsync(async (req, res, next) => {
   confirmationLink:"https://your-site.com/confirm?token=abc123"
  }
   await sendEmail({ userEmail, subject,templateName,replacements });
+  
 });
 
 
