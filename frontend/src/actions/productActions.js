@@ -30,6 +30,7 @@ import { apiUrl } from "./apiUrl";
 export const getCategories = () => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_CATEGORY_REQUEST });
+    console.log(apiUrl)
     const { data } = await axios.get(`${apiUrl}/api/categories`);
     dispatch({ type: PRODUCT_CATEGORY_SUCCESS, payload: data.data.categories });
   } catch (error) {
