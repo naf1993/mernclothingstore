@@ -38,9 +38,10 @@ export const sendEmail = async ({ userEmail, subject, templateName, replacements
 
     const msg = {
       to: userEmail,
-      from: 'support@themodeststore.shop',  // Your verified SendGrid sender email
+      from: process.env.FROM_ADDRESS,  // Your verified SendGrid sender email
       subject: subject,
-      text: replacements.textContent || 'Your order details are provided below.',  // Fallback text content if not provided
+      text:'hello',
+      // text: replacements.textContent || 'Your order details are provided below.',  // Fallback text content if not provided
       html: htmlContent,
     };
     console.log(`this is to address ${msg.to}`)
@@ -51,5 +52,11 @@ export const sendEmail = async ({ userEmail, subject, templateName, replacements
     console.log(`Email sent to ${userEmail} successfully`);
   } catch (error) {
     console.error('Error sending email:', error.response.body);
+    console.error('Error sending email:', error);
+    if (error.response) {
+      console.error('Response body:', error.response.body);
+      console.error('Response status code:', error.response.statusCode);
+      console.error('Response headers:', error.response.headers);
+    }
   }
 };
