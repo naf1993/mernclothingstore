@@ -7,11 +7,9 @@ import morgan from "morgan";
 import passport from "passport"; 
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io"; 
-import { sessionMiddleware } from "./middleware/sessionMiddleware.js";
-import stripeLib from "stripe"; 
 import AppError from "./utils/appError.js"; 
 import globalErrorHandler from "./controllers/errorController.js"; 
-import helmet from "helmet";
+
 import Product from './models/productModel.js' 
 import { googleStrategy } from "./services/googleStrategy.js"; 
 import productRoutes from "./routes/productRoutes.js"; 
@@ -30,13 +28,13 @@ import colors from "colors";
 import connectDB from "./config/db.js"; 
 import { webhookHandler } from "./controllers/orderController.js"; 
 import { v2 as cloudinary } from "cloudinary";
-import * as tf from "@tensorflow/tfjs-node-gpu";
-import trainRecommendationModel from "./services/trainRecommendationModel.js";
+//import * as tf from "@tensorflow/tfjs-node-gpu";
+//import trainRecommendationModel from "./services/trainRecommendationModel.js";
 import { UserRecommendation } from "./models/userModel.js";
-import User from './models/userModel.js'
-import { recommendedProductsForNewUser } from "./controllers/productController.js";
-import { aggregateInteractions } from "./services/interactionService.js";
-import { Interaction } from "./models/productModel.js";
+// import User from './models/userModel.js'
+// import { recommendedProductsForNewUser } from "./controllers/productController.js";
+// import { aggregateInteractions } from "./services/interactionService.js";
+// import { Interaction } from "./models/productModel.js";
 
 // Database connection
 connectDB();
@@ -72,7 +70,11 @@ app.use((req, res, next) => {
 const corsOptions = {
   origin: process.env.NODE_ENV === "development" 
     ? "http://localhost:3000"  // Allow all origins in development
-    : process.env.FRONTEND_URL, // Vercel production URL
+    :  [
+      process.env.FRONTEND_URL, // Vercel URL (production)
+      "https://modeststore.shop",  // Custom domain (non-www)
+      "https://www.modeststore.shop", // Custom domain (www)
+    ], // Vercel production URL
     credentials: true,  // Allow credentials (cookies, Authorization headers)
     methods: ['GET', 'POST', 'PUT', 'DELETE','PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'sessionId'],
@@ -82,7 +84,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(passport.initialize());
 passport.use(googleStrategy);
-app.use(helmet());
+//app.use(helmet());
 
 // Logging (only in development mode)
 if (process.env.NODE_ENV === "development") {
@@ -123,116 +125,116 @@ app.use("/api/notifications", notificationRoutes);
 // Route to log product interactions (view, click, etc.)
 
 
-let recommendationModel = null;
+// let recommendationModel = null;
 
-// Model training endpoint
-app.post("/trainmodel", async (req, res) => {
-  try {
-    recommendationModel = await trainRecommendationModel(); // Train and save the model
-    res.status(200).send("Model training completed");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error training the model");
-  }
-});
-
-
+// // Model training endpoint
+// app.post("/trainmodel", async (req, res) => {
+//   try {
+//     recommendationModel = await trainRecommendationModel(); // Train and save the model
+//     res.status(200).send("Model training completed");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Error training the model");
+//   }
+// });
 
 
-const getProductIndex = (productId, products) => {
-  // Check if productId is valid
-  if (!productId) {
-    console.error("Invalid productId:", productId);  // Log invalid productId
-    return -1; // Return -1 if productId is invalid
-  }
 
-  // Example: Assuming products is an array of product objects with a unique '_id' field
-  return products.findIndex(
-    (product) => product._id.toString() === productId.toString()
-  );
-};
 
-app.post("/cacheRecommendations", async (req, res) => {
-  if (!recommendationModel) {
-    return res.status(500).send("Model not trained yet.");
-  }
+// const getProductIndex = (productId, products) => {
+//   // Check if productId is valid
+//   if (!productId) {
+//     console.error("Invalid productId:", productId);  // Log invalid productId
+//     return -1; // Return -1 if productId is invalid
+//   }
 
-  try {
-    const users = await User.find();
-    const products = await Product.find();
+//   // Example: Assuming products is an array of product objects with a unique '_id' field
+//   return products.findIndex(
+//     (product) => product._id.toString() === productId.toString()
+//   );
+// };
 
-    for (const user of users) {
-      const productIndices = [];
-      const userIndices = [];
+// app.post("/cacheRecommendations", async (req, res) => {
+//   if (!recommendationModel) {
+//     return res.status(500).send("Model not trained yet.");
+//   }
 
-      // Check if the user has any interactions
-      const interactionCount = await Interaction.countDocuments({ userId: user._id });
-      if (interactionCount === 0) {
-        console.log(`No interactions found for user: ${user._id}`);
-        // Fetch popular products for users with no interactions
-        const popularProducts = await recommendedProductsForNewUser();
+//   try {
+//     const users = await User.find();
+//     const products = await Product.find();
 
-        // Cache the popular products as recommendations
-        await UserRecommendation.findOneAndUpdate(
-          { userId: user._id },
-          { userId: user._id, recommendations: popularProducts },
-          { upsert: true } // Insert or update if the user already has recommendations
-        );
-        continue; // Skip further processing for this user
-      }
+//     for (const user of users) {
+//       const productIndices = [];
+//       const userIndices = [];
 
-      const interactions = await aggregateInteractions(user._id);
-      console.log("User Interactions:", interactions);
+//       // Check if the user has any interactions
+//       const interactionCount = await Interaction.countDocuments({ userId: user._id });
+//       if (interactionCount === 0) {
+//         console.log(`No interactions found for user: ${user._id}`);
+//         // Fetch popular products for users with no interactions
+//         const popularProducts = await recommendedProductsForNewUser();
 
-      if (interactions && interactions.length > 0) {
-        interactions.forEach((interaction) => {
-          const productIndex = getProductIndex(interaction._id, products);
-          if (productIndex !== -1) {
-            userIndices.push(user._id.toString());
-            productIndices.push(productIndex);
-          }
-        });
+//         // Cache the popular products as recommendations
+//         await UserRecommendation.findOneAndUpdate(
+//           { userId: user._id },
+//           { userId: user._id, recommendations: popularProducts },
+//           { upsert: true } // Insert or update if the user already has recommendations
+//         );
+//         continue; // Skip further processing for this user
+//       }
 
-        // Validate tensor shapes and contents
-        if (userIndices.length === productIndices.length && userIndices.length > 0) {
-          const userTensor = tf.tensor(userIndices, [userIndices.length, 1], "int32");
-          const productTensor = tf.tensor(productIndices, [productIndices.length, 1], "int32");
+//       const interactions = await aggregateInteractions(user._id);
+//       console.log("User Interactions:", interactions);
 
-          console.log("User Tensor Shape:", userTensor.shape);
-          console.log("Product Tensor Shape:", productTensor.shape);
+//       if (interactions && interactions.length > 0) {
+//         interactions.forEach((interaction) => {
+//           const productIndex = getProductIndex(interaction._id, products);
+//           if (productIndex !== -1) {
+//             userIndices.push(user._id.toString());
+//             productIndices.push(productIndex);
+//           }
+//         });
 
-          const predictions = recommendationModel.predict([userTensor, productTensor]);
-          const predictionArray = predictions.arraySync();
+//         // Validate tensor shapes and contents
+//         if (userIndices.length === productIndices.length && userIndices.length > 0) {
+//           const userTensor = tf.tensor(userIndices, [userIndices.length, 1], "int32");
+//           const productTensor = tf.tensor(productIndices, [productIndices.length, 1], "int32");
 
-          // Ensure predictionArray is properly formed
-          if (predictionArray.length !== productIndices.length) {
-            throw new Error("Prediction array length does not match product indices length.");
-          }
+//           console.log("User Tensor Shape:", userTensor.shape);
+//           console.log("Product Tensor Shape:", productTensor.shape);
 
-          const productScores = products.map((product, index) => ({
-            productId: product._id,
-            score: predictionArray[index]?.[0], // Use optional chaining to avoid undefined errors
-          }));
+//           const predictions = recommendationModel.predict([userTensor, productTensor]);
+//           const predictionArray = predictions.arraySync();
 
-          productScores.sort((a, b) => b.score - a.score);
+//           // Ensure predictionArray is properly formed
+//           if (predictionArray.length !== productIndices.length) {
+//             throw new Error("Prediction array length does not match product indices length.");
+//           }
 
-          await UserRecommendation.findOneAndUpdate(
-            { userId: user._id },
-            { userId: user._id, recommendations: productScores.slice(0, 5) },
-            { upsert: true }
-          );
-        } else {
-          console.error("Mismatch between userIndices and productIndices lengths.");
-        }
-      }
-    }
+//           const productScores = products.map((product, index) => ({
+//             productId: product._id,
+//             score: predictionArray[index]?.[0], // Use optional chaining to avoid undefined errors
+//           }));
 
-    res.status(200).send("Recommendations cached successfully");
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Error caching recommendations");
-  }
-});
+//           productScores.sort((a, b) => b.score - a.score);
+
+//           await UserRecommendation.findOneAndUpdate(
+//             { userId: user._id },
+//             { userId: user._id, recommendations: productScores.slice(0, 5) },
+//             { upsert: true }
+//           );
+//         } else {
+//           console.error("Mismatch between userIndices and productIndices lengths.");
+//         }
+//       }
+//     }
+
+//     res.status(200).send("Recommendations cached successfully");
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send("Error caching recommendations");
+//   }
+// });
 
 
 

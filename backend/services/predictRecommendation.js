@@ -1,21 +1,21 @@
 
-import * as tf from '@tensorflow/tfjs-node-gpu';
-import {products} from './products.js';
+// import * as tf from '@tensorflow/tfjs-node-gpu';
+// import {products} from './products.js';
 
-import { createRecommendationModel } from './recommendationModel.js';
+// import { createRecommendationModel } from './recommendationModel.js';
 
 
 
-export const getUniqueUserCount = async () => {
-  try {
-    // Find all unique userIds from interactions
-    const userIds = await Interaction.distinct('userId');
-    return userIds.length;
-  } catch (error) {
-    console.error('Error fetching unique user count:', error);
-    throw error;
-  }
-};
+// export const getUniqueUserCount = async () => {
+//   try {
+//     // Find all unique userIds from interactions
+//     const userIds = await Interaction.distinct('userId');
+//     return userIds.length;
+//   } catch (error) {
+//     console.error('Error fetching unique user count:', error);
+//     throw error;
+//   }
+// };
 
 
 export const predictRecommendation = async (userId, productId) => {

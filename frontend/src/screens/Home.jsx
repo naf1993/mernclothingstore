@@ -46,7 +46,7 @@ const Home = () => {
           <MultiCarousel items={featuredProducts} heading="Top Selling" />
         )}
 
-        <Review />
+        {/* <Review /> */}
         <NewsLetterSubscription />
       </div>
     </div>
