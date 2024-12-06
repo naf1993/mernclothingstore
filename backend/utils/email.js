@@ -40,9 +40,9 @@ export const sendEmail = async ({ userEmail, subject, templateName, replacements
       to: userEmail,
       from: process.env.FROM_ADDRESS,  // Your verified SendGrid sender email
       subject: subject,
-      text:'hello',
+      text:'this is a test mail',
       // text: replacements.textContent || 'Your order details are provided below.',  // Fallback text content if not provided
-      html: htmlContent,
+      // html: htmlContent,
     };
 
    
