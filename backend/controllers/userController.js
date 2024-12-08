@@ -250,8 +250,8 @@ export const addToFavourites = catchAsync(async (req, res, next) => {
 
   const updatedUser = await User.findById(_id).populate("favourites");
 
-  console.log("Updated favourites after addition:", updatedUser.favourites); // Log updated favorites
-  await addInteractions(user._id, null, productId, "favourites"); // Pass userId and productId to addInteraction
+  
+  // await addInteractions(user._id, null, productId, "favourites"); // Pass userId and productId to addInteraction
 
   res.status(200).json({
     status: "success",

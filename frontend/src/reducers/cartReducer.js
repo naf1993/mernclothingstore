@@ -48,7 +48,7 @@ export const cartReducer = (state = initialState, action) => {
         ...state,
         loading: false,
        
-        product: [],
+        products: [],
         subTotal: 0,
       };
 

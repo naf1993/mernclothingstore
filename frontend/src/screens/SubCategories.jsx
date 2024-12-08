@@ -17,24 +17,16 @@ const sortMenu = [
   { value: "createdAt", name: "New Arrivals" },
 ];
 
-const ProductList1 = () => {
+const SubCategories = () => {
   const location = useLocation();
   const dispatch = useDispatch();
-  const categoryId = location.pathname.split("/")[3];
-  const {
-    loading,
-    error,
-    subcategories: subcats,
-  } = useSelector((state) => state.product);
+  const subCategoryId = location.pathname.split("/")[2];
   const {
     products,
     loading: loadingProducts,
     error: errorProducts,
   } = useSelector((state) => state.product);
-
-  const [options, setOptions] = useState([]);
   const [colors, setColors] = useState([]);
-  const [selectedIds, setSelectedIds] = useState(new Set()); // Subcategory IDs
   const [selectedColor, setSelectedColor] = useState(""); // Selected Color
   const [minPrice, setMinPrice] = useState(""); // Minimum Price
   const [maxPrice, setMaxPrice] = useState(""); // Maximum Price
@@ -42,36 +34,11 @@ const ProductList1 = () => {
   const [selectedSort, setSelectedSort] = useState(""); // Selected Sort Option
   const [filteredProducts, setFilteredProducts] = useState(products); // Filtered Products
 
-  const [isFilterVisible, setFilterVisible] = useState(false);
-  const [isSortVisible, setSortVisible] = useState(false);
-
-  const toggleFilter = () => {
-    setFilterVisible(!isFilterVisible);
-    setSortVisible(false);
-  };
-  const toggleSort = () => {
-    setSortVisible(!isSortVisible);
-    setFilterVisible(false);
-  };
-
   useEffect(() => {
-    if (categoryId) {
-      dispatch(getSubCategories(categoryId));
-      dispatch(listProducts(categoryId));
+    if (subCategoryId) {
+      dispatch(listProducts("", subCategoryId));
     }
-  }, [categoryId, dispatch]);
-
-  useEffect(() => {
-    if (subcats) {
-      const result = subcats.map((item) => ({
-        id: item.id,
-        name: item.name,
-        checked: false,
-      }));
-      setOptions(result);
-    }
-  }, [subcats]);
-
+  }, [subCategoryId, dispatch]);
   useEffect(() => {
     if (products) {
       let uniqueColors = new Set();
@@ -91,13 +58,6 @@ const ProductList1 = () => {
   useEffect(() => {
     let results = products;
 
-    // Apply filters first
-    if (selectedIds.size > 0) {
-      results = results.filter(
-        (product) =>
-          product.SubCategory && selectedIds.has(product.SubCategory.id)
-      );
-    }
     if (selectedColor) {
       results = results.filter((product) =>
         product.colors.includes(selectedColor)
@@ -153,7 +113,6 @@ const ProductList1 = () => {
     console.log("Filtered Products:", results);
   }, [
     products,
-    selectedIds,
     selectedColor,
     minPrice,
     maxPrice,
@@ -165,14 +124,7 @@ const ProductList1 = () => {
     if (type === "color") {
       setSelectedColor(""); // Clear color filter
     }
-    if (type === "category") {
-      // Remove the specific category id from selectedIds
-      setSelectedIds((prevIds) => {
-        const newIds = new Set(prevIds);
-        newIds.delete(id); // Remove the clicked id
-        return newIds;
-      });
-    }
+
     if (type === "price") {
       setMinPrice("");
       setMaxPrice("");
@@ -184,16 +136,11 @@ const ProductList1 = () => {
 
   // Clear all filters
   const handleClearAllFilters = () => {
-    setSelectedIds(new Set()); // Clear categories
     setSelectedColor(""); // Clear color
     setMinPrice(""); // Clear min price
     setMaxPrice(""); // Clear max price
     setSelectedRating(null); // Clear rating
     setSelectedSort(""); // Clear sorting
-  };
-  const handleApplyFilter = () => {
-    setFilterVisible(!isFilterVisible);
-    setSortVisible(false);
   };
 
   return (
@@ -206,10 +153,9 @@ const ProductList1 = () => {
           <>
             <div className="left">
               <ProductFilter
+                showCategoryFilter={false}
                 colors={colors}
                 selectedColor={selectedColor}
-                options={options}
-                setSelectedIds={setSelectedIds}
                 setSelectedColor={setSelectedColor}
                 setMinPrice={setMinPrice}
                 setMaxPrice={setMaxPrice}
@@ -220,7 +166,7 @@ const ProductList1 = () => {
             <div className="right">
               <div className="first">
                 <div className="select-wrapper">
-                  <select //i want this select emenu
+                  <select
                     className="custom-select"
                     value={selectedSort}
                     onChange={handleSortChange}
@@ -236,8 +182,7 @@ const ProductList1 = () => {
 
                 <AppliedFilters
                   selectedColor={selectedColor}
-                  selectedIds={selectedIds}
-                  options={options}
+                  isCategoryPresent={false}
                   minPrice={minPrice}
                   maxPrice={maxPrice}
                   selectedRating={selectedRating}
@@ -248,84 +193,11 @@ const ProductList1 = () => {
               {/* Loading or Error States */}
               {loadingProducts && <Loader />}
               {errorProducts && <Message error={errorProducts} />}
-              {/* Display Filtered Products */}
+
               <div className="products-list">
                 {filteredProducts?.map((product) => (
                   <Product key={product.id} product={product} />
                 ))}
-              </div>
-              <div className="mobile-filters-wrapper">
-                <div className="mobile-filters">
-                  {" "}
-                  <button className="filter-sort-button" onClick={toggleFilter}>
-                    {" "}
-                    Filter{" "}
-                  </button>{" "}
-                  <select
-                    className="custom-select"
-                    value={selectedSort}
-                    onChange={handleSortChange}
-                    onClick={toggleSort} // Toggle the sort menu on select change
-                  >
-                    <option value="">Sort By</option>
-                    {sortMenu.map((option, index) => (
-                      <option key={index} value={option.value}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>{" "}
-                <div
-                  className={`filter-menu ${isFilterVisible ? "active" : ""}`}
-                >
-                  <button
-                    className="filter-close-btn"
-                    onClick={() => setFilterVisible(false)}
-                  >
-                    <AiOutlineClose />
-                  </button>
-                  <ProductFilter
-                    colors={colors}
-                    selectedColor={selectedColor}
-                    options={options}
-                    setSelectedIds={setSelectedIds}
-                    setSelectedColor={setSelectedColor}
-                    setMinPrice={setMinPrice}
-                    setMaxPrice={setMaxPrice}
-                    setSelectedRating={setSelectedRating}
-                    setSelectedSort={setSelectedSort}
-                  />
-                  <AppliedFilters
-                    selectedColor={selectedColor}
-                    selectedIds={selectedIds}
-                    options={options}
-                    minPrice={minPrice}
-                    maxPrice={maxPrice}
-                    selectedRating={selectedRating}
-                    handleClearFilter={handleClearFilter}
-                    handleClearAllFilters={handleClearAllFilters}
-                  />
-                  {(selectedColor ||
-                    selectedIds.size > 0 ||
-                    minPrice ||
-                    maxPrice ||
-                    selectedRating) && (
-                    <div className="filter-action">
-                      <button
-                        onClick={() => handleApplyFilter()}
-                        className="filter-action-btn"
-                      >
-                        Apply Filters
-                      </button>
-                      <button
-                        onClick={handleClearAllFilters}
-                        className="filter-action-btn"
-                      >
-                        Clear All
-                      </button>
-                    </div>
-                  )}
-                </div>
               </div>
             </div>
           </>
@@ -335,4 +207,4 @@ const ProductList1 = () => {
   );
 };
 
-export default ProductList1;
+export default SubCategories;

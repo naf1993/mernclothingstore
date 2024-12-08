@@ -9,8 +9,6 @@ import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import AppError from "./utils/appError.js";
 import globalErrorHandler from "./controllers/errorController.js";
-
-import Product from "./models/productModel.js";
 import { googleStrategy } from "./services/googleStrategy.js";
 import productRoutes from "./routes/productRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
@@ -28,17 +26,8 @@ import colors from "colors";
 import connectDB from "./config/db.js";
 import { webhookHandler } from "./controllers/orderController.js";
 import { v2 as cloudinary } from "cloudinary";
-//import * as tf from "@tensorflow/tfjs-node-gpu";
-//import trainRecommendationModel from "./services/trainRecommendationModel.js";
 import { UserRecommendation } from "./models/userModel.js";
-// import User from './models/userModel.js'
-// import { recommendedProductsForNewUser } from "./controllers/productController.js";
-// import { aggregateInteractions } from "./services/interactionService.js";
-// import { Interaction } from "./models/productModel.js";
-
-// Database connection
 connectDB();
-
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -47,9 +36,9 @@ const io = new Server(server, {
       process.env.NODE_ENV === "development"
         ? "http://localhost:3000" // Allow all origins in development
         : [
-          process.env.FRONTEND_URL,  // Production URL on Vercel (e.g., https://themodeststore.vercel.app)
-          "https://www.themodeststore.shop", // Custom domain with 'www'
-          "https://modeststore.shop" 
+            process.env.FRONTEND_URL, // Production URL on Vercel (e.g., https://themodeststore.vercel.app)
+            "https://www.themodeststore.shop", // Custom domain with 'www'
+            "https://modeststore.shop",
           ], //,  // Vercel app URL for production
     credentials: true, // Allow credentials (cookies, Authorization headers)
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -69,65 +58,47 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
-
-// Middleware Setup
 const corsOptions = {
-  origin: process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"  // Local development (localhost)
-    : [
-        process.env.FRONTEND_URL,  // Production URL on Vercel (e.g., https://themodeststore.vercel.app)
-        "https://www.themodeststore.shop", // Custom domain with 'www'
-        "https://modeststore.shop" // Custom domain without 'www'
-      ],
+  origin:
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000" // Local development (localhost)
+      : [
+          process.env.FRONTEND_URL, // Production URL on Vercel (e.g., https://themodeststore.vercel.app)
+          "https://www.themodeststore.shop", // Custom domain with 'www'
+          "https://modeststore.shop", // Custom domain without 'www'
+        ],
   credentials: true, // Allow cookies and authorization headers
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'sessionId'],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "sessionId"],
 };
-
 app.use(cors(corsOptions));
 app.use(passport.initialize());
 passport.use(googleStrategy);
-//app.use(helmet());
 
-// Logging (only in development mode)
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
-
-// Cloudinary configuration
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
-
-// Routes
-// Stripe webhook handler
 app.post(
   "/api/orders/webhook",
   bodyParser.raw({ type: "application/json" }),
   webhookHandler
 );
-
-
-
-
-// Static file serving
 app.use("/public", express.static("public"));
-
-// Middleware for request body parsing
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
-
 app.use(express.urlencoded({ extended: true }));
+app.post("/sendgrid-webhook", (req, res) => {
+  //not logging anything
+  console.log("Received webhook headers:", req.headers); 
+  console.log("Received webhook events:", req.body); 
 
-app.post('/sendgrid-webhook', (req, res) => {
-  console.log('Received webhook headers:', req.headers); // Log the request headers
-  console.log('Received webhook events:', req.body); // Log the request body (event payload)
-  
-  res.status(200).send('Webhook received'); // Always return HTTP 200
+  res.status(200).send("Webhook received"); 
 });
-
 // app.post('/sendgrid-webhook', (req, res) => {
 //   const events = req.body; // SendGrid sends an array of events
 

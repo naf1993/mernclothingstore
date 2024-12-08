@@ -38,7 +38,7 @@ const Navbar = ({ navItems }) => {
       }),
     };
   });
-  console.log(menus);
+ 
   const usernav = [
     {
       title: "Favourites",

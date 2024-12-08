@@ -11,7 +11,6 @@ import { loginUserWithOauth, loadUser } from "./actions/userActions";
 import axios from "axios";
 import Protected from "./components/Protected";
 import { Toaster } from "react-hot-toast";
-import ProductsCategory from "./screens/ProductsCategory";
 import About from "./screens/About";
 import ReturnPolicy from "./screens/ReturnPolicy";
 import Contact from "./screens/Contact";
@@ -19,6 +18,7 @@ import AccountPage from "./screens/AccountPage";
 import ProductList1 from "./screens/ProductList1";
 import { apiUrl } from "./actions/apiUrl";
 import UpdateProfile from "./screens/UpdateProfile";
+import SubCategories from "./screens/SubCategories";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
@@ -84,16 +84,16 @@ const App = () => {
               <Route path="register" element={<Register />} />
               <Route path="/" element={<Layout navItems={navItems} />}>
                 <Route index element={<Home />} />
-
+               
                 <Route
                   path="products/:category/:id"
                   element={<ProductList1 />}
                 />
                 <Route
-                  path="products/:categoryId/:subcategoryId"
-                  element={<ProductsCategory />}
+                  path="products/:subcategory"
+                  element={<SubCategories />}
                 />
-                <Route path="products/:id" element={<SingleProduct />} />
+                <Route path="product/:id" element={<SingleProduct />} />
 
                 <Route
                   path="favourites"
@@ -139,7 +139,7 @@ const App = () => {
                     </Protected>
                   }
                 />
-                 <Route
+                <Route
                   path="updateProfile"
                   element={
                     <Protected>

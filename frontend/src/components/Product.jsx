@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { useDispatch, useSelector } from "react-redux";
 import StarRating from "./StarRating";
@@ -11,14 +11,16 @@ import { apiUrl } from "../actions/apiUrl";
 const Product = ({ product }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated, favourites,token } = useSelector((state) => state.user);
+  const { isAuthenticated, favourites, token } = useSelector(
+    (state) => state.user
+  );
 
   const isProductFav =
     favourites?.some((fav) => fav._id === product.id) || false;
 
   const handleClick = async (e, id) => {
     e.preventDefault();
-    e.stopPropagation();
+   // Prevent click event from propagating to the parent div
 
     if (!isAuthenticated) {
       navigate("/login");
@@ -31,52 +33,43 @@ const Product = ({ product }) => {
         toast.success("Removed from favourites");
       } else {
         await dispatch(addToFavourites(id));
-        handleView(id,'favourites')
         toast.success("Added to favourites");
       }
     } catch (err) {
       toast.error(err.message);
     }
   };
-  const handleView = async (productId,interactionType='') => {
-    try {
-      // Get sessionId from sessionStorage (if any)
-      const sessionId = sessionStorage.getItem('sessionId');
-      
-      // Prepare the request data
-      const data = { 
-        productId, 
-        interactionType
-      };
-  
-      if (!token && sessionId) {
-        // For anonymous users, if sessionId exists, include it in the request body
-        data.sessionId = sessionId;
-      }
-  
-      // Add the Authorization header if the user is authenticated
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-  
-      // Send request with credentials (cookies)
-      await axios.post(`${apiUrl}/api/users/addinteraction`, data, {
-        headers,
-        withCredentials: true, // Ensure cookies are sent
-      });
-  
-      toast.success("Interaction added");
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-  
-  
+
+  // const handleView = async (productId, interactionType = "") => {
+  //   try {
+  //     const sessionId = sessionStorage.getItem("sessionId");
+  //     const data = { productId, interactionType };
+
+  //     if (!token && sessionId) {
+  //       // For anonymous users, if sessionId exists, include it in the request body
+  //       data.sessionId = sessionId;
+  //     }
+
+  //     const headers = {};
+  //     if (token) {
+  //       headers["Authorization"] = `Bearer ${token}`;
+  //     }
+
+  //     await axios.post(`${apiUrl}/api/users/addinteraction`, data, {
+  //       headers,
+  //       withCredentials: true, // Ensure cookies are sent
+  //     });
+  //   } catch (error) {
+  //     toast.error(error.message);
+  //   }
+  // };
 
   return (
-    <Link to={`/products/${product.id}`}>
-      <div onClick={() => handleView(product.id,'view')}>
+    <Link to={`/product/${product.id}`}>
+      <div
+        // onClick={() => handleView(product.id, "view")}
+        // style={{ cursor: "pointer" }}
+      >
         <div className="product-card">
           <img
             src={product.images[0]}
@@ -92,7 +85,10 @@ const Product = ({ product }) => {
                 border: "none",
                 background: "transparent",
               }}
-              onClick={(event) => handleClick(event, product.id)}
+              onClick={(event) => {
+                // Prevent handleView from being triggered
+                handleClick(event, product.id); // Handle favourite click
+              }}
               className="icon-button"
               type="button"
             >

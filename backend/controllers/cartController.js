@@ -57,7 +57,7 @@ const addToCart = catchAsync(async (req, res, next) => {
     // Re-populate the cart to include the updated product details
     cart = await cart.populate("products.productId");
 
-    await addInteractions(_id, null, productId, "add_to_cart");
+    // await addInteractions(_id, null, productId, "add_to_cart");
 
     return res.status(200).json({
       status: "success",

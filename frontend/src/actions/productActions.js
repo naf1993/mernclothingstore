@@ -30,7 +30,7 @@ import { apiUrl } from "./apiUrl";
 export const getCategories = () => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_CATEGORY_REQUEST });
-    console.log(apiUrl)
+    
     const { data } = await axios.get(`${apiUrl}/api/categories`);
     dispatch({ type: PRODUCT_CATEGORY_SUCCESS, payload: data.data.categories });
   } catch (error) {
@@ -78,30 +78,44 @@ export const getRelatedProducts =
     }
   };
 
-export const listProducts = (categoryId) => async (dispatch) => {
-  try {
-    dispatch({ type: PRODUCT_LIST_REQUEST });
-    const endpoint = categoryId
-      ? `${apiUrl}/api/products?Category=${categoryId}`
-      : `${apiUrl}/api/products`;
-
-    // Fetch products from API
-    const { data } = await axios.get(endpoint);
-
-    const allProducts = data.data.products;
-    console.log(allProducts);
-    dispatch({
-      type: PRODUCT_LIST_SUCCESS,
-      payload: allProducts,
-    });
-  } catch (error) {
-    dispatch({
-      type: PRODUCT_LIST_FAIL,
-      payload: error.response.data.message,
-    });
-  }
-};
-
+  export const listProducts = (categoryId, subCategoryId) => async (dispatch) => {
+    try {
+      dispatch({ type: PRODUCT_LIST_REQUEST });
+  
+      // Build the query string dynamically based on the presence of categoryId and subCategoryId
+      let endpoint = `${apiUrl}/api/products`;
+  
+      const params = [];
+      if (categoryId) {
+        params.push(`Category=${categoryId}`);
+      }
+      if (subCategoryId) {
+        params.push(`SubCategory=${subCategoryId}`);
+      }
+  
+      // If either categoryId or subCategoryId is present, append the query params
+      if (params.length > 0) {
+        endpoint += `?${params.join('&')}`;
+      }
+  
+      // Fetch products from API
+      const { data } = await axios.get(endpoint);
+  
+      const allProducts = data.data.products;
+   
+  
+      dispatch({
+        type: PRODUCT_LIST_SUCCESS,
+        payload: allProducts,
+      });
+    } catch (error) {
+      dispatch({
+        type: PRODUCT_LIST_FAIL,
+        payload: error.response ? error.response.data.message : error.message,
+      });
+    }
+  };
+  
 export const listProductDetails = (id) => async (dispatch) => {
   try {
     dispatch({ type: PRODUCT_DETAIL_REQUEST });

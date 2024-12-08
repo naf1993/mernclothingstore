@@ -44,7 +44,6 @@ const createSendToken = (user, statusCode, res) => {
 //register user
 const register = catchAsync(async (req, res, next) => {
   const { name, email, password, isAdmin } = req.body;
-
   const userExists = await User.findOne({ email });
   if (userExists) {
     res.status(400);
@@ -65,12 +64,8 @@ const register = catchAsync(async (req, res, next) => {
     httpOnly: true,
   };
   if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
-
   res.cookie("token", token, cookieOptions);
-
-  // Remove password from output
   user.password = undefined;
-
   res.status(201).json({
     status: "success",
     token: token,

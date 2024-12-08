@@ -216,3 +216,16 @@ body {
     
   }
 }
+.products-list {
+  margin-top: 2rem;
+  display: grid; /* Use grid layout */
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1rem;
+
+  @media only screen and (max-width: $bp-smallest) {
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    margin-top: 2rem;
+    margin-bottom: 10rem;
+  }
+}

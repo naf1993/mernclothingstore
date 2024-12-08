@@ -3,6 +3,7 @@ import { AiOutlineDelete, AiOutlineHeart } from "react-icons/ai";
 import { useDispatch } from "react-redux";
 import { removeFromCart } from "../actions/cartActions";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 const CartItem = ({
   color,
@@ -18,17 +19,19 @@ const CartItem = ({
   removeItem,
 }) => {
   const dispatch = useDispatch();
-  const [isRemoving,setIsRemoving] = useState(false)
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const handleRemoveItem = () => {
-    setIsRemoving(true)
-    setTimeout(()=>{
-      removeItem(productId,color,size)
-    },400)
-  }
+    setIsRemoving(true);
+    setTimeout(() => {
+      removeItem(productId, color, size);
+    }, 400);
+  };
   return (
-    <div className={`cart-item ${isRemoving ? 'removing' : ''}`}>
-      <img src={productImg} alt={productName} />
+    <div className={`cart-item ${isRemoving ? "removing" : ""}`}>
+      <Link className="cart-item__img-container" to={`/product/${productId}`}>
+        <img src={productImg} alt={productName} />
+      </Link>
       <h6 className="cart-item__heading">{productName}</h6>
       <div className="cart-item__color">
         <span>Color</span>
@@ -61,10 +64,11 @@ const CartItem = ({
         <h6>₹{total}</h6>
       </div>
       <div className="cart-item__action">
-        <button type='button' data-tooltip="Add to Favourites">
+        <button type="button" data-tooltip="Add to Favourites">
           <AiOutlineHeart />
         </button>
-        <button type="button"
+        <button
+          type="button"
           data-tooltip="Remove from Cart"
           onClick={handleRemoveItem}
         >

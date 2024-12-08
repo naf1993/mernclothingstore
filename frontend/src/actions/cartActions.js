@@ -66,6 +66,7 @@ export const addToCart =
         config
       );
       const { products, subTotal } = processCartData(data.data.cart);
+      console.log('cart action products',products)
       dispatch({ type: ADD_TO_CART_SUCCESS, payload: {products,subTotal} });
       toast.success("Product Added to Cart");
     } catch (error) {
@@ -138,6 +139,7 @@ export const getMyCart = () => async (dispatch, getState) => {
 
     const { data } = await axios.get( `${apiUrl}/api/cart`, config);
     const { products, subTotal } = processCartData(data.data.cart);
+    console.log(products)
     dispatch({ type: GET_MY_CART_SUCCESS, payload: {products,subTotal} });
   } catch (error) {
     dispatch({

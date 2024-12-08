@@ -11,12 +11,13 @@ const LargeScreenDetails = ({
   setSizeErr,
   colorErr,
   sizeErr,
-  description,
+  description
 }) => {
 
 
   return (
     <>
+    
       {colors && <h4 className="product-color color-name">COLORS</h4>}
       {colors && (
         <div className="buttons-wrapper">
@@ -48,8 +49,9 @@ const LargeScreenDetails = ({
       {sizeErr && <p className="text-danger">{sizeErr}</p>}
 
       <h4 className="product-details detail-name">Product Details</h4>
-      <p>{description}</p>
-      <p>Return within "30 days". For detailed information, Click.</p>
+      <p className="details">{description}</p>
+      <p>Fabric Info : Pure Cotton</p>
+    
     </>
   );
 };

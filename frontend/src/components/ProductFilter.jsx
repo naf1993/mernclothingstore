@@ -24,7 +24,7 @@ const ProductFilter = ({
   setMinPrice,
   setMaxPrice,
   selectedColor,
-  setSelectedRating,
+  setSelectedRating,showCategoryFilter=true
  
 }) => {
   const handleSubcategoryChange = (e) => {
@@ -58,31 +58,34 @@ const ProductFilter = ({
   return (
     <>
       {/* Filter By Category */}
-      <div className="filter-1">
-        <h6 className="filter-name">Filter By Category</h6>
-        <div
-          className="checkbox-wrapper1"
-          style={{ display: "flex", gap: "0.5rem", flexDirection: "column" }}
-        >
-          {" "}
-          {options.map((item, index) => (
-            <div key={index}>
-              {" "}
-              <label>
+      {showCategoryFilter && (
+          <div className="filter-1">
+          <h6 className="filter-name">Filter By Category</h6>
+          <div
+            className="checkbox-wrapper1"
+            style={{ display: "flex", gap: "0.5rem", flexDirection: "column" }}
+          >
+            {" "}
+            {options.map((item, index) => (
+              <div key={index}>
                 {" "}
-                <input
-                  name={item.id}
-                  value={item.name}
-                  checked={item.checked}
-                  type="checkbox"
-                  onChange={handleSubcategoryChange}
-                />{" "}
-                <span>{item.name}</span>{" "}
-              </label>{" "}
-            </div>
-          ))}{" "}
+                <label>
+                  {" "}
+                  <input
+                    name={item.id}
+                    value={item.name}
+                    checked={item.checked}
+                    type="checkbox"
+                    onChange={handleSubcategoryChange}
+                  />{" "}
+                  <span>{item.name}</span>{" "}
+                </label>{" "}
+              </div>
+            ))}{" "}
+          </div>
         </div>
-      </div>
+      )}
+    
 
       {/* Filter By Price */}
       <div className="filter-2">

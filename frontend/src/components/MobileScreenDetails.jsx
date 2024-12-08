@@ -44,11 +44,9 @@ const MobileScreenDetails = ({
   setSizeErr,
   colorErr,
   sizeErr,
-  productDetails,
+  productDetails,description
 }) => {
-  useEffect(() => {
-    console.log("mobile view rendered");
-  }, []);
+
 
   const [openAccordion, setOpenAccordion] = useState(null);
   const accordionRefs = useRef([]);
@@ -126,8 +124,9 @@ const MobileScreenDetails = ({
             <FaAngleRight className="accord-arrow" />
           </div>
           <div className="accord-details">
-            <p>{productDetails}</p>
-            <p>Return within "30 days". For detailed information, Click.</p>
+            <p>{description}</p>
+            <p>Fabric Info : Pure Cotton</p>
+           
           </div>
         </div>
       </div>

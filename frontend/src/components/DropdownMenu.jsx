@@ -17,7 +17,7 @@ const DropdownMenu = ({ submenus, dropdown ,categoryId}) => {
       {submenus.map((submenu, index) => (
         <li key={index} className="menu-items-dropdown">
           {(submenu.url && categoryId) ? (
-            <Link to={`products/${categoryId}/${submenu.subcategoryId}`} className="menu-items-dropdown-item">
+            <Link to={`products/${submenu.subcategoryId}`} className="menu-items-dropdown-item">
             {submenu.title}
           </Link>
           )
