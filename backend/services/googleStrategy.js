@@ -6,7 +6,7 @@ import User from "../models/userModel.js";
 
 const googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/auth/google/callback';
 
-
+//const googleCallbackUrl = 'http://localhost:5000/auth/google/callback';
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });

@@ -135,7 +135,14 @@ export const loginUserWithOauth = (token) => async (dispatch, getState) => {
 export const logOutUser = () => async (dispatch, getState) => {
   deleteAllCookies();
   const user = getState().user.user;
+  console.log('this is user')
+
+console.log(user)
+
   const provider = user.provider;
+  console.log('this is provider')
+  console.log(provider)
+  
   if (provider !== "google") {
     try {
       await axios.get(`${apiUrl}/auth/logout/email`);
@@ -147,7 +154,7 @@ export const logOutUser = () => async (dispatch, getState) => {
     }
   } else {
     try {
-      await axios.get("/auth/logout/google");
+      await axios.get(`${apiUrl}/auth/logout/google`);
       dispatch({
         type: LOGOUT_SUCCESS,
       });

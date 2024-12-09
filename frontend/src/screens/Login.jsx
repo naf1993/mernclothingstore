@@ -32,7 +32,7 @@ const Login = () => {
     dispatch(loginUserWithEmail(email, password));
   };
   const googleLogin = () => {
-    window.open(`${process.env.REACT_APP_WEB_URL}/auth/google`, "_self");
+    window.open(`${apiUrl}/auth/google`, "_self");
   };
   return (
     <div className="login-container">
