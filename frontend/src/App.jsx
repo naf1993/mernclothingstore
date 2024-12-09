@@ -40,23 +40,20 @@ const App = () => {
   const [navItems, setNavItems] = useState([]);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const { token, isLoading, isAuthenticated } = user;
-
+  const { isLoading, isAuthenticated } = user;
+  const token = Cookies.get("x-auth-token");
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = Cookies.get("x-auth-token");
-        if (token && !isAuthenticated) {
+    if (token && !isAuthenticated) {
+      const fetchUser = async () => {
+        try {
           await dispatch(loginUserWithOauth(token));
-        } else if (!token) {
-          await dispatch(loadUser());
+        } catch (error) {
+          toast.error(error);
         }
-      } catch (error) {
-        toast.error(error);
-      }
-    };
-    fetchUser();
-  }, [dispatch, isAuthenticated]);
+      };
+      fetchUser();
+    }
+  }, [dispatch, isAuthenticated,token]);
 
   // useEffect(() => {
   //   const token = Cookies.get("x-auth-cookie"); // Get token from cookies
