@@ -58,6 +58,7 @@ export const loadUser = () => async (dispatch) => {
       type: USER_FAIL,
       payload: error.response ? error.response.data.message : error.message,
     });
+    throw new Error(error.response ? error.response.data.message : error.message)
   }
 };
 
@@ -168,6 +169,7 @@ export const loginUserWithOauth = (token) => async (dispatch, getState) => {
       type: LOGIN_WITH_OAUTH_FAIL,
       payload: { error: err.response.data.message },
     });
+    throw new Error(err.response ? err.response.data.message : err.message)
   }
 };
 

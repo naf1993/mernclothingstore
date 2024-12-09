@@ -10,7 +10,7 @@ import Cookies from "js-cookie";
 import { loginUserWithOauth, loadUser } from "./actions/userActions";
 import axios from "axios";
 import Protected from "./components/Protected";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import About from "./screens/About";
 import ReturnPolicy from "./screens/ReturnPolicy";
 import Contact from "./screens/Contact";
@@ -42,16 +42,31 @@ const App = () => {
   const user = useSelector((state) => state.user);
   const { token, isLoading, isAuthenticated } = user;
 
-
   useEffect(() => {
-    const token = Cookies.get('x-auth-cookie'); // Get token from cookies
-
-    if (token && !isAuthenticated) {
-      dispatch(loginUserWithOauth(token)); // If token exists, authenticate user
-    } else if (!isAuthenticated) {
-      dispatch(loadUser()); // If no token, try to load user from cookie
-    }
+    const fetchUser = async () => {
+      try {
+        const token = Cookies.get("x-auth-token");
+        if (token && !isAuthenticated) {
+          await dispatch(loginUserWithOauth(token));
+        } else if (!token) {
+          await dispatch(loadUser());
+        }
+      } catch (error) {
+        toast.error(error);
+      }
+    };
+    fetchUser();
   }, [dispatch, isAuthenticated]);
+
+  // useEffect(() => {
+  //   const token = Cookies.get("x-auth-cookie"); // Get token from cookies
+
+  //   if (token && !isAuthenticated) {
+  //     dispatch(loginUserWithOauth(token)); // If token exists, authenticate user
+  //   } else if (!isAuthenticated) {
+  //     dispatch(loadUser()); // If no token, try to load user from cookie
+  //   }
+  // }, [dispatch, isAuthenticated]);
   // useEffect(() => {
   //   const fetchUser = async () => {
   //     try {
@@ -60,7 +75,7 @@ const App = () => {
   //         console.log('JWT found:', cookieJwt);
   //         dispatch(loginUserWithOauth(cookieJwt));  // Only dispatch if not authenticated
   //       }
-  
+
   //       if (!appLoaded && !isLoading && token && !isAuthenticated) {
   //         console.log('Loading user...');
   //         await dispatch(loadUser());  // Dispatch loadUser only if necessary
@@ -69,10 +84,9 @@ const App = () => {
   //       console.error("Error fetching user:", error);
   //     }
   //   };
-  
+
   //   fetchUser();
   // }, [dispatch, isLoading, token, isAuthenticated]);  // Ensure correct dependencies to avoid unnecessary re-renders
-  
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -82,7 +96,6 @@ const App = () => {
         setNavItems(data.data.categories);
 
         // Check for JWT cookie and log in user
-      
       } catch (error) {
         console.error("Error fetching categories or user:", error);
       } finally {
@@ -108,7 +121,7 @@ const App = () => {
               <Route path="register" element={<Register />} />
               <Route path="/" element={<Layout navItems={navItems} />}>
                 <Route index element={<Home />} />
-               
+
                 <Route
                   path="products/:category/:id"
                   element={<ProductList1 />}
