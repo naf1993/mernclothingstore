@@ -20,9 +20,19 @@ router.get(
     session: false,
   }),
   (req, res) => {
+    console.log('req.user:', req.user);  // Log the user object to see if it's populated
+    
+    if (!req.user) {
+      return res.status(401).send('User not authenticated');
+    }
     const token = req.user.generateJWT();
-    console.log(token);
-    res.cookie("x-auth-cookie", token);
+    console.log('this is token')
+    console.log(token)
+    res.cookie("x-auth-cookie", token, {
+      httpOnly: true,  // Ensures the cookie is not accessible via JavaScript
+      secure: process.env.NODE_ENV === 'production',  // Set to true if in production (HTTPS)
+      sameSite: 'None',  // If using cross-site cookies (e.g., if frontend and backend are on different domains)
+    });
     res.redirect(clientUrl);
   }
 );
