@@ -11,8 +11,8 @@ router.get(
   })
 );
 
-//const clientUrl = process.env.FRONTEND_URL
-const clientUrl = "http://localhost:3000"
+const clientUrl = process.env.FRONTEND_URL
+//const clientUrl = "http://localhost:3000"
 
 router.get(
   "/auth/google/callback",
