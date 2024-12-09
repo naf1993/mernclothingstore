@@ -34,6 +34,7 @@ router.get(
       sameSite: 'None',  // If using cross-site cookies (e.g., if frontend and backend are on different domains)
     });
     res.redirect(clientUrl);
+    console.log('cookie sent')
   }
 );
 

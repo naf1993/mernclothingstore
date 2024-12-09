@@ -26,6 +26,8 @@ import toast from 'react-hot-toast';
 
 import { apiUrl } from "./apiUrl";
 
+axios.defaults.withCredentials = true;
+
 export const loadUser = () => async (dispatch, getState) => {
   dispatch({ type: USER_LOADING });
   try {
