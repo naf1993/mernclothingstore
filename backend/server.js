@@ -36,9 +36,8 @@ const io = new Server(server, {
       process.env.NODE_ENV === "development"
         ? "http://localhost:3000" // Allow all origins in development
         : [
-            process.env.FRONTEND_URL, // Production URL on Vercel (e.g., https://themodeststore.vercel.app)
-            "https://www.themodeststore.shop", // Custom domain with 'www'
-            "https://modeststore.shop",
+          process.env.FRONTEND_VERCEL_URL, 
+          process.env.FRONTEND_URL, 
           ], //,  // Vercel app URL for production
     credentials: true, // Allow credentials (cookies, Authorization headers)
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -63,9 +62,9 @@ const corsOptions = {
     process.env.NODE_ENV === "development"
       ? "http://localhost:3000" // Local development (localhost)
       : [
-          process.env.FRONTEND_URL, // Production URL on Vercel (e.g., https://themodeststore.vercel.app)
-          "https://www.themodeststore.shop", // Custom domain with 'www'
-          "https://modeststore.shop", // Custom domain without 'www'
+          process.env.FRONTEND_VERCEL_URL, 
+          process.env.FRONTEND_URL, 
+         
         ],
   credentials: true, // Allow cookies and authorization headers
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
