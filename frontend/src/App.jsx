@@ -42,24 +42,33 @@ const App = () => {
   const user = useSelector((state) => state.user);
   const { token, appLoaded, isLoading, isAuthenticated } = user;
 
+  useEffect(()=>{
+    const fetchUser = async()=>{
+      try{
+        const cookieJwt = Cookies.get('x-auth-cookie');
+        if (cookieJwt) {
+          console.log(cookieJwt)
+          dispatch(loginUserWithOauth(cookieJwt));  // Pass the cookie JWT to the login action
+        }
+        if (!appLoaded && !isLoading && token && !isAuthenticated) {
+          await dispatch(loadUser());
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    }
+    fetchUser()
+  },[dispatch, appLoaded, isLoading, token, isAuthenticated])
+
   useEffect(() => {
-    const fetchCategoriesAndUser = async () => {
+    const fetchCategories = async () => {
       try {
         // Fetch categories
         const { data } = await axios.get(`${apiUrl}/api/categories`);
         setNavItems(data.data.categories);
 
         // Check for JWT cookie and log in user
-        const cookieJwt = Cookies.get('x-auth-cookie');
-        if (cookieJwt) {
-          console.log(cookieJwt)
-          dispatch(loginUserWithOauth(cookieJwt));  // Pass the cookie JWT to the login action
-        }
-
-        // Load user if needed
-        if (!appLoaded && !isLoading && token && !isAuthenticated) {
-          await dispatch(loadUser());
-        }
+      
       } catch (error) {
         console.error("Error fetching categories or user:", error);
       } finally {
@@ -67,8 +76,8 @@ const App = () => {
       }
     };
 
-    fetchCategoriesAndUser();
-  }, [dispatch, appLoaded, isLoading, token, isAuthenticated]);
+    fetchCategories();
+  }, []);
 
   if (loading) {
     return <LoadingFullScreen />;

@@ -112,6 +112,7 @@ export const loginUserWithEmail =
 
 export const loginUserWithOauth = (token) => async (dispatch, getState) => {
   dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
+  console.log('before login outh')
   try {
      // Retrieve the token from the cookie
     const config = {
@@ -120,12 +121,15 @@ export const loginUserWithOauth = (token) => async (dispatch, getState) => {
         "Authorization": `Bearer ${token}`, // Attach the token from the cookie
       },
     };
+    console.log(token)
     const { data }  = await axios.get(`${apiUrl}/api/users/me`, config);
+    console.log(data.data.user)
     dispatch({
       type: LOGIN_WITH_OAUTH_SUCCESS,
       payload: { token: token, user: data.data.user },
     });
     toast.success(`Welcome ${data?.data?.user?.name}`)
+    console.log('after login oauth')
   } catch (err) {
     dispatch({
       type: LOGIN_WITH_OAUTH_FAIL,
