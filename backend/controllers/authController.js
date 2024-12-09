@@ -132,13 +132,7 @@ const loginAdmin = catchAsync(async (req, res, next) => {
 
 const protect = catchAsync(async (req, res, next) => {
   //getting token
-  let token;
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-  }
+  const token = req.cookies['x-auth-cookie'] || req.headers['authorization']?.split(' ')[1];
   if (!token) {
     return next(
       new AppError("You are not logged in..Please login to continue", 401)
