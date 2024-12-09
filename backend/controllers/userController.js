@@ -52,11 +52,21 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-const getMe = (req, res, next) => {
-  console.log(req.user)
+const getMe = catchAsync(async(req, res, next) => {
   req.params.id = req.user.id;
-  next();
-};
+  const user = await User.findById(req.params.id).populate('favourites');
+  console.log("this is logged in user", user);
+  if (!user) {
+    return next(new AppError("No User found with that ID", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  });
+  
+})
 
 const updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data

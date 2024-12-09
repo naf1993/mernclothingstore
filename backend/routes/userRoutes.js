@@ -20,7 +20,7 @@ router.route('/removefromfavourites/:productId').delete(protect,removeFromFavour
 
 
 router.use(protect)
-router.route('/me').get(restrictToUser,getMe,getUserById)
+router.route('/me').get(protect,getMe)
 router.route('/updateMe').patch(restrictToUser,uploadUserPhoto,resizeUserPhoto,updateMe)
 router.route('/:id/applycoupon').post(restrictToUser,applyCoupon)
 
