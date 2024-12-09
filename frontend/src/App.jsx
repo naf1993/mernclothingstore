@@ -40,25 +40,39 @@ const App = () => {
   const [navItems, setNavItems] = useState([]);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const { token, appLoaded, isLoading, isAuthenticated } = user;
+  const { token, isLoading, isAuthenticated } = user;
 
-  useEffect(()=>{
-    const fetchUser = async()=>{
-      try{
-        const cookieJwt = Cookies.get('x-auth-cookie');
-        if (cookieJwt) {
-          console.log(cookieJwt)
-          dispatch(loginUserWithOauth(cookieJwt));  // Pass the cookie JWT to the login action
-        }
-        if (!appLoaded && !isLoading && token && !isAuthenticated) {
-          await dispatch(loadUser());
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
+
+  useEffect(() => {
+    const token = Cookies.get('x-auth-cookie'); // Get token from cookies
+
+    if (token && !isAuthenticated) {
+      dispatch(loginUserWithOauth(token)); // If token exists, authenticate user
+    } else if (!isAuthenticated) {
+      dispatch(loadUser()); // If no token, try to load user from cookie
     }
-    fetchUser()
-  },[dispatch, appLoaded, isLoading, token, isAuthenticated])
+  }, [dispatch, isAuthenticated]);
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const cookieJwt = Cookies.get('x-auth-cookie');
+  //       if (cookieJwt && !isAuthenticated) {
+  //         console.log('JWT found:', cookieJwt);
+  //         dispatch(loginUserWithOauth(cookieJwt));  // Only dispatch if not authenticated
+  //       }
+  
+  //       if (!appLoaded && !isLoading && token && !isAuthenticated) {
+  //         console.log('Loading user...');
+  //         await dispatch(loadUser());  // Dispatch loadUser only if necessary
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching user:", error);
+  //     }
+  //   };
+  
+  //   fetchUser();
+  // }, [dispatch, isLoading, token, isAuthenticated]);  // Ensure correct dependencies to avoid unnecessary re-renders
+  
 
   useEffect(() => {
     const fetchCategories = async () => {

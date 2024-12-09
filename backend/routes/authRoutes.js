@@ -29,6 +29,7 @@ router.get(
     const token = req.user.generateJWT();
     console.log('this is token')
     console.log(token)
+   // res.cookie('x-auth-cookie',token)
     res.cookie("x-auth-cookie", token, {
       httpOnly: true,  // Ensures the cookie is not accessible via JavaScript
       secure: process.env.NODE_ENV === 'production',  // Set to true if in production (HTTPS)

@@ -27,7 +27,7 @@ const AccountPage = () => {
   return (
     <div className="page-container">
       <div className="page-wrapper">
-        <h2 className="account-heading">Welcome, {userdetails.name}!</h2>
+        <h2 className="account-heading">Welcome, {userdetails.name.split(' ')[0]}!</h2>
         <p className="account-email">Email: {userdetails.email}</p>
 
         <div className="user-actions">

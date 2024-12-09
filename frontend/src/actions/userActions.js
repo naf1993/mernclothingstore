@@ -29,29 +29,65 @@ import { apiUrl } from "./apiUrl";
 
 axios.defaults.withCredentials = true;
 
-export const loadUser = () => async (dispatch, getState) => {
+// actions/userActions.js
+
+
+
+// Action to load user from cookies
+export const loadUser = () => async (dispatch) => {
   dispatch({ type: USER_LOADING });
+
+  const token = Cookies.get('x-auth-cookie'); // Get the token from cookies
+
+  if (!token) {
+    return dispatch({ type: USER_FAIL, payload: 'No token found' });
+  }
+
   try {
-    const options = attachTokenToHeaders(getState);
-    const { data } = await axios.get(`${apiUrl}/api/users/me`, options);
+    const config = {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    };
+
+    const { data } = await axios.get(`${apiUrl}/api/users/me`, config);
 
     dispatch({
       type: USER_SUCCESS,
       payload: { user: data.data.user },
     });
-    toast.success(`Welcome ${data?.data?.user?.name}`);
   } catch (error) {
-    const errorMessage = error.response && error.response.data && error.response.data.message 
-      ? error.response.data.message 
-      : error.message;
-
-    toast.error(`Error: ${errorMessage}`); // More descriptive error message
     dispatch({
       type: USER_FAIL,
-      payload: { error: errorMessage }, // Consistent payload structure
+      payload: error.response ? error.response.data.message : error.message,
     });
   }
 };
+
+
+// export const loadUser = () => async (dispatch, getState) => {
+//   dispatch({ type: USER_LOADING });
+//   try {
+//     const options = attachTokenToHeaders(getState);
+//     const { data } = await axios.get(`${apiUrl}/api/users/me`, options);
+
+//     dispatch({
+//       type: USER_SUCCESS,
+//       payload: { user: data.data.user },
+//     });
+   
+//   } catch (error) {
+//     const errorMessage = error.response && error.response.data && error.response.data.message 
+//       ? error.response.data.message 
+//       : error.message;
+
+//     toast.error(`Error: ${errorMessage}`); // More descriptive error message
+//     dispatch({
+//       type: USER_FAIL,
+//       payload: { error: errorMessage }, // Consistent payload structure
+//     });
+//   }
+// };
 
 
 export const loginUserWithEmail =
@@ -112,7 +148,7 @@ export const loginUserWithEmail =
 
 export const loginUserWithOauth = (token) => async (dispatch, getState) => {
   dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
-  console.log('before login outh')
+ 
   try {
      // Retrieve the token from the cookie
     const config = {
@@ -121,14 +157,14 @@ export const loginUserWithOauth = (token) => async (dispatch, getState) => {
         "Authorization": `Bearer ${token}`, // Attach the token from the cookie
       },
     };
-    console.log(token)
+    
     const { data }  = await axios.get(`${apiUrl}/api/users/me`, config);
-    console.log(data.data.user)
+  
     dispatch({
       type: LOGIN_WITH_OAUTH_SUCCESS,
       payload: { token: token, user: data.data.user },
     });
-    toast.success(`Welcome ${data?.data?.user?.name}`)
+   
     console.log('after login oauth')
   } catch (err) {
     dispatch({

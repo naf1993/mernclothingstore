@@ -24,15 +24,15 @@ import {
   USER_GET_FAVOURITES_REQUEST,
   USER_GET_FAVOURITES_SUCCESS,
   USER_GET_FAVOURITES_FAIL,
+  LOGIN_WITH_OAUTH_FAIL,
 } from "../constants/userConstant";
-
+import Cookies from 'js-cookie'
 const initialState = {
-  token: localStorage.getItem("token"),
+  token: localStorage.getItem("token") || Cookies.get('x-auth-cookie') || null,
   isAuthenticated: false,
   isLoading: false,
   user: null,
   error: null,
-  appLoaded: false,
   favourites: [],
 };
 
@@ -42,7 +42,6 @@ export const userReducer = (state = initialState, action) => {
       return {
         ...state,
         isLoading: true,
-        appLoaded: false,
         error: null,
       };
     case LOGIN_WITH_EMAIL_LOADING:
@@ -57,7 +56,7 @@ export const userReducer = (state = initialState, action) => {
         error: null,
       };
     case LOGIN_WITH_EMAIL_SUCCESS:
-    case LOGIN_WITH_OAUTH_SUCCESS:
+   
     case REGISTER_WITH_EMAIL_SUCCESS:
       localStorage.setItem("token", action.payload.token);
       return {
@@ -69,6 +68,16 @@ export const userReducer = (state = initialState, action) => {
         error: null,
         favourites: action.payload.user?.favourites || [],
       };
+    case LOGIN_WITH_OAUTH_SUCCESS:
+      Cookies.set('x-auth-cookie',action.payload.token)
+      return{
+        ...state,
+        isAuthenticated:true,
+        isLoading:false,
+        token:action.payload.token,
+        user:action.payload.user,
+        error:null
+      }
     case USER_SUCCESS:
       return {
         ...state,
@@ -77,7 +86,6 @@ export const userReducer = (state = initialState, action) => {
         user: action.payload.user,
         favourites: action.payload.user?.favourites || [],
         error: null,
-        appLoaded: true,
       };
       case USER_ADD_FAVOURITES_SUCCESS:
         return {
@@ -108,8 +116,7 @@ export const userReducer = (state = initialState, action) => {
         isLoading: false,
         user: null,
         error: action.payload.error,
-        appLoaded: true,
-      };
+             };
     case LOGIN_WITH_EMAIL_FAIL:
     case REGISTER_WITH_EMAIL_FAIL:
       localStorage.removeItem("token");
@@ -121,6 +128,16 @@ export const userReducer = (state = initialState, action) => {
         isLoading: false,
         error: action.payload.error,
       };
+    case LOGIN_WITH_OAUTH_FAIL:
+      Cookies.remove('x-auth-token')
+      return{
+        ...state,
+        isAuthenticated:false,
+        isLoading:false,
+        token: null,
+        user: null,
+        error: action.payload,
+      }
     case USER_ADD_FAVOURITES_FAIL:
     case USER_REMOVE_FAVOURITE_FAIL:
     case USER_GET_FAVOURITES_FAIL:
