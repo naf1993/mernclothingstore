@@ -23,6 +23,7 @@ import {
   USER_REMOVE_FAVOURITE_SUCCESS,USER_SUCCESS,USER_GET_FAVOURITES_FAIL,USER_GET_FAVOURITES_REQUEST,USER_GET_FAVOURITES_SUCCESS
 } from "../constants/userConstant";
 import toast from 'react-hot-toast';
+import Cookies from "js-cookie";
 
 import { apiUrl } from "./apiUrl";
 
@@ -109,23 +110,22 @@ export const loginUserWithEmail =
 
   
 
-export const loginUserWithOauth = (token) => async (dispatch, getState) => {
+export const loginUserWithOauth = () => async (dispatch, getState) => {
   dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
   try {
+    const token = Cookies.get("x-auth-cookie"); // Retrieve the token from the cookie
     const config = {
       headers: {
         "Content-type": "application/json",
+        "Authorization": `Bearer ${token}`, // Attach the token from the cookie
       },
     };
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-   
     const { data }  = await axios.get(`${apiUrl}/api/users/me`, config);
     dispatch({
       type: LOGIN_WITH_OAUTH_SUCCESS,
       payload: { token: token, user: data.data.user },
     });
+    toast.success(`Welcome ${data?.data?.user?.name}`)
   } catch (err) {
     dispatch({
       type: LOGIN_WITH_OAUTH_FAIL,
