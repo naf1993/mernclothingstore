@@ -140,6 +140,8 @@ app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.set('trust proxy', 1);  // Important for reverse proxy (Heroku)
+
 // Route to log product interactions (view, click, etc.)
 
 // let recommendationModel = null;

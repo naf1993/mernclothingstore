@@ -32,6 +32,7 @@ const Login = () => {
     dispatch(loginUserWithEmail(email, password));
   };
   const googleLogin = () => {
+    //https://ecommerce-production-backend-1d4c654763a4.herokuapp.com this is api url
     window.open(`${apiUrl}/auth/google`, "_self");
   };
   return (

@@ -6,7 +6,7 @@ import User from "../models/userModel.js";
 
 const googleCallbackUrl = process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/auth/google/callback';
 
-//const googleCallbackUrl = 'http://localhost:5000/auth/google/callback';
+//GOOGLE_CALLBACK_URL=https://ecommerce-production-backend-1d4c654763a4.herokuapp.com
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
