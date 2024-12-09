@@ -52,6 +52,7 @@ const App = () => {
         // Check for JWT cookie and log in user
         const cookieJwt = Cookies.get('x-auth-cookie');
         if (cookieJwt) {
+          console.log(cookieJwt)
           dispatch(loginUserWithOauth(cookieJwt));  // Pass the cookie JWT to the login action
         }
 
