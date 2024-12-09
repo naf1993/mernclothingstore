@@ -50,9 +50,9 @@ const App = () => {
         setNavItems(data.data.categories);
 
         // Check for JWT cookie and log in user
-        const cookieJwt = Cookies.get("x-auth-cookie");
+        const cookieJwt = Cookies.get('x-auth-cookie');
         if (cookieJwt) {
-          dispatch(loginUserWithOauth());
+          dispatch(loginUserWithOauth(cookieJwt));  // Pass the cookie JWT to the login action
         }
 
         // Load user if needed

@@ -110,10 +110,10 @@ export const loginUserWithEmail =
 
   
 
-export const loginUserWithOauth = () => async (dispatch, getState) => {
+export const loginUserWithOauth = (token) => async (dispatch, getState) => {
   dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
   try {
-    const token = Cookies.get("x-auth-cookie"); // Retrieve the token from the cookie
+     // Retrieve the token from the cookie
     const config = {
       headers: {
         "Content-type": "application/json",
