@@ -39,9 +39,6 @@ export const loadUser = () => async (dispatch) => {
 
   const token = Cookies.get('x-auth-cookie'); // Get the token from cookies
 
-  if (!token) {
-    return dispatch({ type: USER_FAIL, payload: 'No token found' });
-  }
 
   try {
     const config = {

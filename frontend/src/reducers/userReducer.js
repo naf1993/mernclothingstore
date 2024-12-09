@@ -115,7 +115,7 @@ export const userReducer = (state = initialState, action) => {
         isAuthenticated: false,
         isLoading: false,
         user: null,
-        error: action.payload.error,
+        error: action.payload,
              };
     case LOGIN_WITH_EMAIL_FAIL:
     case REGISTER_WITH_EMAIL_FAIL:
