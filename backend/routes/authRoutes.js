@@ -30,11 +30,14 @@ router.get(
   //   console.log('this is token')
   //   console.log(token)
    //res.cookie("x-auth-cookie", token);
-    res.cookie("x-auth-cookie", token, {
-      httpOnly: true,  
-      secure: process.env.NODE_ENV === 'production', 
-      sameSite: 'None', 
-    });
+   res.cookie("x-auth-cookie", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', 
+    sameSite: 'None',
+    path: '/', // Ensure the path is correct
+    domain: process.env.NODE_ENV === 'production' ? '.themodeststore.shop' : 'localhost'
+  });
+  
     res.redirect(clientUrl);
     console.log('cookie sent')//this is printed in heroku logs
   }
