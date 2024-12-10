@@ -34,7 +34,6 @@ router.get(
       httpOnly: true,  
       secure: process.env.NODE_ENV === 'production', 
       sameSite: 'None', 
-      domain:'.themodeststore.shop'
     });
     res.redirect(clientUrl);
     console.log('cookie sent')//this is printed in heroku logs
