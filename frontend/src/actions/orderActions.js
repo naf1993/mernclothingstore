@@ -181,6 +181,7 @@ export const checkIsFirstOrder = () => async (dispatch, getState) => {
     };
 
     const { data } =  await axios.get(`${apiUrl}/api/orders/checkIfFirstOrder`, config);
+    console.log(data)
     
     dispatch({ type: CHECK_IF_FIRST_ORDER_SUCCESS, payload: data.data.isFirstOrder });
   } catch (error) {

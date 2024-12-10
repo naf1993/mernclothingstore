@@ -19,8 +19,7 @@ import ProductList1 from "./screens/ProductList1";
 import { apiUrl } from "./actions/apiUrl";
 import UpdateProfile from "./screens/UpdateProfile";
 import SubCategories from "./screens/SubCategories";
-import axios from 'axios'
-import { credentials } from "amqplib";
+import { LOGIN_WITH_OAUTH_SUCCESS } from "./constants/userConstant";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
@@ -42,40 +41,21 @@ const App = () => {
   const [navItems, setNavItems] = useState([]);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const { isLoading, isAuthenticated} = user;
+  const { isLoading, isAuthenticated } = user;
 
   useEffect(() => {
     const checkUserStatus = async () => {
       try {
-        const cookieJwt = Cookies.get('x-auth-cookie'); // Check for the cookie
+        const cookieJwt = Cookies.get("x-auth-cookie"); // Check for the cookie
         console.log("Cookie JWT:", cookieJwt); // Log to verify if cookie is set
-        
+
         if (!isAuthenticated && !isLoading && cookieJwt) {
           // If user is not authenticated but cookie is present, dispatch login action
-          const config = {
-            headers:{
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            mode:'cors',
-            credentials:'include',
-            withCredentials:true
-        }
-          const response = await axios.get(`${apiUrl}/api/users/me`, config);
-
-          if (response.status === 200) {
-            // Dispatch the success action to store user data and token in Redux
-            dispatch({
-              type: LOGIN_WITH_OAUTH_SUCCESS,
-              payload: { token: response.data.token, user: response.data.user },
-            });
-            console.log("User authenticated and data received.");
-          }
+          dispatch(loginUserWithOauth());
         }
       } catch (error) {
         console.error("Error during authentication:", error);
       }
-      setLoading(false); // End loading after check
     };
 
     // Only run check if not already authenticated
@@ -92,7 +72,6 @@ const App = () => {
   //   }
   //   setLoading(false); // Set loading to false after the check
   // }, [dispatch, isAuthenticated, isLoading]);
-
 
   //const token = Cookies.get("x-auth-token");
   // useEffect(() => {

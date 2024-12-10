@@ -148,8 +148,17 @@ export const loginUserWithEmail =
     dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
   
     try {
+      const config = {
+        headers:{
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        mode:'cors',
+        credentials:'include',
+        withCredentials:true
+    }
       // Make a GET request to get the current user with the JWT cookie
-      const { data } = await axios.get(`${apiUrl}/api/users/me`, { withCredentials: true });
+      const { data } = await axios.get(`${apiUrl}/api/users/me`, config);
   
       // Dispatch success action if the user is successfully fetched
       dispatch({

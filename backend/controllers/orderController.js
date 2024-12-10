@@ -63,16 +63,22 @@ const sendAdminNotification = async (order) => {
   }
 };
 
-export const sendEmailAdmin = async ({ userEmail, subject, templateName, replacements }) => {
+export const sendEmailAdmin = async ({
+  userEmail,
+  subject,
+  templateName,
+  replacements,
+}) => {
   try {
     // Get the HTML content by loading the appropriate template
     const htmlContent = getTemplate(templateName, replacements);
 
     const msg = {
       to: userEmail,
-      from: process.env.SENDGRID_USER_EMAIL,  // Your verified SendGrid sender email
+      from: process.env.SENDGRID_USER_EMAIL, // Your verified SendGrid sender email
       subject: subject,
-      text: replacements.textContent || 'Your order details are provided below.',  // Fallback text content if not provided
+      text:
+        replacements.textContent || "Your order details are provided below.", // Fallback text content if not provided
       html: htmlContent,
     };
 
@@ -80,28 +86,24 @@ export const sendEmailAdmin = async ({ userEmail, subject, templateName, replace
     await sgMail.send(msg);
     console.log(`Email sent to ${userEmail} successfully`);
   } catch (error) {
-    console.error('Error sending email:', error.response.body);
+    console.error("Error sending email:", error.response.body);
   }
 };
 
 export const checkIfFirstOrder = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const orders = await Order.find({ user: userId });
-
+  let isFirstOrder;
   if (orders.length > 0) {
-    return res.status(200).json({
-      status: "success",
-      data: {
-        isFirstOrder: false,
-      },
-    });
+    isFirstOrder = false;
+  } else if (orders.length === 0) {
+    isFirstOrder = true;
   }
-
   // Only send the response if no orders are found
   return res.status(200).json({
     status: "success",
     data: {
-      isFirstOrder: true,
+      isFirstOrder,
     },
   });
 });
