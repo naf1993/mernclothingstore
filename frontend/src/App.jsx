@@ -19,6 +19,7 @@ import ProductList1 from "./screens/ProductList1";
 import { apiUrl } from "./actions/apiUrl";
 import UpdateProfile from "./screens/UpdateProfile";
 import SubCategories from "./screens/SubCategories";
+import axios from 'axios'
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
@@ -43,13 +44,44 @@ const App = () => {
   const { isLoading, isAuthenticated} = user;
 
   useEffect(() => {
-    const cookieJwt = Cookies.get('x-auth-cookie'); // Get the cookie
-    // Only dispatch loadUser if user is not authenticated and cookie is present
-    if (!isAuthenticated && !isLoading && cookieJwt) {
-      dispatch(loginUserWithOauth()); // Dispatch loginUserWithOauth if the user is not authenticated and cookie is present
+    const checkUserStatus = async () => {
+      try {
+        const cookieJwt = Cookies.get('x-auth-cookie'); // Check for the cookie
+        console.log("Cookie JWT:", cookieJwt); // Log to verify if cookie is set
+        
+        if (!isAuthenticated && !isLoading && cookieJwt) {
+          // If user is not authenticated but cookie is present, dispatch login action
+          const response = await axios.get(`${apiUrl}/api/users/me`, { withCredentials: true });
+
+          if (response.status === 200) {
+            // Dispatch the success action to store user data and token in Redux
+            dispatch({
+              type: LOGIN_WITH_OAUTH_SUCCESS,
+              payload: { token: response.data.token, user: response.data.user },
+            });
+            console.log("User authenticated and data received.");
+          }
+        }
+      } catch (error) {
+        console.error("Error during authentication:", error);
+      }
+      setLoading(false); // End loading after check
+    };
+
+    // Only run check if not already authenticated
+    if (!isAuthenticated && !isLoading) {
+      checkUserStatus(); // Make the API request to verify the token and load user data
     }
-    setLoading(false); // Set loading to false after the check
-  }, [dispatch, isAuthenticated, isLoading]);
+  }, [dispatch, isAuthenticated, isLoading]); // Depend on dispatch, isAuthenticated, and isLoading
+
+  // useEffect(() => {
+  //   const cookieJwt = Cookies.get('x-auth-cookie'); // Get the cookie
+  //   // Only dispatch loadUser if user is not authenticated and cookie is present
+  //   if (!isAuthenticated && !isLoading && cookieJwt) {
+  //     dispatch(loginUserWithOauth()); // Dispatch loginUserWithOauth if the user is not authenticated and cookie is present
+  //   }
+  //   setLoading(false); // Set loading to false after the check
+  // }, [dispatch, isAuthenticated, isLoading]);
 
 
   //const token = Cookies.get("x-auth-token");
