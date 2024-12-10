@@ -61,10 +61,8 @@ const corsOptions = {
   origin:
     process.env.NODE_ENV === "development"
       ? "http://localhost:3000" // Local development (localhost)
-      : [
-          process.env.FRONTEND_VERCEL_URL, 
-          process.env.FRONTEND_URL, 
-         
+      : [ process.env.FRONTEND_URL,
+          process.env.FRONTEND_VERCEL_URL      
         ],
   credentials: true, // Allow cookies and authorization headers
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
