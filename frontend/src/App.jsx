@@ -40,7 +40,16 @@ const App = () => {
   const [navItems, setNavItems] = useState([]);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const { isLoading, isAuthenticated,token } = user;
+  const { isLoading, isAuthenticated} = user;
+
+  useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      dispatch(loadUser()); // Fetch user data after login
+    }
+  }, [dispatch, isAuthenticated, isLoading]);
+
+
+
   //const token = Cookies.get("x-auth-token");
   // useEffect(() => {
   //   if (token && !isAuthenticated) {
@@ -66,26 +75,27 @@ const App = () => {
   //   }
   // }, [dispatch, isAuthenticated]);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const cookieJwt = Cookies.get('x-auth-cookie');
-        if (cookieJwt && !isAuthenticated) {
-          console.log('JWT found:', cookieJwt);
-          dispatch(loginUserWithOauth(cookieJwt));  // Only dispatch if not authenticated
-        }
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const cookieJwt = Cookies.get('x-auth-cookie');
+  //       if (cookieJwt && !isAuthenticated) {
+  //         console.log('is Authenticated',isAuthenticated)
+  //         console.log('JWT found:', cookieJwt);
+  //         dispatch(loginUserWithOauth(cookieJwt));  // Only dispatch if not authenticated
+  //       }
 
-        if (!appLoaded && !isLoading && token && !isAuthenticated) {
-          console.log('Loading user...');
-          await dispatch(loadUser());  // Dispatch loadUser only if necessary
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
+  //       if (!isLoading && token && !isAuthenticated) {
+  //         console.log('Loading user...');
+  //         await dispatch(loadUser());  // Dispatch loadUser only if necessary
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching user:", error);
+  //     }
+  //   };
 
-    fetchUser();
-  }, [dispatch, isLoading, token, isAuthenticated]);  // Ensure correct dependencies to avoid unnecessary re-renders
+  //   fetchUser();
+  // }, [dispatch, isLoading, token, isAuthenticated]);  // Ensure correct dependencies to avoid unnecessary re-renders
 
   useEffect(() => {
     const fetchCategories = async () => {

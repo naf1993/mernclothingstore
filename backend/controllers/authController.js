@@ -131,34 +131,38 @@ const loginAdmin = catchAsync(async (req, res, next) => {
 });
 
 const protect = catchAsync(async (req, res, next) => {
-  //getting token
+  // Try to get token from cookie or Authorization header
   const token = req.cookies['x-auth-cookie'] || req.headers['authorization']?.split(' ')[1];
-  console.log('this is token')
-  console.log(token)
+
   if (!token) {
     return next(
-      new AppError("You are not logged in..Please login to continue", 401)
+      new AppError("You are not logged in. Please login to continue.", 401)
     );
   }
-  //verify token
+
+  // Verify the token
   const decoded = await promisify(jwt.verify)(token, secretOrKey);
-  //check if user still exists
+
+  // Find the user based on the decoded token ID
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
     return next(
-      new AppError("The user belonging to this token doesnot exist", 401)
+      new AppError("The user belonging to this token does not exist.", 401)
     );
   }
-  //check if user changed password after token was issued
+
+  // Check if the user has changed the password since the token was issued
   if (currentUser.changedPasswordAfter(decoded.iat)) {
     return next(
-      new AppError("User recently changed password..Please login again", 401)
+      new AppError("User recently changed password. Please login again.", 401)
     );
   }
-  //grant access to protected route
+
+  // Grant access to the protected route
   req.user = currentUser;
   next();
 });
+
 
 const restrictToUser = (req, res, next) => {
   if (req.user && !req.user.isAdmin) {

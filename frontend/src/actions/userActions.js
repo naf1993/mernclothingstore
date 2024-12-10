@@ -27,7 +27,7 @@ import Cookies from "js-cookie";
 
 import { apiUrl } from "./apiUrl";
 
-axios.defaults.withCredentials = true;
+
 
 // actions/userActions.js
 
@@ -66,8 +66,8 @@ axios.defaults.withCredentials = true;
 export const loadUser = () => async (dispatch, getState) => {
   dispatch({ type: USER_LOADING });
   try {
-    const options = attachTokenToHeaders(getState);
-    const { data } = await axios.get(`${apiUrl}/api/users/me`, options);
+    //const options = attachTokenToHeaders(getState);
+    const { data } = await axios.get(`${apiUrl}/api/users/me`,  { withCredentials: true });
 
     dispatch({
       type: USER_SUCCESS,
