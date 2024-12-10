@@ -34,58 +34,58 @@ axios.defaults.withCredentials = true;
 
 
 // Action to load user from cookies
-export const loadUser = () => async (dispatch) => {
-  dispatch({ type: USER_LOADING });
-
-  const token = Cookies.get('x-auth-cookie'); // Get the token from cookies
-
-
-  try {
-    const config = {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    };
-
-    const { data } = await axios.get(`${apiUrl}/api/users/me`, config);
-
-    dispatch({
-      type: USER_SUCCESS,
-      payload: { user: data.data.user },
-    });
-  } catch (error) {
-    dispatch({
-      type: USER_FAIL,
-      payload: error.response ? error.response.data.message : error.message,
-    });
-    throw new Error(error.response ? error.response.data.message : error.message)
-  }
-};
-
-
-// export const loadUser = () => async (dispatch, getState) => {
+// export const loadUser = () => async (dispatch) => {
 //   dispatch({ type: USER_LOADING });
+
+//   const token = Cookies.get('x-auth-cookie'); // Get the token from cookies
+
+
 //   try {
-//     const options = attachTokenToHeaders(getState);
-//     const { data } = await axios.get(`${apiUrl}/api/users/me`, options);
+//     const config = {
+//       headers: {
+//         'Authorization': `Bearer ${token}`,
+//       },
+//     };
+
+//     const { data } = await axios.get(`${apiUrl}/api/users/me`, config);
 
 //     dispatch({
 //       type: USER_SUCCESS,
 //       payload: { user: data.data.user },
 //     });
-   
 //   } catch (error) {
-//     const errorMessage = error.response && error.response.data && error.response.data.message 
-//       ? error.response.data.message 
-//       : error.message;
-
-//     toast.error(`Error: ${errorMessage}`); // More descriptive error message
 //     dispatch({
 //       type: USER_FAIL,
-//       payload: { error: errorMessage }, // Consistent payload structure
+//       payload: error.response ? error.response.data.message : error.message,
 //     });
+//     throw new Error(error.response ? error.response.data.message : error.message)
 //   }
 // };
+
+
+export const loadUser = () => async (dispatch, getState) => {
+  dispatch({ type: USER_LOADING });
+  try {
+    const options = attachTokenToHeaders(getState);
+    const { data } = await axios.get(`${apiUrl}/api/users/me`, options);
+
+    dispatch({
+      type: USER_SUCCESS,
+      payload: { user: data.data.user },
+    });
+   
+  } catch (error) {
+    const errorMessage = error.response && error.response.data && error.response.data.message 
+      ? error.response.data.message 
+      : error.message;
+
+    toast.error(`Error: ${errorMessage}`); // More descriptive error message
+    dispatch({
+      type: USER_FAIL,
+      payload: { error: errorMessage }, // Consistent payload structure
+    });
+  }
+};
 
 
 export const loginUserWithEmail =

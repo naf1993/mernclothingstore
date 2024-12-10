@@ -40,20 +40,21 @@ const App = () => {
   const [navItems, setNavItems] = useState([]);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const { isLoading, isAuthenticated } = user;
-  const token = Cookies.get("x-auth-token");
-  useEffect(() => {
-    if (token && !isAuthenticated) {
-      const fetchUser = async () => {
-        try {
-          await dispatch(loginUserWithOauth(token));
-        } catch (error) {
-          toast.error(error);
-        }
-      };
-      fetchUser();
-    }
-  }, [dispatch, isAuthenticated,token]);
+  const { isLoading, isAuthenticated,token } = user;
+  //const token = Cookies.get("x-auth-token");
+  // useEffect(() => {
+  //   if (token && !isAuthenticated) {
+  //     const fetchUser = async () => {
+  //       try {
+  //         await dispatch(loginUserWithOauth(token));
+  //       } catch (error) {
+
+  //         toast.error(error);
+  //       }
+  //     };
+  //     fetchUser();
+  //   }
+  // }, [dispatch, isAuthenticated,token]);
 
   // useEffect(() => {
   //   const token = Cookies.get("x-auth-cookie"); // Get token from cookies
@@ -64,26 +65,27 @@ const App = () => {
   //     dispatch(loadUser()); // If no token, try to load user from cookie
   //   }
   // }, [dispatch, isAuthenticated]);
-  // useEffect(() => {
-  //   const fetchUser = async () => {
-  //     try {
-  //       const cookieJwt = Cookies.get('x-auth-cookie');
-  //       if (cookieJwt && !isAuthenticated) {
-  //         console.log('JWT found:', cookieJwt);
-  //         dispatch(loginUserWithOauth(cookieJwt));  // Only dispatch if not authenticated
-  //       }
 
-  //       if (!appLoaded && !isLoading && token && !isAuthenticated) {
-  //         console.log('Loading user...');
-  //         await dispatch(loadUser());  // Dispatch loadUser only if necessary
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching user:", error);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const cookieJwt = Cookies.get('x-auth-cookie');
+        if (cookieJwt && !isAuthenticated) {
+          console.log('JWT found:', cookieJwt);
+          dispatch(loginUserWithOauth(cookieJwt));  // Only dispatch if not authenticated
+        }
 
-  //   fetchUser();
-  // }, [dispatch, isLoading, token, isAuthenticated]);  // Ensure correct dependencies to avoid unnecessary re-renders
+        if (!appLoaded && !isLoading && token && !isAuthenticated) {
+          console.log('Loading user...');
+          await dispatch(loadUser());  // Dispatch loadUser only if necessary
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUser();
+  }, [dispatch, isLoading, token, isAuthenticated]);  // Ensure correct dependencies to avoid unnecessary re-renders
 
   useEffect(() => {
     const fetchCategories = async () => {
