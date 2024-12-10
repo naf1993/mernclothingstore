@@ -46,7 +46,7 @@ const App = () => {
     const cookieJwt = Cookies.get('x-auth-cookie');
     // Only dispatch loadUser if user is not authenticated and cookie is present
     if (!isAuthenticated && !isLoading && cookieJwt) {
-      dispatch(loadUser()); // Dispatch loadUser only if cookie exists in production
+      dispatch(loginUserWithOauth()); // Dispatch loadUser only if cookie exists in production
     }
     setLoading(false); // Set loading to false after the check
   }, [dispatch, isAuthenticated, isLoading]);

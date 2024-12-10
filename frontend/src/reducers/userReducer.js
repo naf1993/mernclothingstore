@@ -28,7 +28,7 @@ import {
 } from "../constants/userConstant";
 import Cookies from 'js-cookie'
 const initialState = {
-  token: localStorage.getItem("token") || Cookies.get('x-auth-cookie') || null,
+  token: localStorage.getItem("token"),
   isAuthenticated: false,
   isLoading: false,
   user: null,
@@ -56,7 +56,7 @@ export const userReducer = (state = initialState, action) => {
         error: null,
       };
     case LOGIN_WITH_EMAIL_SUCCESS:
-   
+   case LOGIN_WITH_OAUTH_SUCCESS:
     case REGISTER_WITH_EMAIL_SUCCESS:
       localStorage.setItem("token", action.payload.token);
       return {
@@ -68,16 +68,7 @@ export const userReducer = (state = initialState, action) => {
         error: null,
         favourites: action.payload.user?.favourites || [],
       };
-    case LOGIN_WITH_OAUTH_SUCCESS:
-      Cookies.set('x-auth-cookie',action.payload.token)
-      return{
-        ...state,
-        isAuthenticated:true,
-        isLoading:false,
-        token:action.payload.token,
-        user:action.payload.user,
-        error:null
-      }
+   
     case USER_SUCCESS:
       return {
         ...state,
@@ -129,6 +120,7 @@ export const userReducer = (state = initialState, action) => {
         error: action.payload.error,
       };
     case LOGIN_WITH_OAUTH_FAIL:
+      localStorage.removeItem("token");
       Cookies.remove('x-auth-token')
       return{
         ...state,

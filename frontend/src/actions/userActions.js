@@ -144,23 +144,16 @@ export const loginUserWithEmail =
 
   
 
-export const loginUserWithOauth = (token) => async (dispatch, getState) => {
+export const loginUserWithOauth = () => async (dispatch, getState) => {
   dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
  
   try {
-     // Retrieve the token from the cookie
-    const config = {
-      headers: {
-        "Content-type": "application/json",
-        "Authorization": `Bearer ${token}`, // Attach the token from the cookie
-      },
-    };
     
-    const { data }  = await axios.get(`${apiUrl}/api/users/me`, config);
+    const { data }  = await axios.get(`${apiUrl}/api/users/me`, {withCredentials:true});
   
     dispatch({
       type: LOGIN_WITH_OAUTH_SUCCESS,
-      payload: { token: token, user: data.data.user },
+      payload: { token: data.data.token, user: data.data.user },
     });
    
     console.log('after login oauth')
