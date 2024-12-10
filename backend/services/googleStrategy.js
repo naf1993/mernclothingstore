@@ -27,7 +27,7 @@ export const googleStrategy = new GoogleStrategy(
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
-      console.log('Google profile:', profile);
+    
       const currentUser = await User.findOne({ googleId: profile.id });
       if (currentUser) {
         // User already exists

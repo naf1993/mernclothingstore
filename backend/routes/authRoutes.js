@@ -29,11 +29,11 @@ router.get(
     const token = req.user.generateJWT();
     console.log('this is token')
     console.log(token)
-  // res.cookie('x-auth-cookie',token)
+   // res.cookie("x-auth-cookie", token);
     res.cookie("x-auth-cookie", token, {
-      httpOnly: true,  // Ensures the cookie is not accessible via JavaScript
-      secure: process.env.NODE_ENV === 'production',  // Set to true if in production (HTTPS)
-      sameSite: 'None',  // If using cross-site cookies (e.g., if frontend and backend are on different domains)
+      httpOnly: true,  
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'None', 
     });
     res.redirect(clientUrl);
     console.log('cookie sent')

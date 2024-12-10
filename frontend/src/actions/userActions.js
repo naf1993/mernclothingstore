@@ -144,27 +144,28 @@ export const loginUserWithEmail =
 
   
 
-export const loginUserWithOauth = () => async (dispatch, getState) => {
-  dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
- 
-  try {
-    
-    const { data }  = await axios.get(`${apiUrl}/api/users/me`, {withCredentials:true});
+  export const loginUserWithOauth = () => async (dispatch) => {
+    dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
   
-    dispatch({
-      type: LOGIN_WITH_OAUTH_SUCCESS,
-      payload: { token: data.data.token, user: data.data.user },
-    });
-   
-    console.log('after login oauth')
-  } catch (err) {
-    dispatch({
-      type: LOGIN_WITH_OAUTH_FAIL,
-      payload: { error: err.response.data.message },
-    });
-    throw new Error(err.response ? err.response.data.message : err.message)
-  }
-};
+    try {
+      // Make a GET request to get the current user with the JWT cookie
+      const { data } = await axios.get(`${apiUrl}/api/users/me`, { withCredentials: true });
+  
+      // Dispatch success action if the user is successfully fetched
+      dispatch({
+        type: LOGIN_WITH_OAUTH_SUCCESS,
+        payload: { token: data.data.token, user: data.data.user },
+      });
+      console.log('Successfully logged in with OAuth');
+    } catch (err) {
+      // Dispatch failure action if there's an error
+      dispatch({
+        type: LOGIN_WITH_OAUTH_FAIL,
+        payload: { error: err.response?.data?.message || err.message },
+      });
+      console.error('Error logging in with OAuth:', err);
+    }
+  };
 
 export const logOutUser = () => async (dispatch, getState) => {
   deleteAllCookies();

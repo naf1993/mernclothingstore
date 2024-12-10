@@ -26,7 +26,7 @@ import {
   USER_GET_FAVOURITES_FAIL,
   LOGIN_WITH_OAUTH_FAIL,
 } from "../constants/userConstant";
-import Cookies from 'js-cookie'
+import Cookies from "js-cookie";
 const initialState = {
   token: localStorage.getItem("token"),
   isAuthenticated: false,
@@ -45,7 +45,7 @@ export const userReducer = (state = initialState, action) => {
         error: null,
       };
     case LOGIN_WITH_EMAIL_LOADING:
-    case LOGIN_WITH_OAUTH_LOADING:
+
     case REGISTER_WITH_EMAIL_LOADING:
     case USER_ADD_FAVOURITES_REQUEST:
     case USER_REMOVE_FAVOURITE_REQUEST:
@@ -56,7 +56,7 @@ export const userReducer = (state = initialState, action) => {
         error: null,
       };
     case LOGIN_WITH_EMAIL_SUCCESS:
-   case LOGIN_WITH_OAUTH_SUCCESS:
+
     case REGISTER_WITH_EMAIL_SUCCESS:
       localStorage.setItem("token", action.payload.token);
       return {
@@ -68,7 +68,7 @@ export const userReducer = (state = initialState, action) => {
         error: null,
         favourites: action.payload.user?.favourites || [],
       };
-   
+
     case USER_SUCCESS:
       return {
         ...state,
@@ -78,26 +78,28 @@ export const userReducer = (state = initialState, action) => {
         favourites: action.payload.user?.favourites || [],
         error: null,
       };
-      case USER_ADD_FAVOURITES_SUCCESS:
-        return {
-          ...state,
-          isLoading: false,
-          favourites: [
-            ...state.favourites.filter(fav => !action.payload.some(item => item._id === fav._id)), // Filter out existing favourites
-            ...action.payload // Add new products
-          ],
-        };
-      case USER_GET_FAVOURITES_SUCCESS:
-        return {
-          ...state,
-          isLoading:false,
-          favourites:action.payload
-        }
+    case USER_ADD_FAVOURITES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        favourites: [
+          ...state.favourites.filter(
+            (fav) => !action.payload.some((item) => item._id === fav._id)
+          ), // Filter out existing favourites
+          ...action.payload, // Add new products
+        ],
+      };
+    case USER_GET_FAVOURITES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        favourites: action.payload,
+      };
     case USER_REMOVE_FAVOURITE_SUCCESS:
       return {
         ...state,
         isLoading: false,
-        favourites:  action.payload,
+        favourites: action.payload,
       };
     case USER_FAIL:
       localStorage.removeItem("token");
@@ -107,7 +109,7 @@ export const userReducer = (state = initialState, action) => {
         isLoading: false,
         user: null,
         error: action.payload,
-             };
+      };
     case LOGIN_WITH_EMAIL_FAIL:
     case REGISTER_WITH_EMAIL_FAIL:
       localStorage.removeItem("token");
@@ -119,21 +121,11 @@ export const userReducer = (state = initialState, action) => {
         isLoading: false,
         error: action.payload.error,
       };
-    case LOGIN_WITH_OAUTH_FAIL:
-      localStorage.removeItem("token");
-      Cookies.remove('x-auth-token')
-      return{
-        ...state,
-        isAuthenticated:false,
-        isLoading:false,
-        token: null,
-        user: null,
-        error: action.payload,
-      }
+
     case USER_ADD_FAVOURITES_FAIL:
     case USER_REMOVE_FAVOURITE_FAIL:
     case USER_GET_FAVOURITES_FAIL:
-      return { ...state, error: action.payload};
+      return { ...state, error: action.payload };
     case LOGOUT_SUCCESS:
       localStorage.removeItem("token");
       return {
@@ -144,6 +136,40 @@ export const userReducer = (state = initialState, action) => {
         isLoading: false,
         error: null,
       };
+      case LOGIN_WITH_OAUTH_LOADING:
+        return {
+          ...state,
+          isLoading: true,
+          error: null,
+        };
+  
+      case LOGIN_WITH_OAUTH_SUCCESS:
+        localStorage.setItem('token', action.payload.token);
+        Cookies.set('x-auth-cookie', action.payload.token); // Store the token in a cookie
+  
+        return {
+          ...state,
+          isAuthenticated: true,
+          isLoading: false,
+          token: action.payload.token,
+          user: action.payload.user,
+          error: null,
+          favourites: action.payload.user?.favourites || [],
+        };
+  
+      case LOGIN_WITH_OAUTH_FAIL:
+        localStorage.removeItem('token');
+        Cookies.remove('x-auth-cookie');
+  
+        return {
+          ...state,
+          isAuthenticated: false,
+          isLoading: false,
+          token: null,
+          user: null,
+          error: action.payload.error,
+        };
+  
     default:
       return state;
   }

@@ -43,10 +43,10 @@ const App = () => {
   const { isLoading, isAuthenticated} = user;
 
   useEffect(() => {
-    const cookieJwt = Cookies.get('x-auth-cookie');
+    const cookieJwt = Cookies.get('x-auth-cookie'); // Get the cookie
     // Only dispatch loadUser if user is not authenticated and cookie is present
     if (!isAuthenticated && !isLoading && cookieJwt) {
-      dispatch(loginUserWithOauth()); // Dispatch loadUser only if cookie exists in production
+      dispatch(loginUserWithOauth()); // Dispatch loginUserWithOauth if the user is not authenticated and cookie is present
     }
     setLoading(false); // Set loading to false after the check
   }, [dispatch, isAuthenticated, isLoading]);
