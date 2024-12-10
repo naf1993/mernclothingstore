@@ -27,9 +27,9 @@ router.get(
       return res.status(401).send('User not authenticated');
     }
     const token = req.user.generateJWT();
-    console.log('this is token')
-    console.log(token)
-   // res.cookie("x-auth-cookie", token);
+  //   console.log('this is token')
+  //   console.log(token)
+  //  // res.cookie("x-auth-cookie", token);
     res.cookie("x-auth-cookie", token, {
       httpOnly: true,  
       secure: process.env.NODE_ENV === 'production', 

@@ -20,6 +20,7 @@ import { apiUrl } from "./actions/apiUrl";
 import UpdateProfile from "./screens/UpdateProfile";
 import SubCategories from "./screens/SubCategories";
 import axios from 'axios'
+import { credentials } from "amqplib";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
@@ -51,7 +52,16 @@ const App = () => {
         
         if (!isAuthenticated && !isLoading && cookieJwt) {
           // If user is not authenticated but cookie is present, dispatch login action
-          const response = await axios.get(`${apiUrl}/api/users/me`, { withCredentials: true });
+          const config = {
+            headers:{
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+            },
+            mode:'cors',
+            credentials:'include',
+            withCredentials:true
+        }
+          const response = await axios.get(`${apiUrl}/api/users/me`, config);
 
           if (response.status === 200) {
             // Dispatch the success action to store user data and token in Redux
