@@ -170,7 +170,7 @@ export const checkIsFirstOrder = () => async (dispatch, getState) => {
     } = getState();
 
     if (!isAuthenticated || !token) {
-      throw new Error("User not logged in");
+      return
     }
 
     const config = {
@@ -179,13 +179,13 @@ export const checkIsFirstOrder = () => async (dispatch, getState) => {
         Authorization: `Bearer ${token}`,
       },
     };
-
+console.log(token)
     const { data } =  await axios.get(`${apiUrl}/api/orders/checkIfFirstOrder`, config);
     console.log(data)
     
     dispatch({ type: CHECK_IF_FIRST_ORDER_SUCCESS, payload: data.data.isFirstOrder });
   } catch (error) {
-    dispatch({ type: CHECK_IF_FIRST_ORDER_FAIL, payload: error.response.data.message });
+    dispatch({ type: CHECK_IF_FIRST_ORDER_FAIL, payload: error.response ? error.response.data.message : error.message });
     throw new Error(error.response ? error.response.data.message : error.message)
   }
 };

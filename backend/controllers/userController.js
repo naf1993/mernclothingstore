@@ -61,13 +61,12 @@ const getMe = catchAsync(async(req, res, next) => {
     return next(new AppError("No User found with that ID", 404));
   }
  
-  const token = req.user.generateJWT();  // assuming `generateJWT` is a method on your User model
-  console.log('this is token from getme ',token)
+
   res.status(200).json({
     status: "success",
     data: {
       user,
-      token,  // Include the token in the response body
+      
     },
   });
   

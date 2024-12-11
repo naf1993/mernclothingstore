@@ -144,8 +144,6 @@ export const userReducer = (state = initialState, action) => {
         };
   
       case LOGIN_WITH_OAUTH_SUCCESS:
-        localStorage.setItem('token', action.payload.token);
-        Cookies.set('x-auth-cookie', action.payload.token); // Store the token in a cookie
   
         return {
           ...state,
@@ -153,14 +151,12 @@ export const userReducer = (state = initialState, action) => {
           isLoading: false,
           token: action.payload.token,
           user: action.payload.user,
-          error: null,
           favourites: action.payload.user?.favourites || [],
+          error: null,
         };
   
       case LOGIN_WITH_OAUTH_FAIL:
-        localStorage.removeItem('token');
-        Cookies.remove('x-auth-cookie');
-  
+         
         return {
           ...state,
           isAuthenticated: false,

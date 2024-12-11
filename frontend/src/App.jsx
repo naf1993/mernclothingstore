@@ -1,12 +1,18 @@
 import React, { useEffect, useState, lazy, Suspense } from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  useLocation,
+  
+} from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import Layout from "./components/Layout";
 import LoadingFullScreen from "./components/LoadingFullScreen";
 import ScrollToTop from "./components/ScrollToTop";
-import Cookies from "js-cookie";
+import api from "./utils/api";
 import { loginUserWithOauth, loadUser } from "./actions/userActions";
 import axios from "axios";
 import Protected from "./components/Protected";
@@ -19,7 +25,11 @@ import ProductList1 from "./screens/ProductList1";
 import { apiUrl } from "./actions/apiUrl";
 import UpdateProfile from "./screens/UpdateProfile";
 import SubCategories from "./screens/SubCategories";
-import { LOGIN_WITH_OAUTH_SUCCESS } from "./constants/userConstant";
+import {
+  LOGIN_WITH_OAUTH_SUCCESS,
+  LOGIN_WITH_OAUTH_LOADING,
+  LOGIN_WITH_OAUTH_FAIL,
+} from "./constants/userConstant";
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLIC_KEY);
 
@@ -38,29 +48,117 @@ const OrderSucess = lazy(() => import("./screens/OrderSuccess"));
 
 const App = () => {
   const [loading, setLoading] = useState(true);
+ 
   const [navItems, setNavItems] = useState([]);
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const { isLoading, isAuthenticated } = user;
+  const { isAuthenticated } = user;
+  const location = useLocation;
 
   useEffect(() => {
-    console.log('entering useffect')
     const checkUserStatus = async () => {
       try {
-        if (!isAuthenticated && !isLoading) {
-          console.log('is authenticated',isAuthenticated)
-          console.log('is loading',isLoading)
-          dispatch(loginUserWithOauth());
+       
+        const queryString = window.location.search;
+      
+        const params = new URLSearchParams(queryString);
+        const token = params.get("token");
+        
+        if (token) {
+          localStorage.setItem("token", token);
+          console.log("Token stored in local storage");
+        const newUrl = window.location.protocol + "//" + window.location.host; 
+        window.history.replaceState({}, document.title, newUrl); 
+        console.log('Token and path cleared from URL')
+          
         }
-      } catch (error) {
-        console.error("Error during authentication:", error);
+
+        if (token && !isAuthenticated) {
+          console.log("sending requests to authenticate");
+          const config = {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            withCredentials: true,
+          };
+
+          const { data } = await api.get("/api/users/me", config);
+          console.log("This is data from api", data);
+          console.log(token)
+          dispatch({
+            type: LOGIN_WITH_OAUTH_SUCCESS,
+            payload: { token: token, user: data.data.user },
+          });
+          console.log("Succesfully authenticated");
+        }
+      } catch (err) {
+        dispatch({
+          type: LOGIN_WITH_OAUTH_FAIL,
+          payload: { error: err.response?.data?.message || err.message },
+        });
+        console.error("Error during authentication:", err);
       }
     };
+    checkUserStatus();
+  }, [dispatch, isAuthenticated, location]);
+  // useEffect(() => {
+  //   const loginUserWithOauth = () => async (dispatch) => {
+  //     dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
+  //     console.log("entering action");
 
-    if (!isAuthenticated && !isLoading) {
-      checkUserStatus(); 
-    }
-  }, [dispatch, isAuthenticated, isLoading]); 
+  //     try {
+  //       const config = {
+  //         headers: {
+  //           Accept: "application/json",
+  //           "Content-Type": "application/json",
+  //         },
+  //         mode: "cors",
+  //         credentials: "include",
+  //         withCredentials: true,
+  //       };
+  //       // Make a GET request to get the current user with the JWT cookie
+  //       const { data } = await axios.get(`${apiUrl}/api/users/me`, config);
+  //       console.log("this is data from api", data);
+  //       // Dispatch success action if the user is successfully fetched
+  //       dispatch({
+  //         type: LOGIN_WITH_OAUTH_SUCCESS,
+  //         payload: { token: data.data.token, user: data.data.user },
+  //       });
+  //       console.log("Successfully logged in with OAuth");
+  //     } catch (err) {
+  //       // Dispatch failure action if there's an error
+  //       dispatch({
+  //         type: LOGIN_WITH_OAUTH_FAIL,
+  //         payload: { error: err.response?.data?.message || err.message },
+  //       });
+  //       console.error("Error logging in with OAuth:", err);
+  //     }
+  //   };
+  //   if (!isAuthenticated && !isLoading) {
+  //     loginUserWithOauth();
+  //   }
+  // }, [isAuthenticated, isLoading, dispatch]);
+
+  // useEffect(() => {
+  //   console.log('entering useffect')
+  //   const checkUserStatus = async () => {
+  //     try {
+  //       if (!isAuthenticated && !isLoading) {
+  //         console.log('is authenticated',isAuthenticated)
+  //         console.log('is loading',isLoading)
+  //         dispatch(loginUserWithOauth());
+  //       }
+  //     } catch (error) {
+  //       console.error("Error during authentication:", error);
+  //     }
+  //   };
+
+  //   if (!isAuthenticated && !isLoading) {
+  //     checkUserStatus();
+  //   }
+  // }, [dispatch, isAuthenticated, isLoading]);
 
   // useEffect(() => {
   //   const cookieJwt = Cookies.get('x-auth-cookie'); // Get the cookie
@@ -151,7 +249,7 @@ const App = () => {
               <Route path="register" element={<Register />} />
               <Route path="/" element={<Layout navItems={navItems} />}>
                 <Route index element={<Home />} />
-
+                <Route path="/auth-google" element={<Home />} />
                 <Route
                   path="products/:category/:id"
                   element={<ProductList1 />}

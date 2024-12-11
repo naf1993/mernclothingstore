@@ -8,6 +8,8 @@ const AccountPage = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
   const { user: userdetails, isAuthenticated } = user;
+  const { provider } = userdetails;
+  console.log(provider)
   const handleLogout = () => {
     dispatch(logOutUser());
     navigate("/");
@@ -27,16 +29,20 @@ const AccountPage = () => {
   return (
     <div className="page-container">
       <div className="page-wrapper">
-        <h2 className="account-heading">Welcome, {userdetails.name.split(' ')[0]}!</h2>
+        <h2 className="account-heading">
+          Welcome, {userdetails.name.split(" ")[0]}!
+        </h2>
         <p className="account-email">Email: {userdetails.email}</p>
 
         <div className="user-actions">
           <button className="btn-user-actions" onClick={handleMyOrders}>
-            My Orders
+            Orders
           </button>
-          <button className="btn-user-actions" onClick={handleUpdateProfile}>
-            Update Profile
-          </button>
+          {provider !== "google" && (
+            <button className="btn-user-actions" onClick={handleUpdateProfile}>
+              Update Profile
+            </button>
+          )}
           <button
             className="btn-user-actions btn-logout"
             onClick={handleLogout}

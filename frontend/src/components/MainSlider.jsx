@@ -11,7 +11,7 @@ export const sliderData = [
 const MainSlider = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
-  const { isAuthenticated } = user;
+  const { isAuthenticated,token } = user;
   const { loading, error, isFirstOrder } = useSelector((state) => state.order);
   const [current, setCurrent] = useState(0);
   const length = sliderData.length;
@@ -22,11 +22,14 @@ const MainSlider = () => {
 
     return () => clearInterval(interval); // Clear interval on component unmount
   }, [current, length]);
+  console.log('is Authenticated',isAuthenticated)
+  console.log('token...',token)
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && token) {
+      console.log('check is first order')
       dispatch(checkIsFirstOrder());
     }
-  }, [isAuthenticated, dispatch]);
+  }, [isAuthenticated, dispatch,token]);
 
   const handleCopyCoupon = () => {
     const couponCode = "GET20";

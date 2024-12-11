@@ -1,5 +1,5 @@
-import dotenv from 'dotenv'
-dotenv.config()
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import passport from "passport";
 const router = express.Router();
@@ -11,7 +11,7 @@ router.get(
   })
 );
 
-const clientUrl = process.env.FRONTEND_URL
+const clientUrl = process.env.FRONTEND_URL;
 //const clientUrl = "http://localhost:3000"
 
 router.get(
@@ -20,30 +20,24 @@ router.get(
     failureRedirect: "/",
     session: false,
   }),
-  (req, res) => { 
+  (req, res) => {
+    console.log('req.user:', req.user);
     
     if (!req.user) {
       return res.status(401).send('User not authenticated');
     }
     const token = req.user.generateJWT();
-  //   console.log('this is token')
-  //   console.log(token)
-   //res.cookie("x-auth-cookie", token);
-   res.cookie("x-auth-cookie", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: 'None'
-  });
-  console.log('this is token',token)
-  
-    res.redirect(clientUrl);
-    console.log('cookie sent')//this is printed in heroku logs
+    console.log('this is token:', token);
+    const redirectUrl = `${clientUrl}/auth-google?token=${token}`;
+    console.log('Redirecting to:', redirectUrl);
+    res.redirect(redirectUrl);
   }
 );
 
+
 router.get("/auth/logout/google", (req, res) => {
   req.logout();
-  res.clearCookie('x-auth-cookie');
+  res.clearCookie("x-auth-cookie");
   res.redirect(clientUrl);
 });
 
