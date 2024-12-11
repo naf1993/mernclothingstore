@@ -46,11 +46,7 @@ const App = () => {
   useEffect(() => {
     const checkUserStatus = async () => {
       try {
-        const cookieJwt = Cookies.get("x-auth-cookie"); // Check for the cookie
-        console.log("Cookie JWT:", cookieJwt); // Log to verify if cookie is set
-
-        if (!isAuthenticated && !isLoading && cookieJwt) {
-          // If user is not authenticated but cookie is present, dispatch login action
+        if (!isAuthenticated && !isLoading) {
           dispatch(loginUserWithOauth());
         }
       } catch (error) {
@@ -58,11 +54,10 @@ const App = () => {
       }
     };
 
-    // Only run check if not already authenticated
     if (!isAuthenticated && !isLoading) {
-      checkUserStatus(); // Make the API request to verify the token and load user data
+      checkUserStatus(); 
     }
-  }, [dispatch, isAuthenticated, isLoading]); // Depend on dispatch, isAuthenticated, and isLoading
+  }, [dispatch, isAuthenticated, isLoading]); 
 
   // useEffect(() => {
   //   const cookieJwt = Cookies.get('x-auth-cookie'); // Get the cookie
