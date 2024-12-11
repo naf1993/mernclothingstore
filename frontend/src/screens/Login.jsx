@@ -19,8 +19,6 @@ const Login = () => {
   const user = useSelector((state) => state.user);
   const { isAuthenticated,error,isLoading } = user;
   
-
-
   useEffect(() => {
     if (isAuthenticated) {
       return history("/");
@@ -35,6 +33,7 @@ const Login = () => {
     //https://ecommerce-production-backend-1d4c654763a4.herokuapp.com this is api url
     window.open(`${apiUrl}/auth/google`, "_self");
   };
+  console.log(isLoading)
   return (
     <div className="login-container">
       <div className="wrapper-login">

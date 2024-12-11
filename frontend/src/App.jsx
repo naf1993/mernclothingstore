@@ -44,9 +44,12 @@ const App = () => {
   const { isLoading, isAuthenticated } = user;
 
   useEffect(() => {
+    console.log('entering useffect')
     const checkUserStatus = async () => {
       try {
         if (!isAuthenticated && !isLoading) {
+          console.log('is authenticated',isAuthenticated)
+          console.log('is loading',isLoading)
           dispatch(loginUserWithOauth());
         }
       } catch (error) {

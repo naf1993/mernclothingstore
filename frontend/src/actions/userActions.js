@@ -66,8 +66,8 @@ import { apiUrl } from "./apiUrl";
 export const loadUser = () => async (dispatch, getState) => {
   dispatch({ type: USER_LOADING });
   try {
-    //const options = attachTokenToHeaders(getState);
-    const { data } = await axios.get(`${apiUrl}/api/users/me`,  { withCredentials: true });
+    const options = attachTokenToHeaders(getState);
+    const { data } = await axios.get(`${apiUrl}/api/users/me`,  options);
 
     dispatch({
       type: USER_SUCCESS,
@@ -146,6 +146,7 @@ export const loginUserWithEmail =
 
   export const loginUserWithOauth = () => async (dispatch) => {
     dispatch({ type: LOGIN_WITH_OAUTH_LOADING });
+    console.log('entering action')
   
     try {
       const config = {
@@ -159,7 +160,7 @@ export const loginUserWithEmail =
     }
       // Make a GET request to get the current user with the JWT cookie
       const { data } = await axios.get(`${apiUrl}/api/users/me`, config);
-  
+  console.log('this is data from api',data)
       // Dispatch success action if the user is successfully fetched
       dispatch({
         type: LOGIN_WITH_OAUTH_SUCCESS,
