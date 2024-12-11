@@ -20,8 +20,7 @@ router.get(
     failureRedirect: "/",
     session: false,
   }),
-  (req, res) => {
-    console.log('req.user:', req.user);  // Log the user object to see if it's populated
+  (req, res) => { 
     
     if (!req.user) {
       return res.status(401).send('User not authenticated');
@@ -33,10 +32,9 @@ router.get(
    res.cookie("x-auth-cookie", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production', 
-    sameSite: 'None',
-    path: '/', // Ensure the path is correct
-    domain: process.env.NODE_ENV === 'production' ? '.themodeststore.shop' : 'localhost'
+    sameSite: 'None'
   });
+  console.log('this is token',token)
   
     res.redirect(clientUrl);
     console.log('cookie sent')//this is printed in heroku logs
