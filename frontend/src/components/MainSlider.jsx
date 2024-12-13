@@ -22,11 +22,10 @@ const MainSlider = () => {
 
     return () => clearInterval(interval); // Clear interval on component unmount
   }, [current, length]);
-  console.log('is Authenticated',isAuthenticated)
-  console.log('token...',token)
+ 
   useEffect(() => {
     if (isAuthenticated && token) {
-      console.log('check is first order')
+     
       dispatch(checkIsFirstOrder());
     }
   }, [isAuthenticated, dispatch,token]);

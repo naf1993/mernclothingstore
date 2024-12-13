@@ -4,15 +4,6 @@ import catchAsync from "../utils/catchAsync.js";
 import AppError from "../utils/appError.js";
 import APIFeatures from "../utils/apiFeatures.js";
 
-
-
-
-
-
-
-
-
-
 const createSubCategory = catchAsync(async (req, res, next) => {
   const subCategory = await SubCategory.create(req.body);
 

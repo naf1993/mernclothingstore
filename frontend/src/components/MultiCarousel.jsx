@@ -94,11 +94,11 @@ const MultiCarousel = ({ items, autoScroll, heading }) => {
       </div>
       <div className="carousel" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove}>
        
-      {items.length > 1 && (
+      {/* {items.length > 1 && (
           <button onClick={handlePrev} className="carousel-button left">
             <AiOutlineLeft />
           </button>
-        )}
+        )} */}
 
         <div className="carousel-images">
           {items
@@ -108,11 +108,11 @@ const MultiCarousel = ({ items, autoScroll, heading }) => {
               return <Product key={item.id} product={item} />;
             })}
         </div>
-        {items.length > 1 && (
+        {/* {items.length > 1 && (
           <button onClick={handleNext} className="carousel-button right">
             <AiOutlineRight />
           </button>
-        )}
+        )} */}
         <div className="dots">
           {Array.from({ length: Math.ceil(items.length / itemsToShow) }).map(
             (_, index) => (

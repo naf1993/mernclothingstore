@@ -20,6 +20,7 @@ import bodyParser from "body-parser";
 import couponRoutes from "./routes/couponRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import subscriptionRoutes from './routes/subscriptionRoutes.js'
 import notificationRoutes from "./routes/notificationRoutes.js";
 import { fileURLToPath } from "url";
 import colors from "colors";
@@ -137,6 +138,7 @@ app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use('/api/subscription',subscriptionRoutes)
 app.set('trust proxy', 1);  // Important for reverse proxy (Heroku)
 
 // Route to log product interactions (view, click, etc.)

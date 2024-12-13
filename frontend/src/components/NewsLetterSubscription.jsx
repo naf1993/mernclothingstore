@@ -1,25 +1,34 @@
 import React, { useState } from "react";
 import Headings from "./Headings";
+import toast from "react-hot-toast";
+import axios from "axios";
+import {apiUrl} from "../actions/apiUrl.js";
 
 const NewsLetterSubscription = () => {
   const [email, setEmail] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
-      setErrorMessage("Please enter a valid email");
+      toast.error("Please enter a valid email address");
       return;
     }
     try {
-      //try api call
-      setSuccessMessage("Thank you for subscribing");
+      const config = {
+        headers:{
+          'Content-Type':'application/json'
+        }
+      }
+      const { data } = await axios.post(`${apiUrl}/api/subscription/subscribe`,{email},config);
+      console.log(data)
+
+      toast.success(data.message);
       setEmail("");
-      setErrorMessage("");
+    
     } catch (error) {
-      setErrorMessage("An error occured.Please try again later");
+      console.log(error)
+      toast.error(error?.response?.data?.message);
     }
   };
   return (
@@ -37,8 +46,7 @@ const NewsLetterSubscription = () => {
         />
         <button type="submit">Subscribe</button>
       </form>
-      {successMessage && <p className="success">{successMessage}</p>}
-      {errorMessage && <p className="error">{errorMessage}</p>}
+    
     </div>
   );
 };

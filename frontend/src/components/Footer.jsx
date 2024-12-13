@@ -40,8 +40,7 @@ const Footer = () => {
 
             <div className="footer-section contact">
               <h3>Contact Us</h3>
-              <p>Email: modestclothing@gmail.com</p>
-              <p>Phone: +1 (234) 567-890</p>
+              <p>Email: support@themodeststore.shop</p>
             </div>
 
            
