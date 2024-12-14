@@ -587,23 +587,53 @@ export const recommendSimilarItems = async (productId) => {
   return similarItems;
 };
 
+export const recommendedProductsForNewUser = catchAsync(async (req,res) => {
+  console.log('hi');
 
+  // Get the top popular items (product IDs)
+  const popularItemsIds = await getPopularItems();
+  console.log(popularItemsIds);
 
+  // Fetch the full product details for the popular items
+  const popularItems = await Product.find({ _id: { $in: popularItemsIds } });
 
-export const recommendedProductsForNewUser = async () => {
-  // Get top popular items
-  const popularItems = await getPopularItems();
+  // Get attributes of the top popular item to recommend similar items
+  const similarItems = await recommendSimilarItems(popularItems[0]._id);
 
-  // Get attributes of top popular item to recommend similar items
-  const similarItems = await recommendSimilarItems(popularItems[0]);
+  // Combine results, ensuring no duplicates by checking product _id
+  const allProducts = [...popularItems, ...similarItems];
 
-  // Combine results, ensuring no duplicates
-  const recommendations = [
-    ...new Set([...popularItems, ...similarItems.map((item) => item._id)]),
+  // Remove duplicates based on product _id by using a Map
+  const uniqueProducts = [
+    ...new Map(allProducts.map((item) => [item._id.toString(), item])).values(),
   ];
 
-  return recommendations.slice(0,10);
-};
+  // Limit to 10 products
+  let products =  uniqueProducts;
+  res.status(200).json({message:'Success',length:products.length,products})
+})
+
+
+// export const recommendedProductsForNewUser = catchAsync(async (req,res) => {
+//   console.log('hi')
+//   // Get top popular items
+//   const popularItems = await getPopularItems();
+//   console.log(popularItems)
+
+//   // Get attributes of top popular item to recommend similar items
+//   const similarItems = await recommendSimilarItems(popularItems[0]);
+
+
+//   // Combine results, ensuring no duplicates
+//   const recommendations = [
+//     ...new Set([...popularItems, ...similarItems.map((item) => item._id)]),
+//   ];
+
+//   //return recommendations.slice(0,10);
+//   res.status(200).json({
+//     products:recommendations
+//   })
+// })
 
 export {
   getProductsByCategory,

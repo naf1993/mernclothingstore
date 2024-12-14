@@ -1,11 +1,12 @@
 import express from 'express';
 import {  login, protect,  restrictToAdmin } from '../controllers/authController.js';
-import { addToWishList, createProduct, deleteProduct ,getAllProducts, getProductById, getProductStatistics, getProductsByCategory, getProductsBySubCategory, getSimilarProducts, productSearch, updateProduct, upload, resizeImages, deleteImageFromProduct, topSellingProducts, bulkUpdateProductStock, productsSearchByName, getRecommendedProducts, getAllInteractions } from '../controllers/productController.js';
+import { addToWishList, createProduct, deleteProduct ,getAllProducts, getProductById, getProductStatistics, getProductsByCategory, getProductsBySubCategory, getSimilarProducts, productSearch, updateProduct, upload, resizeImages, deleteImageFromProduct, topSellingProducts, bulkUpdateProductStock, productsSearchByName, getRecommendedProducts, getAllInteractions, recommendedProductsForNewUser } from '../controllers/productController.js';
 import { getSoldProductCount,getAllColorsOfAllProducts } from '../controllers/productController.js';
 import reviewRoutes from './reviewRoutes.js'
 
 const router = express.Router();
 
+router.route('/toprecommended').get(recommendedProductsForNewUser)
 router.route('/getallinteractions').get(getAllInteractions)
 router.use('/:productId/reviews',reviewRoutes)
 router.route('/getrecommendedproducts').get(protect,getRecommendedProducts)

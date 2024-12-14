@@ -21,11 +21,15 @@ import {
   GET_SUBCATEGORIES_REQUEST,
   GET_SUBCATEGORIES_SUCCESS,
   GET_SUBCATEGORIES_FAIL,
+  PRODUCT_RECOMMENDED_REQUEST,
+  PRODUCT_RECOMMENDED_SUCCESS,
+  PRODUCT_RECOMMENDED_FAIL,
 } from "../constants/productConstants";
 
 const initialState = {
   categories: [],
   searchedProducts: [],
+  topProducts:[],
   products: [],
   relatedProducts: [],
   colors: [],
@@ -85,6 +89,12 @@ export const productReducer = (state = initialState, action) => {
       return { ...state, loading: false, searchedProducts: [] };
     case GET_SEARCH_PRODUCTS_FAIL:
       return { ...state, loading: false, error: action.payload };
+    case PRODUCT_RECOMMENDED_REQUEST:
+      return {...state,loading:true}
+    case PRODUCT_RECOMMENDED_SUCCESS:
+      return { ...state,loading:false,topProducts:action.payload}
+    case PRODUCT_RECOMMENDED_FAIL:
+      return {...state,loading:false,error:action.paylaod}
     default:
       return state;
   }

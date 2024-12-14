@@ -5,17 +5,21 @@ import MainSlider from "../components/MainSlider";
 import Review from "../components/Review";
 import NewsLetterSubscription from "../components/NewsLetterSubscription";
 import MultiCarousel from "../components/MultiCarousel";
-import { listProducts } from "../actions/productActions";
+import { getRecommendedProducts, listProducts } from "../actions/productActions";
 import { useDispatch, useSelector } from "react-redux";
 import Message from "../components/Message";
 import Loader from "../components/Loader";
 const Home = () => {
   const dispatch = useDispatch();
   const { loading, error, products } = useSelector((state) => state.product);
+  const { loading:loadingTopProducts, error:errorTopProducts,topProducts } = useSelector((state) => state.product);
   useEffect(() => {
    
     dispatch(listProducts());
   }, [dispatch]);
+  useEffect(()=>{
+    dispatch(getRecommendedProducts())
+  },[dispatch])
 
   const newProducts =
     Array.isArray(products) && products.length > 0
@@ -44,6 +48,12 @@ const Home = () => {
         {error && <Message error={error} />}
         {products && products.length > 0 && (
           <MultiCarousel items={featuredProducts} heading="Top Selling" />
+        )}
+
+{loadingTopProducts && <Loader />}
+        {errorTopProducts && <Message error={error} />}
+        {topProducts && topProducts.length > 0 && (
+          <MultiCarousel items={topProducts} heading="Recommended For You" />
         )}
 
         {/* <Review /> */}

@@ -17,13 +17,17 @@ export const addSubscription = catchAsync(async(req,res,next)=>{
     console.log('email',email)
     const msg = {
         to: email,
-        from: process.env.FROM_ADDRESS,
+        from: 'support@themodeststore.shop',
         subject:'Thank you for subscribing',
         text: 'You will now receive updates on discounts and offers.',
         html: '<strong>Thank you for subscribing!</strong>',
 
     }
-    console.log(msg)
-    await sgMail.send(msg)
-    res.status(201).json({message:'Thanks for Subscribing'})
+    try {
+        await sgMail.send(msg);
+        res.status(201).json({ message: 'Thanks for Subscribing' });
+    } catch (error) {
+        console.error('SendGrid Error:', error.response.body);
+        return next(new AppError('Failed to send email', 500));
+    }
 })
