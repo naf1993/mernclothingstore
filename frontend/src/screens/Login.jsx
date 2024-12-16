@@ -91,9 +91,9 @@ const Login = () => {
               Sign In With Google
             </button>
 
-          <Link to="/forgetpassword" className="forget-password">
+          {/* <Link to="/forgetpassword" className="forget-password">
             <span>Forgot Password?</span>
-          </Link>
+          </Link> */}
           <div className="register">
             <span>
               Dont have an account? <Link className="register-link" to="/register">Register here</Link>

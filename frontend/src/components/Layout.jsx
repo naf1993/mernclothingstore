@@ -2,6 +2,7 @@ import React from "react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { Outlet } from "react-router-dom";
+import ChatBot from "./ChatBot";
 
 const Layout = ({ navItems }) => {
   return (
@@ -9,6 +10,7 @@ const Layout = ({ navItems }) => {
       <Navbar navItems={navItems} />
 
       <Outlet />
+      {/* <ChatBot/> */}
 
       <Footer />
     </div>

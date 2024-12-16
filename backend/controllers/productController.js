@@ -1,3 +1,5 @@
+import dotenv from 'dotenv'
+dotenv.config()
 import path from "path";
 import Product from "../models/productModel.js";
 import User from "../models/userModel.js";
@@ -14,7 +16,127 @@ import cloudinary from "cloudinary";
 import { uploadFiles, deleteFiles } from "../utils/cloudinary.js";
 import { dataUri } from "../utils/datauri.js";
 import { recommendTopProducts } from "../services/predictRecommendation.js";
+import { SessionsClient } from '@google-cloud/dialogflow';
+import { v4 as uuidv4 } from 'uuid'
+const sessionClient = new SessionsClient()
+const sessionId = uuidv4()
+const sessionPath = sessionClient.projectAgentSessionPath(process.env.GOOGLE_PROJECT_ID,sessionId)
 
+export const sendMessageDialogFlow = async(req,res,next)=>{
+  console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+  console.log(process.env.GOOGLE_PROJECT_ID)
+  try {
+    const { message } = req.body; // The message to send to Dialogflow
+    const request = {
+      session: sessionPath,
+      queryInput: {
+        text: {
+          text: message,
+          languageCode: 'en', // Change if your agent uses a different language
+        },
+      },
+    };
+
+    const [response] = await sessionClient.detectIntent(request);
+    const queryResult = response.queryResult;
+
+    if (queryResult.intent.displayName === 'Product Recommendation') {
+      const productResponse = queryResult.fulfillmentText;
+      res.json({ reply: productResponse });
+    } else if (queryResult.intent.displayName === 'Order Status') {
+      const orderResponse = queryResult.fulfillmentText;
+      res.json({ reply: orderResponse });
+    } else {
+      // Default response if intent doesn't match
+      res.json({ reply: queryResult.fulfillmentText });
+    }
+  } catch (error) {
+    console.error('Dialogflow request failed', error);
+    res.status(500).json({ error: 'Something went wrong' });
+  }
+}
+
+export const getProductRecommendationOrderStatus = async(req,res)=>{
+  const { queryResult } = req.body;
+
+  // Product Recommendation Intent
+  if (queryResult.intent.displayName === 'Product Recommendation') {
+    const category = queryResult.parameters['category']; // e.g., "shoes"
+    const maxPrice = queryResult.parameters['price']; // e.g., 1000
+    const brand = queryResult.parameters['brand']; // e.g., "Nike" (optional)
+    const color = queryResult.parameters['color']; // e.g., "black"
+    const size = queryResult.parameters['size']; // e.g., 38 (could be an array or single value)
+
+    try {
+      // Build the query dynamically based on parameters provided by the user
+      let productQuery = { category: { $regex: category, $options: 'i' } };
+
+      if (maxPrice) {
+        // Add price filter if maxPrice is provided
+        productQuery.price = { $lte: maxPrice };
+      }
+
+      if (brand) {
+        // Add brand filter if a brand is provided
+        productQuery.brand = { $regex: brand, $options: 'i' };
+      }
+
+      if (color) {
+        // Add color filter if color is provided
+        productQuery.color = { $regex: color, $options: 'i' };
+      }
+
+      if (size) {
+        // Add size filter if size is provided
+        if (Array.isArray(size)) {
+          // If multiple sizes are provided (e.g., size 38, size 40), use the $in operator
+          productQuery.sizes = { $in: size };
+        } else {
+          // If single size is provided (e.g., size 38), check if the size is in the array
+          productQuery.sizes = size;
+        }
+      }
+
+      // Fetch products based on the constructed query
+      const products = await Product.find(productQuery);
+
+      if (products.length > 0) {
+        // Format the product list with relevant details
+        const productList = products.map(
+          (product) => `${product.name} - $${product.price}`
+        );
+        res.json({
+          fulfillmentText: `Here are some ${category} recommendations: ${productList.join(', ')}`,
+        });
+      } else {
+        res.json({
+          fulfillmentText: `Sorry, I couldn't find any ${category} products matching your criteria.`,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      res.json({ fulfillmentText: 'I encountered an error while fetching products.' });
+    }
+  }
+
+  // Order Status Intent
+  if (queryResult.intent.displayName === 'Order Status') {
+    const orderId = queryResult.parameters['order_id']; // e.g., "ORD12345"
+
+    try {
+      const order = await Order.findOne({ order_id: orderId });
+      if (order) {
+        res.json({
+          fulfillmentText: `Your order status is: ${order.status}.`,
+        });
+      } else {
+        res.json({ fulfillmentText: 'I couldn’t find an order with that ID.' });
+      }
+    } catch (err) {
+      res.json({ fulfillmentText: 'I encountered an error while checking your order status.' });
+    }
+}
+}
 const storage = multer.memoryStorage(); // Store files in memory to process with Sharp
 const fileFilter = (req, file, cb) => {
   const fileTypes = /jpeg|jpg|png|gif/;
