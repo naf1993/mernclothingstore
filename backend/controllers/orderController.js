@@ -112,7 +112,14 @@ export const webhookHandler = catchAsync(async (req, res, next) => {
   // Get the Stripe signature and payload
   const sig = req.headers["stripe-signature"];
   const payload = req.body;
+  console.log("Received Webhook Event:", req.body);
+  console.log("Stripe Signature:", sig);
 
+  const endpointSecret =
+    process.env.NODE_ENV === "production"
+      ? process.env.STRIPE_LIVE_WEBHOOK_SECRET
+      : process.env.STRIPE_TEST_WEBHOOK_SECRET;
+    console.log('this is secert',endpointSecret)
   // Verify the webhook signature
   let event;
   try {

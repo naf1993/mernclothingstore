@@ -10,7 +10,7 @@ const Layout = ({ navItems }) => {
       <Navbar navItems={navItems} />
 
       <Outlet />
-      {/* <ChatBot/> */}
+      <ChatBot/>
 
       <Footer />
     </div>

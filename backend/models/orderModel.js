@@ -51,7 +51,7 @@ const orderSchema = mongoose.Schema(
           validator: function (v) {
             return isValidPhoneNumber(v, "IN");
           },
-          message: (props) => `${props.value} is not a valid phone number`,
+          message: (props) => `${props.value} is not a valid phone number..Please provide Indian Phone Numbers`,
         },
       },
       streetName: {

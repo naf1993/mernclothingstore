@@ -19,8 +19,9 @@ import subCategoryRoutes from "./routes/subCategoryRoutes.js";
 import bodyParser from "body-parser";
 import couponRoutes from "./routes/couponRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
+import Order from "./models/orderModel.js";
 import authRoutes from "./routes/authRoutes.js";
-import subscriptionRoutes from './routes/subscriptionRoutes.js'
+import subscriptionRoutes from "./routes/subscriptionRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import { fileURLToPath } from "url";
 import colors from "colors";
@@ -28,7 +29,17 @@ import connectDB from "./config/db.js";
 import { webhookHandler } from "./controllers/orderController.js";
 import { v2 as cloudinary } from "cloudinary";
 import { UserRecommendation } from "./models/userModel.js";
+import { SessionsClient } from "@google-cloud/dialogflow";
+import { v4 as uuidv4 } from "uuid";
+import Product from "./models/productModel.js";
 connectDB();
+
+const sessionClient = new SessionsClient();
+const sessionId = uuidv4();
+const sessionPath = sessionClient.projectAgentSessionPath(
+  process.env.GOOGLE_PROJECT_ID,
+  sessionId
+);
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -36,10 +47,7 @@ const io = new Server(server, {
     origin:
       process.env.NODE_ENV === "development"
         ? "http://localhost:3000" // Allow all origins in development
-        : [
-          process.env.FRONTEND_VERCEL_URL, 
-          process.env.FRONTEND_URL, 
-          ], //,  // Vercel app URL for production
+        : [process.env.FRONTEND_VERCEL_URL, process.env.FRONTEND_URL], //,  // Vercel app URL for production
     credentials: true, // Allow credentials (cookies, Authorization headers)
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "sessionId"],
@@ -62,9 +70,7 @@ const corsOptions = {
   origin:
     process.env.NODE_ENV === "development"
       ? "http://localhost:3000" // Local development (localhost)
-      : [ process.env.FRONTEND_URL,
-          process.env.FRONTEND_VERCEL_URL      
-        ],
+      : [process.env.FRONTEND_URL, process.env.FRONTEND_VERCEL_URL],
   credentials: true, // Allow cookies and authorization headers
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization", "sessionId"],
@@ -81,6 +87,7 @@ cloudinary.config({
   api_key: process.env.API_KEY,
   api_secret: process.env.API_SECRET,
 });
+
 app.post(
   "/api/orders/webhook",
   bodyParser.raw({ type: "application/json" }),
@@ -92,10 +99,10 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.post("/sendgrid-webhook", (req, res) => {
   //not logging anything
-  console.log("Received webhook headers:", req.headers); 
-  console.log("Received webhook events:", req.body); 
+  console.log("Received webhook headers:", req.headers);
+  console.log("Received webhook events:", req.body);
 
-  res.status(200).send("Webhook received"); 
+  res.status(200).send("Webhook received");
 });
 // app.post('/sendgrid-webhook', (req, res) => {
 //   const events = req.body; // SendGrid sends an array of events
@@ -128,6 +135,168 @@ app.post("/sendgrid-webhook", (req, res) => {
 // });
 
 // Application Routes
+
+let x = "outer wear"; // Category name
+let y = "Black"; // Color
+let z = "M"; // Size
+let p = 1000; // Maximum price
+
+const fetchProducts = async () => {
+  const products = await Product.aggregate([
+    {
+      $lookup: {
+        from: "categories", // Join with 'categories' collection
+        localField: "Category", // Field in 'Product' collection (e.g., category ID)
+        foreignField: "_id", // Matching field in 'Category' collection
+        as: "product", // Name of the resulting array field
+      },
+    },
+    {
+      $unwind: "$product", // Flatten the 'CategoryDetails' array
+    },
+    {
+      $match: {
+        $or: [
+          {
+            "product.name": { $regex: x, $options: "i" },
+            colors: { $in: [new RegExp(y, "i")] },
+            sizes: { $in: [z] },
+            price: { $gte: p },
+          },
+        ],
+
+        // Case-insensitive match for color
+      },
+    },
+  ]);
+
+  return products;
+};
+
+const subproducts = await fetchProducts();
+// console.log("this is subproducts", subproducts.length);
+// console.log(subproducts);
+console.log(new RegExp("hijab", "i").test("Hijab")); // Should print: true
+console.log(new RegExp("indigo", "i").test("Indigo")); // Should print: true
+
+app.post("/webhook", async (req, res) => {
+  //console.log("Received webhook request:", JSON.stringify(req.body, null, 2));
+  const { queryText, parameters } = req.body.queryResult;
+  console.log('this is query text',queryText)
+  console.log('this is parameters',parameters)
+  
+  try {
+    const request = {
+      session: sessionPath,
+      queryInput: { text: { text: queryText, languageCode: "en" } },
+    };
+    const [response] = await sessionClient.detectIntent(request);
+    const queryResult = response.queryResult;
+    //console.log(queryResult)
+   
+    if (queryResult.intent.displayName === "productrecommendation") {
+      console.log(queryResult.intent.displayName)
+
+      const productType = parameters.product;
+      
+      const color = parameters.color || '';  
+    
+
+      const price = parameters.price || 0; 
+     
+      const size = parameters.size || ''; 
+     
+      console.log("Product Type:", productType);
+      console.log("Color:", color);
+      console.log("Size:", size);
+      console.log("Price:", price);
+      let products = [];
+
+      products = await Product.aggregate([
+        {
+          $lookup: {
+            from: "categories", // Join with 'categories' collection
+            localField: "Category", // Field in 'Product' collection (e.g., category ID)
+            foreignField: "_id", // Matching field in 'Category' collection
+            as: "product", // Name of the resulting array field
+          },
+        },
+        {
+          $unwind: "$product", // Flatten the 'CategoryDetails' array
+        },
+        {
+          $match: {
+            $or: [
+              {
+                "product.name": { $regex: productType, $options: "i" },
+                colors: { $in: [new RegExp(color, "i")] },
+                "sizes":{$in:[size]},
+                "price":{$gte:price}
+              },
+            ],
+
+            // Case-insensitive match for color
+          },
+        },
+      ]);
+
+      console.log("Found Products:", products); // Log the found products
+
+      if (products.length > 0) {
+        res.json({
+          fulfillmentText: `I found ${products.length} product(s) for you.`,
+          products: products.map((product) => ({
+            name: product.name,
+            brand: product.brand,
+            price: product.price,
+            color: product.color,
+            sizes: product.sizes.join(", "),
+            image: product.images[0],
+          })),
+        });
+      } else {
+        res.json({
+          fulfillmentText: `Sorry, I couldn't find any products for "${productType}" in "${color}".`,
+        });
+      }
+    } else if (queryResult.intent.displayName === "orderstatus") {
+      const orderId = parameters.order_id.stringValue;
+      if (orderId) {
+        const order = await Order.findOne({ orderId: orderId });
+        if (order) {
+          res.json({
+            fulfillmentText: `Your order #${order.orderId} is currently ${order.orderStatus}.`,
+            shipping: `Shipping fee: $${order.shippingFee}`,
+            payment: `Payment Method: ${order.paymentMethod}`,
+            products: order.products.map((product) => ({
+              product: product.product,
+              count: product.count,
+              color: product.color,
+              size: product.size,
+            })),
+          });
+        } else {
+          res.json({
+            fulfillmentText: `Sorry, I couldn't find an order with ID #${orderId}.`,
+          });
+        }
+      } else {
+        res.json({ fulfillmentText: `Sorry, no order ID was provided.` });
+      }
+    } else {
+      res.json({
+        fulfillmentText:
+          queryResult.fulfillmentText || "I am not sure how to help with that.",
+      });
+    }
+  } catch (error) {
+    console.error("Error processing Dialogflow request:", error);
+    res.status(500).json({
+      fulfillmentText: "Sorry, something went wrong. Please try again later.",
+    });
+  }
+});
+
 app.use("/", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/users", userRoutes);
@@ -138,8 +307,8 @@ app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/coupon", couponRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use('/api/subscription',subscriptionRoutes)
-app.set('trust proxy', 1);  // Important for reverse proxy (Heroku)
+app.use("/api/subscription", subscriptionRoutes);
+app.set("trust proxy", 1); // Important for reverse proxy (Heroku)
 
 // Route to log product interactions (view, click, etc.)
 

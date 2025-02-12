@@ -45,7 +45,6 @@ export const userReducer = (state = initialState, action) => {
         error: null,
       };
     case LOGIN_WITH_EMAIL_LOADING:
-
     case REGISTER_WITH_EMAIL_LOADING:
     case USER_ADD_FAVOURITES_REQUEST:
     case USER_REMOVE_FAVOURITE_REQUEST:
