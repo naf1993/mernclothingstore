@@ -6,6 +6,7 @@ import Notification from "../models/notificationModel.js";
 import { sendEmail } from "../utils/email.js";
 // Function to send messages to RabbitMQ
 const sendToQueue = async (message) => {
+  console.log('reached rabbitmq')
   try {
     const { channel } = await connectRabbitMQ();
     console.log("Sending message to queue:", message);

@@ -88,12 +88,7 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
           },
         }}
       >
-        <Box
-          component="span"
-          sx={{ display: { xs: "none", md: "block" }, flexGrow: 1 }}
-        >
-          ADMIN
-        </Box>
+     
         <ButtonBase sx={{ borderRadius: "12px", overflow: "hidden" }}>
           <Avatar
             variant="rounded"
@@ -116,7 +111,7 @@ const Navbar = ({ handleLeftDrawerToggle }) => {
         </ButtonBase>
       </Box>
 
-      <SearchSection />
+ 
       <Box sx={{ flexGrow: 1 }} />
       <Box sx={{ flexGrow: 1 }} />
       <FlexBetween gap="1rem">

@@ -112,14 +112,12 @@ export const webhookHandler = catchAsync(async (req, res, next) => {
   // Get the Stripe signature and payload
   const sig = req.headers["stripe-signature"];
   const payload = req.body;
-  console.log("Received Webhook Event:", req.body);
-  console.log("Stripe Signature:", sig);
 
   const endpointSecret =
     process.env.NODE_ENV === "production"
       ? process.env.STRIPE_LIVE_WEBHOOK_SECRET
       : process.env.STRIPE_TEST_WEBHOOK_SECRET;
-    console.log('this is secert',endpointSecret)
+
   // Verify the webhook signature
   let event;
   try {
@@ -132,50 +130,74 @@ export const webhookHandler = catchAsync(async (req, res, next) => {
   // Handle the event based on its type
   switch (event.type) {
     case "payment_intent.created":
+      console.log("payment intent created");
       const paymentIntentCreated = event.data.object;
 
       break;
-
+    case "charge.succeeded":
+      const chargeSucceeded = event.data.object;
+      break;
+    case "charge.updated":
+      const chargeUpdated = event.data.object;
+      break;
     case "payment_intent.succeeded":
       const paymentIntent = event.data.object;
+      console.log("Payment Intent Succeeded:", paymentIntent);
+
       const orderId = paymentIntent.metadata.orderId;
       const userId = paymentIntent.metadata.userId;
 
       if (!orderId || !userId) {
-        return next(new AppError("No order or user found in metadata", 400));
+        console.error("Missing orderId or userId in payment intent metadata");
+        return next(new AppError("Missing orderId or userId in metadata", 400));
       }
 
-      // Find the user and order based on the metadata
-      const user = await User.findOne({ _id: userId });
-      if (!user) {
-        return next(new AppError(`User with ID ${userId} not found`, 400));
+      try {
+        const user = await User.findOne({ _id: userId });
+        if (!user) {
+          console.error("User not found");
+          return next(new AppError(`User with ID ${userId} not found`, 404));
+        }
+
+        const order = await Order.findOne({ orderId: orderId });
+        if (!order) {
+          console.error("Order not found");
+          return next(new AppError(`Order with ID ${orderId} not found`, 404));
+        }
+
+        const stripeChargeId = paymentIntent.latest_charge;
+        if (!stripeChargeId) {
+          console.error("No charge ID found for payment intent");
+          return next(
+            new AppError("No charge ID found for payment intent", 400)
+          );
+        }
+        order.stripeChargeId = stripeChargeId;
+        order.paymentStatus = "Paid";
+
+        await order.save();
+        console.log("Order saved successfully");
+        try {
+          console.log("Sending order message to RabbitMQ:", order);
+          await sendToQueue(order);
+        } catch (error) {
+          console.error("Error sending order to message queue:", error);
+          return next(new AppError("Error processing message queue", 500));
+        }
+  
+      } catch (error) {
+        console.error("Error processing payment intent:", error);
+        return next(new AppError("Error processing payment intent", 500));
       }
+      // const orderMessage = {
+      //   orderId: order.orderId,
+      //   userId: order.user,
+      //   finalPrice: order.finalPrice,
+      //   paymentStatus: order.paymentStatus,
+      //   products: order.products,
+      // };
 
-      const order = await Order.findOne({ orderId: orderId });
-      if (!order) {
-        return next(new AppError(`Order with ID ${orderId} not found`, 400));
-      }
-
-      // Capture the charge ID from the paymentIntent object
-      const stripeChargeId = paymentIntent.charges.data[0].id; // This is the actual charge ID created by Stripe
-
-      // Update the order with the charge ID and payment status
-      order.stripeChargeId = stripeChargeId; // Store the stripe charge ID in the order
-      order.paymentStatus = "Paid"; // Update the payment status to 'Paid'
-
-      // Save the order with the updated payment status and charge ID
-      await order.save();
-
-      // Prepare order message to send to RabbitMQ
-      const orderMessage = {
-        user,
-        order,
-        products: order.products,
-      };
-
-      console.log("Sending order message to RabbitMQ:", orderMessage);
-      await sendToQueue(orderMessage); // Assuming sendToQueue is properly set up to handle this
-console.log('payment intent succeded')
+      
       break;
 
     case "payment_intent.payment_failed":
@@ -199,6 +221,7 @@ console.log('payment intent succeded')
 });
 
 export const getPaymentIntent = catchAsync(async (req, res) => {
+  console.log("creating payment intent");
   const { products, address, paymentMethod, discountCode } = req.body;
   const orderId = `ORD${uuidv4().slice(0, 8).toUpperCase()}`;
 
