@@ -175,7 +175,7 @@ export const webhookHandler = catchAsync(async (req, res, next) => {
 
       console.log("Sending order message to RabbitMQ:", orderMessage);
       await sendToQueue(orderMessage); // Assuming sendToQueue is properly set up to handle this
-
+console.log('payment intent succeded')
       break;
 
     case "payment_intent.payment_failed":
