@@ -179,123 +179,123 @@ const subproducts = await fetchProducts();
 console.log(new RegExp("hijab", "i").test("Hijab")); // Should print: true
 console.log(new RegExp("indigo", "i").test("Indigo")); // Should print: true
 
-app.post("/webhook", async (req, res) => {
-  //console.log("Received webhook request:", JSON.stringify(req.body, null, 2));
-  const { queryText, parameters } = req.body.queryResult;
-  console.log('this is query text',queryText)
-  console.log('this is parameters',parameters)
+// app.post("/webhook", async (req, res) => {
+//   //console.log("Received webhook request:", JSON.stringify(req.body, null, 2));
+//   const { queryText, parameters } = req.body.queryResult;
+//   console.log('this is query text',queryText)
+//   console.log('this is parameters',parameters)
   
-  try {
-    const request = {
-      session: sessionPath,
-      queryInput: { text: { text: queryText, languageCode: "en" } },
-    };
-    const [response] = await sessionClient.detectIntent(request);
-    const queryResult = response.queryResult;
-    //console.log(queryResult)
+//   try {
+//     const request = {
+//       session: sessionPath,
+//       queryInput: { text: { text: queryText, languageCode: "en" } },
+//     };
+//     const [response] = await sessionClient.detectIntent(request);
+//     const queryResult = response.queryResult;
+//     //console.log(queryResult)
    
-    if (queryResult.intent.displayName === "productrecommendation") {
-      console.log(queryResult.intent.displayName)
+//     if (queryResult.intent.displayName === "productrecommendation") {
+//       console.log(queryResult.intent.displayName)
 
-      const productType = parameters.product;
+//       const productType = parameters.product;
       
-      const color = parameters.color || '';  
+//       const color = parameters.color || '';  
     
 
-      const price = parameters.price || 0; 
+//       const price = parameters.price || 0; 
      
-      const size = parameters.size || ''; 
+//       const size = parameters.size || ''; 
      
-      console.log("Product Type:", productType);
-      console.log("Color:", color);
-      console.log("Size:", size);
-      console.log("Price:", price);
-      let products = [];
+//       console.log("Product Type:", productType);
+//       console.log("Color:", color);
+//       console.log("Size:", size);
+//       console.log("Price:", price);
+//       let products = [];
 
-      products = await Product.aggregate([
-        {
-          $lookup: {
-            from: "categories", // Join with 'categories' collection
-            localField: "Category", // Field in 'Product' collection (e.g., category ID)
-            foreignField: "_id", // Matching field in 'Category' collection
-            as: "product", // Name of the resulting array field
-          },
-        },
-        {
-          $unwind: "$product", // Flatten the 'CategoryDetails' array
-        },
-        {
-          $match: {
-            $or: [
-              {
-                "product.name": { $regex: productType, $options: "i" },
-                colors: { $in: [new RegExp(color, "i")] },
-                "sizes":{$in:[size]},
-                "price":{$gte:price}
-              },
-            ],
+//       products = await Product.aggregate([
+//         {
+//           $lookup: {
+//             from: "categories", // Join with 'categories' collection
+//             localField: "Category", // Field in 'Product' collection (e.g., category ID)
+//             foreignField: "_id", // Matching field in 'Category' collection
+//             as: "product", // Name of the resulting array field
+//           },
+//         },
+//         {
+//           $unwind: "$product", // Flatten the 'CategoryDetails' array
+//         },
+//         {
+//           $match: {
+//             $or: [
+//               {
+//                 "product.name": { $regex: productType, $options: "i" },
+//                 colors: { $in: [new RegExp(color, "i")] },
+//                 "sizes":{$in:[size]},
+//                 "price":{$gte:price}
+//               },
+//             ],
 
-            // Case-insensitive match for color
-          },
-        },
-      ]);
+//             // Case-insensitive match for color
+//           },
+//         },
+//       ]);
 
-      console.log("Found Products:", products); // Log the found products
+//       console.log("Found Products:", products); // Log the found products
 
-      if (products.length > 0) {
-        res.json({
-          fulfillmentText: `I found ${products.length} product(s) for you.`,
-          products: products.map((product) => ({
-            name: product.name,
-            brand: product.brand,
-            price: product.price,
-            color: product.color,
-            sizes: product.sizes.join(", "),
-            image: product.images[0],
-          })),
-        });
-      } else {
-        res.json({
-          fulfillmentText: `Sorry, I couldn't find any products for "${productType}" in "${color}".`,
-        });
-      }
-    } else if (queryResult.intent.displayName === "orderstatus") {
-      const orderId = parameters.order_id.stringValue;
-      if (orderId) {
-        const order = await Order.findOne({ orderId: orderId });
-        if (order) {
-          res.json({
-            fulfillmentText: `Your order #${order.orderId} is currently ${order.orderStatus}.`,
-            shipping: `Shipping fee: $${order.shippingFee}`,
-            payment: `Payment Method: ${order.paymentMethod}`,
-            products: order.products.map((product) => ({
-              product: product.product,
-              count: product.count,
-              color: product.color,
-              size: product.size,
-            })),
-          });
-        } else {
-          res.json({
-            fulfillmentText: `Sorry, I couldn't find an order with ID #${orderId}.`,
-          });
-        }
-      } else {
-        res.json({ fulfillmentText: `Sorry, no order ID was provided.` });
-      }
-    } else {
-      res.json({
-        fulfillmentText:
-          queryResult.fulfillmentText || "I am not sure how to help with that.",
-      });
-    }
-  } catch (error) {
-    console.error("Error processing Dialogflow request:", error);
-    res.status(500).json({
-      fulfillmentText: "Sorry, something went wrong. Please try again later.",
-    });
-  }
-});
+//       if (products.length > 0) {
+//         res.json({
+//           fulfillmentText: `I found ${products.length} product(s) for you.`,
+//           products: products.map((product) => ({
+//             name: product.name,
+//             brand: product.brand,
+//             price: product.price,
+//             color: product.color,
+//             sizes: product.sizes.join(", "),
+//             image: product.images[0],
+//           })),
+//         });
+//       } else {
+//         res.json({
+//           fulfillmentText: `Sorry, I couldn't find any products for "${productType}" in "${color}".`,
+//         });
+//       }
+//     } else if (queryResult.intent.displayName === "orderstatus") {
+//       const orderId = parameters.order_id.stringValue;
+//       if (orderId) {
+//         const order = await Order.findOne({ orderId: orderId });
+//         if (order) {
+//           res.json({
+//             fulfillmentText: `Your order #${order.orderId} is currently ${order.orderStatus}.`,
+//             shipping: `Shipping fee: $${order.shippingFee}`,
+//             payment: `Payment Method: ${order.paymentMethod}`,
+//             products: order.products.map((product) => ({
+//               product: product.product,
+//               count: product.count,
+//               color: product.color,
+//               size: product.size,
+//             })),
+//           });
+//         } else {
+//           res.json({
+//             fulfillmentText: `Sorry, I couldn't find an order with ID #${orderId}.`,
+//           });
+//         }
+//       } else {
+//         res.json({ fulfillmentText: `Sorry, no order ID was provided.` });
+//       }
+//     } else {
+//       res.json({
+//         fulfillmentText:
+//           queryResult.fulfillmentText || "I am not sure how to help with that.",
+//       });
+//     }
+//   } catch (error) {
+//     console.error("Error processing Dialogflow request:", error);
+//     res.status(500).json({
+//       fulfillmentText: "Sorry, something went wrong. Please try again later.",
+//     });
+//   }
+// });
 
 app.use("/", authRoutes);
 app.use("/api/products", productRoutes);
