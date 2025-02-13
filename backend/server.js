@@ -29,17 +29,17 @@ import connectDB from "./config/db.js";
 import { webhookHandler } from "./controllers/orderController.js";
 import { v2 as cloudinary } from "cloudinary";
 import { UserRecommendation } from "./models/userModel.js";
-import { SessionsClient } from "@google-cloud/dialogflow";
-import { v4 as uuidv4 } from "uuid";
+// import { SessionsClient } from "@google-cloud/dialogflow";
+// import { v4 as uuidv4 } from "uuid";
 import Product from "./models/productModel.js";
 connectDB();
 
-const sessionClient = new SessionsClient();
-const sessionId = uuidv4();
-const sessionPath = sessionClient.projectAgentSessionPath(
-  process.env.GOOGLE_PROJECT_ID,
-  sessionId
-);
+// const sessionClient = new SessionsClient();
+// const sessionId = uuidv4();
+// const sessionPath = sessionClient.projectAgentSessionPath(
+//   process.env.GOOGLE_PROJECT_ID,
+//   sessionId
+// );
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {

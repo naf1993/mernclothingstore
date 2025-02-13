@@ -16,102 +16,102 @@ import cloudinary from "cloudinary";
 import { uploadFiles, deleteFiles } from "../utils/cloudinary.js";
 import { dataUri } from "../utils/datauri.js";
 import { recommendTopProducts } from "../services/predictRecommendation.js";
-import { SessionsClient } from "@google-cloud/dialogflow";
-import { v4 as uuidv4 } from "uuid";
-const sessionClient = new SessionsClient();
-const sessionId = uuidv4();
-const sessionPath = sessionClient.projectAgentSessionPath(
-  process.env.GOOGLE_PROJECT_ID,
-  sessionId
-);
+// import { SessionsClient } from "@google-cloud/dialogflow";
+// import { v4 as uuidv4 } from "uuid";
+// const sessionClient = new SessionsClient();
+// const sessionId = uuidv4();
+// const sessionPath = sessionClient.projectAgentSessionPath(
+//   process.env.GOOGLE_PROJECT_ID,
+//   sessionId
+// );
 
-export const sendMessageDialogFlow = async (req, res, next) => {
-  console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS);
-  console.log(process.env.GOOGLE_PROJECT_ID);
-  try {
-    const { message } = req.body; // The message to send to Dialogflow
-    console.log(message)
-    const request = {
-      session: sessionPath,
-      queryInput: {
-        text: {
-          text: message,
-          languageCode: "en", // Change if your agent uses a different language
-        },
-      },
-    };
+// export const sendMessageDialogFlow = async (req, res, next) => {
+//   console.log(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+//   console.log(process.env.GOOGLE_PROJECT_ID);
+//   try {
+//     const { message } = req.body; // The message to send to Dialogflow
+//     console.log(message)
+//     const request = {
+//       session: sessionPath,
+//       queryInput: {
+//         text: {
+//           text: message,
+//           languageCode: "en", // Change if your agent uses a different language
+//         },
+//       },
+//     };
 
-    const [response] = await sessionClient.detectIntent(request);
-    const queryResult = response.queryResult;
-    //console.log('Dialogflow Quer+y Result:', JSON.stringify(queryResult, null, 2));
-    console.log('Parameters:', JSON.stringify(queryResult.parameters, null, 2));
-    if (queryResult.intent.displayName === 'productrecommendation') {
-      console.log('product recommendation')
+//     const [response] = await sessionClient.detectIntent(request);
+//     const queryResult = response.queryResult;
+//     //console.log('Dialogflow Quer+y Result:', JSON.stringify(queryResult, null, 2));
+//     console.log('Parameters:', JSON.stringify(queryResult.parameters, null, 2));
+//     if (queryResult.intent.displayName === 'productrecommendation') {
+//       console.log('product recommendation')
     
-      // Handling Product Recommendations
-      const productType = queryResult.parameters.fields.product ? queryResult.parameters.fields.product.stringValue : null;
-      const color = queryResult.parameters.fields.color ? queryResult.parameters.fields.color.stringValue : null;
-let products
-      // Query MongoDB to find matching products based on category and color
-      if(productType && color){
-        products = await Product.find({
-          'Category.name': new RegExp(productType, 'i'),
-          colors: { $in: [new RegExp(color, 'i')] },
-        });
-        console.log(products)
-      }
+//       // Handling Product Recommendations
+//       const productType = queryResult.parameters.fields.product ? queryResult.parameters.fields.product.stringValue : null;
+//       const color = queryResult.parameters.fields.color ? queryResult.parameters.fields.color.stringValue : null;
+// let products
+//       // Query MongoDB to find matching products based on category and color
+//       if(productType && color){
+//         products = await Product.find({
+//           'Category.name': new RegExp(productType, 'i'),
+//           colors: { $in: [new RegExp(color, 'i')] },
+//         });
+//         console.log(products)
+//       }
       
 
-      if (products.length > 0) {
-        res.json({
-          reply: `I found ${products.length} product(s) for you.`,
-          products: products.map((product) => ({
-            name: product.name,
-            brand: product.brand,
-            price: product.price,
-            color: product.colors.join(', '),
-            sizes: product.sizes.join(', '),
-            image: product.images[0],  // assuming the first image as thumbnail
-          })),
-        });
-      } else {
-        res.json({
-          reply: `Sorry, I couldn't find any products for "${productType}" in "${color}".`,
-        });
-      }
-    } else if (queryResult.intent.displayName === 'Order Status') {
-      // Handling Order Status
-      const orderId = queryResult.parameters.fields.order_id.stringValue;
+//       if (products.length > 0) {
+//         res.json({
+//           reply: `I found ${products.length} product(s) for you.`,
+//           products: products.map((product) => ({
+//             name: product.name,
+//             brand: product.brand,
+//             price: product.price,
+//             color: product.colors.join(', '),
+//             sizes: product.sizes.join(', '),
+//             image: product.images[0],  // assuming the first image as thumbnail
+//           })),
+//         });
+//       } else {
+//         res.json({
+//           reply: `Sorry, I couldn't find any products for "${productType}" in "${color}".`,
+//         });
+//       }
+//     } else if (queryResult.intent.displayName === 'Order Status') {
+//       // Handling Order Status
+//       const orderId = queryResult.parameters.fields.order_id.stringValue;
 
-      // Query MongoDB to find the order by orderId
-      const order = await Order.findOne({ orderId: orderId });
+//       // Query MongoDB to find the order by orderId
+//       const order = await Order.findOne({ orderId: orderId });
 
-      if (order) {
-        res.json({
-          reply: `Your order #${order.orderId} is currently ${order.orderStatus}.`,
-          shipping: `Shipping fee: $${order.shippingFee}`,
-          payment: `Payment Method: ${order.paymentMethod}`,
-          products: order.products.map((product) => ({
-            product: product.product, // Product ID
-            count: product.count,
-            color: product.color,
-            size: product.size,
-          })),
-        });
-      } else {
-        res.json({
-          reply: `Sorry, I couldn't find an order with ID #${orderId}.`,
-        });
-      }
-    } else {
-      // Default fallback for other intents
-      res.json({ reply: queryResult.fulfillmentText });
-    } 
-  } catch (error) {
-    console.error("Dialogflow request failed", error);
-    res.status(500).json({ error: "Something went wrong" });
-  }
-};
+//       if (order) {
+//         res.json({
+//           reply: `Your order #${order.orderId} is currently ${order.orderStatus}.`,
+//           shipping: `Shipping fee: $${order.shippingFee}`,
+//           payment: `Payment Method: ${order.paymentMethod}`,
+//           products: order.products.map((product) => ({
+//             product: product.product, // Product ID
+//             count: product.count,
+//             color: product.color,
+//             size: product.size,
+//           })),
+//         });
+//       } else {
+//         res.json({
+//           reply: `Sorry, I couldn't find an order with ID #${orderId}.`,
+//         });
+//       }
+//     } else {
+//       // Default fallback for other intents
+//       res.json({ reply: queryResult.fulfillmentText });
+//     } 
+//   } catch (error) {
+//     console.error("Dialogflow request failed", error);
+//     res.status(500).json({ error: "Something went wrong" });
+//   }
+// };
 
 export const getProductRecommendationOrderStatus = async (req, res) => {
   const { queryResult } = req.body;
